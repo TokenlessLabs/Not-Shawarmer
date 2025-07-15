@@ -74,7 +74,7 @@ export default function Signup() {
           {/* Sign Up Button */}
           <button
             type="submit"
-            className="bg-theme-blue hover:bg-theme-blue-highlighted text-white py-2 rounded-md mt-2 font-medium"
+            className="bg-theme-blue hover:bg-theme-bluehighlighted text-white py-2 rounded-md mt-2 font-medium"
           >
             Sign Up
           </button>
