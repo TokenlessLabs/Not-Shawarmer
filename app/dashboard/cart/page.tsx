@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const CartPage = () => {
   return (
-    <div className="max-h-screen overflow-y-hidden  text-theme-dark-blue flex flex-col">
+    <div className="max-h-screen overflow-y-hidden p-6  text-theme-dark-blue flex flex-col">
       {/* Cart Heading */}
       <h1 className="text-3xl font-bold mb-10">My Cart</h1>
 
