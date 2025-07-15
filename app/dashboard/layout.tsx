@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Sidebar />
       </div>
       <div className="flex-grow overflow-y-auto max-h-screen">
-        <div>{children}</div>
+        <div className="min-h-screen">{children}</div>
         <Footer />
       </div>
     </div>
