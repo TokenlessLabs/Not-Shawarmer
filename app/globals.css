@@ -5,3 +5,7 @@
   --color-theme-light-blue: #dff5ff;
   --color-theme-blue: #058ccd;
 }
+
+.input-field {
+  @apply w-full px-2 py-2 rounded border border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 mb-3   placeholder-gray-400;
+}
