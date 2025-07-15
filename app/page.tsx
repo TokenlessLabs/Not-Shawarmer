@@ -67,7 +67,7 @@ export default function Home() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="bg-theme-blue hover:bg-theme-blue-highlighted text-white py-2 rounded-md mt-2 font-medium"
+            className="bg-theme-blue hover:bg-theme-bluehighlighted text-white py-2 rounded-md mt-2 font-medium"
           >
             Sign In
           </button>

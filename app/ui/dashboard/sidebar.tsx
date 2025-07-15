@@ -41,7 +41,7 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
         {menuItems.map(({ name, href, icon: Icon }) => {
-          const isActive = pathname === href || pathname.startsWith(href + "/");
+          const isActive = pathname === href;
 
           return (
             <Link
