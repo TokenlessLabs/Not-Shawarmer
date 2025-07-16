@@ -3,6 +3,7 @@ import AddressBar from "../ui/dashboard/address-bar";
 import Card from "../ui/dashboard/menu-item-card";
 import Cart from "../ui/dashboard/cart";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
+import OrderHandle from "../ui/dashboard/order-handle";
 
 const DashboardPage = () => {
   return (
@@ -27,6 +28,7 @@ const DashboardPage = () => {
       </div>
 
       <Cart />
+      <OrderHandle/>
     </>
   );
 };
