@@ -71,6 +71,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
         }
       } catch (err) {
         setHumanLocation("Error fetching address");
+        console.error(err);
       }
     };
 
