@@ -1,9 +1,14 @@
-import React from 'react'
 
-const AdminDashboard = () => {
-  return (
-    <div>AdminDashboardPage</div>
-  )
+import OrderComponent from "../ui/dashboard/ordercomponent";
+
+export default function Dashboard(){
+    return(
+        <>
+        <OrderComponent/>
+        <OrderComponent/>
+        <OrderComponent/>
+        <OrderComponent/>
+        </>
+    )
 }
 
-export default AdminDashboard
