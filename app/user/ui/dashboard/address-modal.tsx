@@ -9,17 +9,44 @@ const DynamicMap = dynamic(() => import("../map"), { ssr: false });
 type Props = {
   savedAddress?: string;
   onClose: () => void;
+  onSave: (address: string, location: LatLngExpression | null) => void;
 };
 
-const AddressModal = ({ savedAddress, onClose }: Props) => {
+const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
   const [editing, setEditing] = useState(false);
   const [address, setAddress] = useState(savedAddress || "");
   const [location, setLocation] = useState<LatLngExpression | null>(null);
-  const [humanLocation, setHumanLocation] = useState("");
+  const [humanLocation, setHumanLocation] = useState(savedAddress || "");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  // Fetch reverse geocoded address when location updates
+  // Load initial savedAddress and geocode it into coordinates
+  useEffect(() => {
+    const loadSavedAddress = async () => {
+      if (savedAddress && !location) {
+        setHumanLocation(savedAddress);
+        setAddress(savedAddress);
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              savedAddress
+            )}&limit=1&countrycodes=pk&accept-language=en`
+          );
+          const data = await res.json();
+          if (data.length > 0) {
+            setLocation([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          }
+        } catch (err) {
+          console.error("Error geocoding saved address", err);
+        }
+      }
+    };
+
+    loadSavedAddress();
+  }, [savedAddress, location]);
+
+  // Reverse geocode when coordinates change
   useEffect(() => {
     const fetchAddress = async () => {
       if (!location) return;
@@ -45,6 +72,7 @@ const AddressModal = ({ savedAddress, onClose }: Props) => {
     if (editing) fetchAddress();
   }, [location]);
 
+  // Autocomplete suggestions
   useEffect(() => {
     if (!editing || humanLocation.trim() === "") {
       setSuggestions([]);
@@ -107,6 +135,7 @@ const AddressModal = ({ savedAddress, onClose }: Props) => {
                         key={index}
                         onClick={() => {
                           setHumanLocation(item.display_name);
+                          setAddress(item.display_name);
                           setLocation([
                             parseFloat(item.lat),
                             parseFloat(item.lon),
@@ -142,8 +171,9 @@ const AddressModal = ({ savedAddress, onClose }: Props) => {
 
             <button
               onClick={() => {
-                console.log("Saving address:", address);
-                console.log("Location:", location);
+                if (editing) {
+                  onSave(address, location);
+                }
                 setEditing(!editing);
               }}
               className="px-4 py-2 text-sm rounded bg-theme-blue text-white hover:bg-theme-bluehighlighted transition"

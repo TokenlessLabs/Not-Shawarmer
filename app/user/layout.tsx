@@ -1,5 +1,5 @@
-import Sidebar from "../ui/dashboard/sidebar";
-import Footer from "../ui/footer";
+import Sidebar from "./ui/sidebar";
+import Footer from "./ui/footer";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
