@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <div className="h-screen w-full flex text-theme-dark-blue">
-      {/* Left Panel */}
+     
       <div className="w-1/2 h-full bg-theme-light-blue flex items-center justify-center">
         <img src="/logo.svg" alt="Logo" className="w-[90%] h-auto" />
       </div>
@@ -19,7 +19,7 @@ export default function Home() {
         <p className="text-4xl font-bold">Login</p>
 
         <form
-          //onSubmit={handleSubmit}
+          
           className="border rounded-xl border-gray-300 p-6 w-1/2 max-w-md flex flex-col gap-4 shadow-md bg-white"
         >
           {/* Email */}
