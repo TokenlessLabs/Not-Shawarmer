@@ -24,7 +24,7 @@ export default function ProfileForm({
 
   return (
     <>
-      {fields.map(({ label, key, type }) => (
+      {fields.map(({ label, key }) => (
         <div key={key} className="flex flex-col relative">
           <label className="text-sm font-medium text-gray-600 mb-1">
             {label}
