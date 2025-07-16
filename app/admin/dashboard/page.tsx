@@ -1,3 +1,4 @@
+
 "use client"
 import Card from "../ui/dashboard/card"
 import FloatingButton from "../ui/dashboard/addbtn"
@@ -40,4 +41,5 @@ export default function DashboardPage (){
     </>
    )
 }
+
 
