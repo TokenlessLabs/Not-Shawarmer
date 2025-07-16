@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 
 export default function FloatingButton() {
   const [showOptions, setShowOptions] = useState(false);
@@ -50,6 +51,15 @@ export default function FloatingButton() {
         <div className="fixed inset-0 z-40 flex justify-center items-center">
           <div className="bg-theme-light-blue p-6 rounded-xl shadow-2xl w-[90%] max-w-md">
             <h2 className="text-xl font-semibold mb-4">Add Item to Menu</h2>
+            <div className="w-full h-52 relative">
+                    <Image
+                      src="/images/burger.jpg "
+                      alt="Item Image"
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-2xl "
+                    />
+                  </div>
             <div className="space-y-4">
               <label className="block">
                 <span className="block mb-1 font-medium">Name:</span>

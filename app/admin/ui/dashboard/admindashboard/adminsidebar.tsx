@@ -72,10 +72,9 @@ const AdminSidebarPage = () => {
         })}
       </nav>
 
-      {/* Thicker separator before logout */}
+    
       <div className="border-t-3 border-theme-dark-blue mt-4 mb-3 -mx-2"></div>
 
-      {/* Logout */}
       <Link
         href="/logout"
         className="w-full rounded-lg hover:bg-red-500/20 transition"

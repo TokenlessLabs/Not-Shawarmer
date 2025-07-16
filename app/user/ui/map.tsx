@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
 import { toTuple } from "../lib/utils";
 
-// Fix default Leaflet icon paths for Next.js
+
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/leaflet/marker-icon-2x.png",
