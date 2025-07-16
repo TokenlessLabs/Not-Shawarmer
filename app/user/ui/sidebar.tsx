@@ -13,17 +13,17 @@ import {
 const menuItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/user/dashboard",
     icon: Squares2X2Icon,
   },
   {
     name: "Orders",
-    href: "/dashboard/orders",
+    href: "/user/orders",
     icon: ShoppingBagIcon,
   },
   {
     name: "Profile",
-    href: "/dashboard/profile",
+    href: "/user/profile",
     icon: UserCircleIcon,
   },
 ];
@@ -41,7 +41,7 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
         {menuItems.map(({ name, href, icon: Icon }) => {
-          const isActive = pathname === href;
+          const isActive = pathname.startsWith(href);
 
           return (
             <Link

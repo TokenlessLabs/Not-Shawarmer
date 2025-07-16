@@ -1,7 +1,8 @@
 import React from "react";
-import AddressBar from "../ui/dashboard/addressbar";
-import Card from "../ui/dashboard/card";
+import AddressBar from "../ui/dashboard/address-bar";
+import Card from "../ui/dashboard/menu-item-card";
 import Cart from "../ui/dashboard/cart";
+import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 
 const DashboardPage = () => {
   return (
@@ -9,22 +10,7 @@ const DashboardPage = () => {
       <AddressBar />
       <div className="flex justify-center mt-7">
         <div className="flex items-center gap-2 w-full max-w-md mx-auto mt-8 px-4">
-          <h1 className="text-gray-500">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
-          </h1>
+          <MagnifyingGlassIcon className="text-gray-500 w-8 h-8" />
           <input
             type="text"
             placeholder="Search..."
@@ -33,7 +19,7 @@ const DashboardPage = () => {
         </div>
       </div>
       <div className="m-10">
-        <h1 className="text-2xl  my-5 border-b-2 ">Starter </h1>
+        <h1 className="text-2xl my-5 border-b-2 ">Starter </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
           <Card />
           <Card />

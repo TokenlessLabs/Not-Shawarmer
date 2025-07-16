@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 export default function OrderCompo() {
@@ -24,10 +25,8 @@ export default function OrderCompo() {
         </button>
       </div>
 
-      
       {isExpanded && (
         <div className="mt-4">
-         
           <div className="mb-4">
             <h3 className="text-md font-semibold mb-2">Items:</h3>
             <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
@@ -37,7 +36,6 @@ export default function OrderCompo() {
             </ul>
           </div>
 
-          
           <div className="mb-4">
             <h3 className="text-md font-semibold mb-1">Delivery Address:</h3>
             <p className="text-sm text-gray-700">
@@ -45,7 +43,6 @@ export default function OrderCompo() {
             </p>
           </div>
 
-         
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm mb-1">
               <span>Subtotal</span>

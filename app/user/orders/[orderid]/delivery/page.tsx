@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { LatLngExpression } from "leaflet";
 import dynamic from "next/dynamic";
 
-const DynamicMap = dynamic(() => import("../../ui/map"), {
+const DynamicMap = dynamic(() => import("../../../ui/map"), {
   ssr: false,
 });
 
