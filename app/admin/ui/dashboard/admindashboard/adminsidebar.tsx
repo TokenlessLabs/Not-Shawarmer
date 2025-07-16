@@ -20,22 +20,22 @@ const menuItems = [
   },
   {
     name: "Orders",
-    href: "/dashboard/orders",
+    href: "/admin/orders",
     icon: ShoppingBagIcon,
   },
   {
     name: "Edit Restaurant",
-    href: "/dashboard/edit-restaurant",
+    href: "/admin/editrestaurant",
     icon: PencilSquareIcon,
   },
   {
     name: "Statistics",
-    href: "/dashboard/statistics",
+    href: "/admin/statistics",
     icon: ChartBarIcon,
   },
    {
     name: "Profile",
-    href: "/dashboard/profile",
+    href: "/admin/profile",
     icon: UserCircleIcon,
   },
 ];
