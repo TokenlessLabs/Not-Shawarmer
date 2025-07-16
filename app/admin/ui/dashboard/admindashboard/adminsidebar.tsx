@@ -33,7 +33,7 @@ const menuItems = [
     href: "/admin/statistics",
     icon: ChartBarIcon,
   },
-   {
+  {
     name: "Profile",
     href: "/admin/profile",
     icon: UserCircleIcon,
@@ -44,7 +44,7 @@ const AdminSidebarPage = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="h-full w-full bg-theme-light-blue text-white px-2 pt-6 pb-3 flex flex-col">
+    <aside className="h-full w-full bg-theme-light-blue text-white px-2 pt-6 pb-3 flex flex-col border-r-3 border-theme-dark-blue">
       <img src="/logo.svg" alt="Logo" className="my-3" />
 
       {/* Separator above menu */}
