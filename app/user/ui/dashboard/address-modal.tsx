@@ -11,13 +11,18 @@ type Props = {
   onClose: () => void;
   onSave: (address: string, location: LatLngExpression | null) => void;
 };
+type Suggestion = {
+  display_name: string;
+  lat: string;
+  lon: string;
+};
 
 const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
   const [editing, setEditing] = useState(false);
   const [address, setAddress] = useState(savedAddress || "");
   const [location, setLocation] = useState<LatLngExpression | null>(null);
   const [humanLocation, setHumanLocation] = useState(savedAddress || "");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   // Load initial savedAddress and geocode it into coordinates
@@ -66,6 +71,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
         }
       } catch (err) {
         setHumanLocation("Error fetching address");
+        console.error(err);
       }
     };
 
