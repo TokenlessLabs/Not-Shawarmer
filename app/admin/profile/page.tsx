@@ -1,5 +1,5 @@
-import ProfileClient from "../../ui/profile/profile-client";
-import { getUserData } from "@/app/lib/actions";
+import ProfileClient from "../../user/ui/profile/profile-client";
+import { getUserData } from "../../user/lib/actions";
 
 export default async function AdminProfilePage() {
   const user = await getUserData();
