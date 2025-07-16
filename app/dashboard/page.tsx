@@ -2,6 +2,7 @@ import React from "react";
 import AddressBar from "../ui/dashboard/addressbar";
 import Card from "../ui/dashboard/card";
 import Cart from "../ui/dashboard/cart";
+import OrderHandle from "../ui/dashboard/OrderHandle";
 
 const DashboardPage = () => {
   return (
@@ -32,9 +33,10 @@ const DashboardPage = () => {
           />
         </div>
       </div>
+
       <div className="m-10">
-        <h1 className="text-2xl  my-5 border-b-2 ">Starter </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
+        <h1 className="text-2xl my-5 border-b-2">Starter</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <Card />
           <Card />
           <Card />
@@ -47,6 +49,7 @@ const DashboardPage = () => {
       </div>
 
       <Cart />
+      <OrderHandle /> 
     </>
   );
 };
