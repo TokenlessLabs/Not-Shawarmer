@@ -15,7 +15,7 @@ import {
 const menuItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/admin/dashboard",
     icon: Squares2X2Icon,
   },
   {
