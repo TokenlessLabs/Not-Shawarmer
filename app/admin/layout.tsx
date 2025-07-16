@@ -1,5 +1,5 @@
 import AdminSidebarPage from "./ui/dashboard/admindashboard/adminsidebar";
-import Footer from "../ui/footer";
+import Footer from "../user/ui/footer";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
