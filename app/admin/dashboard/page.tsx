@@ -1,3 +1,4 @@
+
 import OrderComponent from "../ui/dashboard/ordercomponent";
 
 export default function Dashboard(){
@@ -10,3 +11,4 @@ export default function Dashboard(){
         </>
     )
 }
+
