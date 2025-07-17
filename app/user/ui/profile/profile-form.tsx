@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { User } from "../../lib/definitions";
-import ChangePasswordModal from "./change-password-modal";
 import AddressModal from "../dashboard/address-modal";
+import Link from "next/link";
 
 export default function ProfileForm({
   formData,
@@ -14,7 +14,6 @@ export default function ProfileForm({
   onChange: (field: keyof User, value: string) => void;
   isEditing: boolean;
 }) {
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
 
   const fields: { label: string; key: keyof User; type?: string }[] = [
@@ -74,13 +73,12 @@ export default function ProfileForm({
             <p className="text-lg font-medium tracking-widest select-none">
               ********
             </p>
-            <button
-              type="button"
-              onClick={() => setShowPasswordModal(true)}
+            <Link
+              href="/user/profile/changepassword"
               className="text-theme-blue hover:underline text-left text-sm"
             >
               Change Password
-            </button>
+            </Link>
           </>
         ) : (
           <p className="text-lg font-bold tracking-widest select-none">
@@ -90,9 +88,6 @@ export default function ProfileForm({
       </div>
 
       {/* Modals */}
-      {showPasswordModal && (
-        <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
-      )}
       {showAddressModal && (
         <AddressModal
           savedAddress={formData.address}

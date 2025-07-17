@@ -1,45 +1,54 @@
 "use server";
 
-import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import postgres from "postgres";
-import { User } from "./definitions";
-import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-export async function POST(req: NextRequest) {
-  const { currentPassword, newPassword } = await req.json();
+export type ChangePasswordErrorState = {
+  success?: boolean;
+  message?: string | null;
+  errors?: string[];
+};
 
-  // Get user ID from session (or token, depending on your auth system)
-  const userId = 1; // ← Replace with real session logic
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(6, "New password must be at least 6 characters")
+    .regex(/\d/, "New password must include at least one digit"),
+});
 
-  const user = await sql`SELECT password FROM users WHERE id = ${userId}`;
+export async function changePassword(
+  prevState: ChangePasswordErrorState,
+  formData: FormData
+): Promise<ChangePasswordErrorState> {
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
 
-  if (!user[0]) {
-    return NextResponse.json({ message: "User not found" }, { status: 404 });
+  const result = passwordSchema.safeParse({ currentPassword, newPassword });
+
+  if (!result.success) {
+    return {
+      errors: result.error.issues.map((e) => e.message),
+    };
   }
 
-  const passwordMatch = await bcrypt.compare(currentPassword, user[0].password);
+  try {
+    const users = await sql`SELECT * FROM users WHERE id = ${1}`; // Replace with session user
+    const user = users[0];
 
-  if (!passwordMatch) {
-    return NextResponse.json({ message: "Incorrect current password" }, { status: 401 });
+    if (!user) return { message: "User not found" };
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return { message: "Current password is incorrect" };
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await sql`UPDATE users SET password = ${hashed} WHERE id = ${1}`;
+
+    return { success: true };
+  } catch (err) {
+    return { message: "Something went wrong" };
   }
-
-  const hashed = await bcrypt.hash(newPassword, 10);
-
-  await sql`UPDATE users SET password = ${hashed} WHERE id = ${userId}`;
-
-  return NextResponse.json({ message: "Password updated successfully" });
-}
-
-export async function updateUser(field: keyof User, value: string) {
-  console.log(`Updating ${field}: ${value}`);
-  // Update DB logic here...
-  revalidatePath("/profile");
-}
-
-export async function deleteUser() {
-  console.log("User deleted");
-  // DB delete logic here...
 }

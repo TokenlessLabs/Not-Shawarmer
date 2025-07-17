@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { updateUser, deleteUser } from "../../lib/actions";
 import { User } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 
@@ -27,11 +26,11 @@ export default function ProfileClient({ user }: { user: User }) {
   //   });
   // };
 
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete your account?")) {
-      startTransition(() => deleteUser());
-    }
-  };
+  // const handleDelete = () => {
+  //   if (confirm("Are you sure you want to delete your account?")) {
+  //     startTransition(() => deleteUser());
+  //   }
+  // };
 
   return (
     <form
@@ -77,7 +76,7 @@ export default function ProfileClient({ user }: { user: User }) {
         {!isEditing && (
           <button
             type="button"
-            onClick={handleDelete}
+            // onClick={handleDelete}
             disabled={pending}
             className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
           >
