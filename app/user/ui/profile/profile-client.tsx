@@ -14,18 +14,18 @@ export default function ProfileClient({ user }: { user: User }) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditing(false);
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsEditing(false);
 
-    startTransition(async () => {
-      for (const field in formData) {
-        if (formData[field as keyof User] !== user[field as keyof User]) {
-          await updateUser(field as keyof User, formData[field as keyof User]);
-        }
-      }
-    });
-  };
+  //   startTransition(async () => {
+  //     for (const field in formData) {
+  //       if (formData[field as keyof User] !== user[field as keyof User]) {
+  //         await updateUser(field as keyof User, formData[field as keyof User]);
+  //       }
+  //     }
+  //   });
+  // };
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete your account?")) {
@@ -35,7 +35,7 @@ export default function ProfileClient({ user }: { user: User }) {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      //onSubmit={handleSubmit}
       className="bg-theme-light-blue shadow rounded-lg p-6 space-y-6"
     >
       <ProfileForm
