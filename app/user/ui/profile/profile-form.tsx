@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { User } from "../../lib/definitions";
 import AddressModal from "../dashboard/address-modal";
 import Link from "next/link";
+import { updateUserAddress } from "../../lib/actions";
 
 export default function ProfileForm({
   formData,
@@ -31,6 +32,7 @@ export default function ProfileForm({
           </label>
           {isEditing ? (
             <input
+              name={key}
               type={type || "text"}
               value={formData[key]}
               onChange={(e) => onChange(key, e.target.value)}
@@ -92,7 +94,14 @@ export default function ProfileForm({
         <AddressModal
           savedAddress={formData.address}
           onClose={() => setShowAddressModal(false)}
-          onSave={(add) => (formData.address = add)}
+          onSave={(newAddress) => {
+            setShowAddressModal(false);
+
+            if (newAddress !== formData.address) {
+              formData.address = newAddress;
+              updateUserAddress(newAddress);
+            }
+          }}
         />
       )}
     </>

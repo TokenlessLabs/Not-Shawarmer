@@ -1,40 +1,31 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState } from "react";
+import { useActionState } from "react";
+import { updateUser, ErrorState } from "../../lib/actions";
 import { User } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 
 export default function ProfileClient({ user }: { user: User }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
-  const [pending, startTransition] = useTransition();
+  const initialState: ErrorState = {
+    success: undefined,
+    message: null,
+    errors: [],
+  };
+  const [state, formAction, isPending] = useActionState(
+    updateUser,
+    initialState
+  );
 
   const handleChange = (field: keyof User, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsEditing(false);
-
-  //   startTransition(async () => {
-  //     for (const field in formData) {
-  //       if (formData[field as keyof User] !== user[field as keyof User]) {
-  //         await updateUser(field as keyof User, formData[field as keyof User]);
-  //       }
-  //     }
-  //   });
-  // };
-
-  // const handleDelete = () => {
-  //   if (confirm("Are you sure you want to delete your account?")) {
-  //     startTransition(() => deleteUser());
-  //   }
-  // };
-
   return (
     <form
-      //onSubmit={handleSubmit}
+      action={formAction}
       className="bg-theme-light-blue shadow rounded-lg p-6 space-y-6"
     >
       <ProfileForm
@@ -43,15 +34,34 @@ export default function ProfileClient({ user }: { user: User }) {
         isEditing={isEditing}
       />
 
+      <div>
+        {isEditing &&
+          state.errors?.map((err, i) => (
+            <p key={i} className="text-red-500 text-sm">
+              {err}
+            </p>
+          ))}
+
+        {isEditing && state.message && (
+          <p className="text-red-500 text-sm">{state.message}</p>
+        )}
+
+        {isEditing && state.success && (
+          <p className="text-green-600 text-sm">
+            Information updated successfully!
+          </p>
+        )}
+      </div>
+
       <div className="flex justify-end items-center gap-4 pt-4">
         {isEditing ? (
           <>
             <button
               type="submit"
-              disabled={pending}
+              disabled={isPending}
               className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
             >
-              {pending ? "Saving..." : "Save"}
+              {isPending ? "Saving..." : "Save"}
             </button>
             <button
               type="button"
@@ -61,27 +71,26 @@ export default function ProfileClient({ user }: { user: User }) {
               }}
               className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
             >
-              Cancel
+              Close
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
-          >
-            Edit
-          </button>
-        )}
-        {!isEditing && (
-          <button
-            type="button"
-            // onClick={handleDelete}
-            disabled={pending}
-            className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
-          >
-            {pending ? "Deleting..." : "Delete Account"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              //onClick={() => setIsEditing(true)}
+              className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600"
+            >
+              Delete Account
+            </button>
+          </div>
         )}
       </div>
     </form>
