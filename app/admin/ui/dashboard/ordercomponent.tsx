@@ -1,7 +1,13 @@
 'use client'
-import { useState } from "react";
 
-export default function OrderComponent() {
+import { useState } from "react";
+import { Order } from "@/app/user/lib/definitions"; // adjust path if needed
+
+type Props = {
+  order: Order;
+};
+
+export default function OrderComponent({ order }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const statuses = [
@@ -18,13 +24,21 @@ export default function OrderComponent() {
   };
 
   const currentStatus = statuses[statusIndex];
+const deliveryCharges = order.delivery_fee ?? 0;
+
+  const subtotal = order.items?.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  ) ?? 0;
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-4 mb-4 border-l-4 border-blue-500 transition-all duration-300">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h2 className="text-lg font-semibold">Order #001</h2>
-          <p className="text-sm text-gray-500">Order Time: 2:15 PM</p>
+          <h2 className="text-lg font-semibold">Order #{order.id}</h2>
+          <p className="text-sm text-gray-500">
+            Order Time: {new Date(order.createdat).toLocaleTimeString()}
+          </p>
         </div>
 
         <div className="flex flex-col items-end space-y-2">
@@ -64,30 +78,33 @@ export default function OrderComponent() {
           <div className="mb-4">
             <h3 className="font-semibold mb-1">Items:</h3>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Zinger Burger x2 – Rs. 900</li>
-              <li>Fries x1 – Rs. 200</li>
-              <li>Cold Drink x2 – Rs. 300</li>
+              {order.items?.map((item, index) => (
+                <li key={index}>
+                  {item.name} x{item.quantity} – Rs. {item.price}
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="mb-4">
             <h3 className="font-semibold mb-1">Delivery Address:</h3>
-            <p>123-B Street, Model Town, Lahore</p>
+            <p>{order.address ?? "No address provided"}</p>
           </div>
 
           <div className="border-t pt-4">
             <div className="flex justify-between mb-1">
-              <span>Subtotal</span>
-              <span>Rs. 1400</span>
-            </div>
-            <div className="flex justify-between mb-1">
-              <span>Delivery Charges</span>
-              <span>Rs. 150</span>
-            </div>
-            <div className="flex justify-between font-bold text-base mt-2">
-              <span>Total</span>
-              <span>Rs. 1550</span>
-            </div>
+  <span>Subtotal</span>
+  <span>Rs. {subtotal}</span>
+</div>
+<div className="flex justify-between mb-1">
+  <span>Delivery Charges</span>
+  <span>Rs. {deliveryCharges}</span>
+</div>
+<div className="flex justify-between font-bold text-base mt-2">
+  <span>Total</span>
+  <span>Rs. {subtotal + deliveryCharges}</span>
+</div>
+
           </div>
         </div>
       )}
