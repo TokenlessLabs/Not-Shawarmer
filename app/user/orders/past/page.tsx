@@ -1,7 +1,10 @@
+import { getPastOrders } from "../../lib/data";
 import OrderCompo from "@/app/user/ui/orders/orderComponent";
 import Link from "next/link";
 
-export default function Pastorder() {
+export default async function Pastorder() {
+  const orders = await getPastOrders(); // ⬅️ fetch orders
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-center mb-6 space-x-6">
@@ -16,14 +19,11 @@ export default function Pastorder() {
         </button>
       </div>
 
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
-      <OrderCompo />
+      {orders.length === 0 ? (
+        <p className="text-center text-gray-500">No past orders found.</p>
+      ) : (
+        orders.map((order) => <OrderCompo key={order.id} order={order} />)
+      )}
     </div>
   );
 }
