@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { changePassword, ChangePasswordErrorState } from "../../lib/actions";
+import { changePassword, ErrorState } from "../../lib/actions";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline"; // or solid
 
 export default function ChangePasswordForm() {
-  const initialState: ChangePasswordErrorState = {
+  const initialState: ErrorState = {
+    success: undefined,
     message: null,
-    success: false,
+    errors: [],
   };
   const [state, formAction] = useActionState(changePassword, initialState);
 
@@ -65,7 +66,7 @@ export default function ChangePasswordForm() {
         </button>
 
         <div>
-          {state.errors?.map((err, i) => (
+          {state.errors?.map((err: string, i: number) => (
             <p key={i} className="text-red-500 text-sm">
               {err}
             </p>
