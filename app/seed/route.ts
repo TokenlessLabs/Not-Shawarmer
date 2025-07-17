@@ -1,8 +1,8 @@
-import postgres from 'postgres';
-import bcrypt from 'bcryptjs';
-import { NextResponse } from 'next/server';
+import postgres from "postgres";
+import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 async function dropTables() {
   await sql`
@@ -23,7 +23,7 @@ async function createTables() {
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE RestDetails (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -36,14 +36,14 @@ await sql`
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE Categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE Items (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -54,7 +54,7 @@ await sql`
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE ItemCategories (
     itemId INTEGER NOT NULL,
     categoryId INTEGER NOT NULL,
@@ -64,7 +64,7 @@ await sql`
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE Orders (
     id SERIAL PRIMARY KEY,
     userId INTEGER NOT NULL,
@@ -72,11 +72,12 @@ await sql`
     deliveredAt TIMESTAMP,
     status VARCHAR(20) NOT NULL DEFAULT 'Cooking' CHECK (status IN ('Cooking', 'Dispatched', 'Delivered', 'Cancelled')),
     instructions TEXT,
+    address TEXT,
     FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE SET NULL ON UPDATE CASCADE
   );
 `;
 
-await sql`
+  await sql`
   CREATE TABLE OrderDetails (
     orderId INTEGER NOT NULL,
     itemId INTEGER NOT NULL,
@@ -91,20 +92,20 @@ await sql`
 async function seedUsers() {
   const users = [
     {
-      username: 'john_doe',
-      email: 'john@example.com',
-      contact: '1234567890',
-      password: await bcrypt.hash('password123', 10),
-      role: 'Customer',
-      address: '123 Main Street',
+      username: "john_doe",
+      email: "john@example.com",
+      contact: "1234567890",
+      password: await bcrypt.hash("password123", 10),
+      role: "Customer",
+      address: "123 Main Street",
     },
     {
-      username: 'admin_user',
-      email: 'admin@example.com',
-      contact: '0987654321',
-      password: await bcrypt.hash('adminpassword', 10),
-      role: 'Admin',
-      address: '456 Admin Lane',
+      username: "admin_user",
+      email: "admin@example.com",
+      contact: "0987654321",
+      password: await bcrypt.hash("adminpassword", 10),
+      role: "Admin",
+      address: "456 Admin Lane",
     },
   ];
 
@@ -120,13 +121,12 @@ async function seedRestaurants() {
   await sql`
     INSERT INTO RestDetails (name, address, operatingHoursStart, operatingHoursEnd, about, contact, delivery_fee)
     VALUES 
-      ('Pasta Palace', '12 Italy Street', '10:00', '22:00', 'Authentic Italian Cuisine', '1112223333', 150),
-      ('Burger Town', '5 Grill Road', '11:00', '23:00', 'Smash burgers & more!', '4445556666', 100);
+      ('Not Shawarmer', '12 Italy Street', '10:00', '22:00', 'Authentic Arabian Cuisine', '03334567898', 200),
   `;
 }
 
 async function seedCategories() {
-  const categories = ['Fast Food', 'Italian', 'Drinks', 'Dessert'];
+  const categories = ["Fast Food", "Italian", "Drinks", "Dessert"];
 
   for (const name of categories) {
     await sql`INSERT INTO Categories (name) VALUES (${name});`;
@@ -157,10 +157,10 @@ async function seedItemCategories() {
 
 async function seedOrders() {
   await sql`
-    INSERT INTO Orders (userId, status, instructions)
+    INSERT INTO Orders (userId, status, instructions, address)
     VALUES 
-      (1, 'Cooking', 'Extra cheese please'),
-      (1, 'Delivered', 'No onions');
+      (1, 'Cooking', 'Extra cheese please', '123 Main Street'),
+      (1, 'Delivered', 'No onions', '123 Main Street');
   `;
 }
 
@@ -189,9 +189,9 @@ export async function GET() {
       await seedOrderDetails();
     });
 
-    return NextResponse.json({ message: '✅ Database seeded successfully.' });
+    return NextResponse.json({ message: "✅ Database seeded successfully." });
   } catch (error) {
-    console.error('Seed failed:', error);
-    return NextResponse.json({ error: 'Seeding failed.' }, { status: 500 });
+    console.error("Seed failed:", error);
+    return NextResponse.json({ error: "Seeding failed." }, { status: 500 });
   }
 }

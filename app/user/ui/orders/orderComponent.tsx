@@ -1,18 +1,31 @@
 "use client";
-import { useState } from "react";
 
-export default function OrderCompo() {
+import { useState } from "react";
+import { Order } from "../../lib/definitions";
+import { OrderItem } from "../../lib/definitions";
+
+export default function OrderCompo({ order }: { order: Order }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const deliveryCharges = order.delivery_fee ?? 0;
+
+  const subtotal = order.items?.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  ) ?? 0;
+
+  const total = subtotal + deliveryCharges;
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-blue-500 transition-all duration-300">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-semibold">Order #001</h2>
-          <p className="text-sm text-gray-500">Order Time: 2:15 PM</p>
+          <h2 className="text-xl font-semibold">Order #{order.id}</h2>
+          <p className="text-sm text-gray-500">
+            Order Time: {new Date(order.createdat).toLocaleTimeString()}
+          </p>
         </div>
-        <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-4 py-1 rounded-full">
-          Preparing
+        <span className="bg-green-100 text-green-800 text-sm font-medium px-4 py-1 rounded-full">
+          {order.status}
         </span>
       </div>
 
@@ -30,31 +43,38 @@ export default function OrderCompo() {
           <div className="mb-4">
             <h3 className="text-md font-semibold mb-2">Items:</h3>
             <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
-              <li>Zinger Burger x2 – Rs. 900</li>
-              <li>Fries x1 – Rs. 200</li>
-              <li>Cold Drink x2 – Rs. 300</li>
+              {order.items?.length > 0 ? (
+                order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.name} x{item.quantity} – Rs.{" "}
+                    {item.price * item.quantity}
+                  </li>
+                ))
+              ) : (
+                <li>No items found.</li>
+              )}
             </ul>
           </div>
 
           <div className="mb-4">
             <h3 className="text-md font-semibold mb-1">Delivery Address:</h3>
             <p className="text-sm text-gray-700">
-              123-B Street, Model Town, Lahore
+              {order.address}
             </p>
           </div>
 
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm mb-1">
               <span>Subtotal</span>
-              <span>Rs. 1400</span>
+              <span>Rs. {subtotal}</span>
             </div>
             <div className="flex justify-between text-sm mb-1">
               <span>Delivery Charges</span>
-              <span>Rs. 150</span>
+              <span>Rs. {deliveryCharges}</span>
             </div>
             <div className="flex justify-between font-bold text-base mt-2">
               <span>Total</span>
-              <span>Rs. 1550</span>
+              <span>Rs. {total}</span>
             </div>
           </div>
         </div>
