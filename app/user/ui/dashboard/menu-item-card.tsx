@@ -72,7 +72,7 @@ export default function ProductCard() {
                 onClick={() => setShowCardDescription(false)}
                 className="bg-theme-blue text-white font-bold px-4 py-2 rounded shadow-xl hover:px-5 hover:bg-theme-dark-blue transition-all duration-200"
               >
-                Add Item <span className="ml-3"> Rs. 1,2334</span>
+                Add to Cart <span className="ml-3"> Rs. 1,2334</span>
               </button>
             </div>
         
