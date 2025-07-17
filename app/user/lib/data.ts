@@ -13,6 +13,7 @@ export async function getUserData(): Promise<User> {
   `;
   return result[0];
 }
+
 export async function getPastOrders(): Promise<Order[]> {
   const userId = 1;
 
@@ -25,6 +26,7 @@ export async function getPastOrders(): Promise<Order[]> {
       o.status,
       o.instructions,
       o.address,
+      r.delivery_fee,
       COALESCE(
         json_agg(
           json_build_object(
@@ -39,8 +41,9 @@ export async function getPastOrders(): Promise<Order[]> {
     FROM Orders o
     LEFT JOIN OrderDetails od ON o.id = od.orderId
     LEFT JOIN Items i ON i.id = od.itemId
-    WHERE o.userId = ${userId} AND o.status in ('Delivered','Cancelled')
-    GROUP BY o.id
+    LEFT JOIN RestDetails r ON r.id = 1 -- static for now
+    WHERE o.userId = ${userId} AND o.status IN ('Delivered', 'Cancelled')
+    GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
 
@@ -52,6 +55,7 @@ export async function getPastOrders(): Promise<Order[]> {
     status: row.status,
     instructions: row.instructions,
     address: row.address,
+    delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
 
