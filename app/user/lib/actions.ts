@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -192,5 +193,47 @@ export async function cancelOrder(orderId: number): Promise<ErrorState> {
   } catch (error) {
     console.error("Failed to cancel order:", error);
     return { success: false, message: "Failed to cancel order" };
+  }
+}
+
+export async function updateRestaurant(
+  prevState: { success: boolean; message: string | null; errors: string[] },
+  formData: FormData
+): Promise<{ success: boolean; message: string | null; errors: string[] }> {
+  try {
+    const name = formData.get("name")?.toString().trim() ?? "";
+    const address = formData.get("address")?.toString().trim() ?? "";
+    const about = formData.get("about")?.toString().trim() ?? "";
+    const startTime = formData.get("startTime")?.toString().trim() ?? "";
+    const endTime = formData.get("endTime")?.toString().trim() ?? "";
+    const contact = formData.get("contact")?.toString().trim() ?? "";
+
+    if (!name || !address || !startTime || !endTime || !contact) {
+      return {
+        success: false,
+        message: null,
+        errors: ["All fields except 'about' are required."],
+      };
+    }
+
+    await sql`
+      UPDATE RestDetails
+      SET name = ${name},
+          address = ${address},
+          about = ${about},
+          operatingHoursStart = ${startTime},
+          operatingHoursEnd = ${endTime},
+          contact = ${contact}
+      WHERE id = 1
+    `;
+
+    return { success: true, message: "Restaurant updated!", errors: [] };
+  } catch (error) {
+    console.error("Update error:", error);
+    return {
+      success: false,
+      message: "Update failed due to a server error. Please try again later.",
+      errors: [],
+    };
   }
 }
