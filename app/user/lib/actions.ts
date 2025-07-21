@@ -5,7 +5,7 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export type ErrorState = {
   success?: boolean;
@@ -14,13 +14,13 @@ export type ErrorState = {
 };
 
 const userSchema = z.object({
-  username: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email'),
+  username: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
   contact: z
     .string()
-    .min(6, 'Contact number must be at least 6 digits')
-    .max(20, 'Contact number must be at most 20 digits')
-    .regex(/^\d+$/, 'Contact must contain only digits'),
+    .min(6, "Contact number must be at least 6 digits")
+    .max(20, "Contact number must be at most 20 digits")
+    .regex(/^\d+$/, "Contact must contain only digits"),
 });
 
 export async function updateUserAddress(
@@ -54,26 +54,26 @@ export async function updateUserAddress(
       message: "Failed to update address.",
     };
   }
-};
+}
 
 export async function updateUser(
   prevState: ErrorState,
   formData: FormData
 ): Promise<ErrorState> {
   try {
-    const username = formData.get('username') as string;
-    const email = formData.get('email') as string;
-    const contact = formData.get('contact') as string;
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const contact = formData.get("contact") as string;
 
     const result = userSchema.safeParse({ username, email, contact });
 
-  if (!result.success) {
-    return {
-      errors: result.error.issues.map((e) => e.message),
-    };
-  }
+    if (!result.success) {
+      return {
+        errors: result.error.issues.map((e) => e.message),
+      };
+    }
 
-      // Uniqueness check (excluding current user)
+    // Uniqueness check (excluding current user)
     const [existingUser] = await sql`
       SELECT * FROM users
       WHERE (username = ${username} OR email = ${email}) AND id <> ${1}
@@ -104,14 +104,14 @@ export async function updateUser(
 
     return {
       success: true,
-      message: '',
+      message: "",
       errors: [],
     };
   } catch (error: any) {
     console.error(error);
     return {
       success: false,
-      message: 'Failed to update user.',
+      message: "Failed to update user.",
       errors: [],
     };
   }
@@ -155,5 +155,42 @@ export async function changePassword(
     return { success: true };
   } catch (err) {
     return { message: "Something went wrong" };
+  }
+}
+
+// --- ORDER STATUS MANAGEMENT ---
+
+export async function updateOrderStatus(
+  orderId: number,
+  newStatus: string
+): Promise<ErrorState> {
+  try {
+    await sql`
+      UPDATE Orders
+      SET status = ${newStatus}
+      WHERE id = ${orderId}
+    `;
+
+    revalidatePath("/admin/orders/currentorders"); // Adjust path if needed
+    return { success: true, message: "Status updated" };
+  } catch (error) {
+    console.error("Failed to update order status:", error);
+    return { success: false, message: "Failed to update status" };
+  }
+}
+
+export async function cancelOrder(orderId: number): Promise<ErrorState> {
+  try {
+    await sql`
+      UPDATE Orders
+      SET status = 'Cancelled'
+      WHERE id = ${orderId}
+    `;
+
+    revalidatePath("/admin/orders/currentorders");
+    return { success: true, message: "Order cancelled" };
+  } catch (error) {
+    console.error("Failed to cancel order:", error);
+    return { success: false, message: "Failed to cancel order" };
   }
 }

@@ -1,7 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from "react";
-import { Order } from "@/app/user/lib/definitions"; // adjust path if needed
+import { useState, useTransition } from "react";
+import { Order } from "@/app/user/lib/definitions";
+import { updateOrderStatus, cancelOrder } from "@/app/user/lib/actions";
 
 type Props = {
   order: Order;
@@ -9,23 +10,35 @@ type Props = {
 
 export default function OrderComponent({ order }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isUpdatingStatus, startStatusTransition] = useTransition();
+  const [isCancelling, startCancelTransition] = useTransition();
 
   const statuses = [
-    { label: "Preparing", color: "bg-yellow-100 text-yellow-800" },
-    { label: "Cooking", color: "bg-orange-100 text-orange-800" },
-    { label: "Order Dispatched", color: "bg-blue-100 text-blue-800" },
-    { label: "Delivered", color: "bg-green-100 text-green-800" },
+    { label: "Preparing", value: "Preparing", color: "bg-yellow-100 text-yellow-800" },
+    { label: "Cooking", value: "Cooking", color: "bg-orange-100 text-orange-800" },
+    { label: "Dispatched", value: "Dispatched", color: "bg-blue-100 text-blue-800" },
+    { label: "Delivered", value: "Delivered", color: "bg-green-100 text-green-800" },
   ];
-  const [statusIndex, setStatusIndex] = useState(0);
+
+  const currentStatusIndex = statuses.findIndex(s => s.value === order.status);
+  const currentStatus = statuses[currentStatusIndex] ?? statuses[0];
 
   const handleStatusClick = () => {
-    const nextIndex = (statusIndex + 1) % statuses.length;
-    setStatusIndex(nextIndex);
+    const nextIndex = (currentStatusIndex + 1) % statuses.length;
+    const nextStatus = statuses[nextIndex].value;
+
+    startStatusTransition(() => {
+      updateOrderStatus(order.id, nextStatus);
+    });
   };
 
-  const currentStatus = statuses[statusIndex];
-const deliveryCharges = order.delivery_fee ?? 0;
+  const handleCancelOrder = () => {
+    startCancelTransition(() => {
+      cancelOrder(order.id);
+    });
+  };
 
+  const deliveryCharges = order.delivery_fee ?? 0;
   const subtotal = order.items?.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -44,23 +57,29 @@ const deliveryCharges = order.delivery_fee ?? 0;
         <div className="flex flex-col items-end space-y-2">
           <div
             className={`${currentStatus.color} text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2`}
+            onClick={handleStatusClick}
           >
             <span>{currentStatus.label}</span>
-            <button onClick={handleStatusClick}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69Z" />
-              </svg>
-            </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69Z" />
+            </svg>
           </div>
-          <button className="bg-red-500 text-white text-xs px-3 py-1 rounded shadow hover:bg-red-600 transition">
-            Cancel Order
-          </button>
+
+          {order.status !== "Cancelled" && order.status !== "Delivered" && (
+            <button
+              onClick={handleCancelOrder}
+              className="bg-red-500 text-white text-xs px-3 py-1 rounded shadow hover:bg-red-600 transition"
+              disabled={isCancelling}
+            >
+              {isCancelling ? "Cancelling..." : "Cancel Order"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -93,18 +112,17 @@ const deliveryCharges = order.delivery_fee ?? 0;
 
           <div className="border-t pt-4">
             <div className="flex justify-between mb-1">
-  <span>Subtotal</span>
-  <span>Rs. {subtotal}</span>
-</div>
-<div className="flex justify-between mb-1">
-  <span>Delivery Charges</span>
-  <span>Rs. {deliveryCharges}</span>
-</div>
-<div className="flex justify-between font-bold text-base mt-2">
-  <span>Total</span>
-  <span>Rs. {subtotal + deliveryCharges}</span>
-</div>
-
+              <span>Subtotal</span>
+              <span>Rs. {subtotal}</span>
+            </div>
+            <div className="flex justify-between mb-1">
+              <span>Delivery Charges</span>
+              <span>Rs. {deliveryCharges}</span>
+            </div>
+            <div className="flex justify-between font-bold text-base mt-2">
+              <span>Total</span>
+              <span>Rs. {subtotal + deliveryCharges}</span>
+            </div>
           </div>
         </div>
       )}
