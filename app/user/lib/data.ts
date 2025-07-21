@@ -5,7 +5,7 @@ import { Order } from "./definitions";
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export async function getUserData(): Promise<User> {
-await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   const result = await sql<User[]>`
     SELECT id, username, email, contact, role, address
     FROM Users
@@ -201,4 +201,14 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
   }));
 
   return orders;
+}
+
+export async function getRestaurantDetails() {
+  const result = await sql`
+    SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd
+    FROM RestDetails
+    WHERE id = 1
+    LIMIT 1;
+  `;
+  return result[0];
 }
