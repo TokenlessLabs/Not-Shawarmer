@@ -1,29 +1,27 @@
 "use client";
-//testing comment hehe
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { getCurrentOrders } from "@/app/user/lib/data"; // adjust the path if necessary
+import { Order } from "@/app/user/lib/definitions";
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const orders = [
-    {
-      items: [
-        { name: "Shawarma Wrap", quantity: 2, price: 600 },
-        { name: "Garlic Sauce", quantity: 1, price: 150 },
-      ],
-      address: "123 Z Block, DHA, Lahore",
-      status: "Preparing",
-    },
-    {
-      items: [
-        { name: "Falafel Plate", quantity: 1, price: 750 },
-        { name: "Mint Raita", quantity: 1, price: 100 },
-      ],
-      address: "21 Model Town, Lahore",
-      status: "Out for Delivery",
-    },
-  ];
+useEffect(() => {
+  async function fetchOrders() {
+    try {
+      const res = await fetch("/api/current-orders");
+      const data = await res.json();
+      setOrders(data);
+    } catch (error) {
+      console.error("Failed to fetch current orders:", error);
+    }
+  }
+  fetchOrders();
+}, []);
+
 
   return (
     <>
@@ -34,74 +32,76 @@ const OrderHandle = () => {
         }`}
       >
         <div className="p-6 overflow-y-auto h-full space-y-8">
-          {orders.map((order, index) => {
-            const total = order.items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
-              0
-            );
+          {orders.length === 0 ? (
+            <p className="text-sm text-gray-500">No active orders found.</p>
+          ) : (
+            orders.map((order, index) => {
+              const total = order.items.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0
+              );
 
-            return (
-              <div key={index} className="space-y-4">
-                {/* Order Heading */}
-                <h2 className="text-xl font-bold text-theme-dark-blue">
-                  Order {index + 1}
-                </h2>
+              return (
+                <div key={index} className="space-y-4">
+                  {/* Order Heading */}
+                  <h2 className="text-xl font-bold text-theme-dark-blue">
+                    Order #{order.id}
+                  </h2>
 
-                {/* Items List */}
-                <div>
-                  {order.items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between text-sm text-gray-800"
-                    >
-                      <span>
-                        {item.name} x{item.quantity}
+                  {/* Items List */}
+                  <div>
+                    {order.items.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between text-sm text-gray-800"
+                      >
+                        <span>
+                          {item.name} x{item.quantity}
+                        </span>
+                        <span>Rs {item.quantity * item.price}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Total */}
+                  <div className="flex justify-between text-base font-semibold text-theme-dark-blue">
+                    <span>Total:</span>
+                    <span>Rs {total}</span>
+                  </div>
+
+                  {/* Address */}
+                  <div>
+                    <p className="text-sm font-semibold text-theme-dark-blue">
+                      Delivering to:
+                    </p>
+                    <p className="text-sm text-gray-700">{order.address}</p>
+                  </div>
+
+                  {/* Status and Show Details Button */}
+                  <div className="flex items-center justify-between mt-2">
+                    <div>
+                      <p className="text-sm font-semibold text-theme-dark-blue">Status:</p>
+                      <span className="inline-block mt-1 px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
+                        {order.status}
                       </span>
-                      <span>Rs {item.quantity * item.price}</span>
                     </div>
-                  ))}
+
+                    <Link
+                      href={`/user/orders/${order.id}/delivery`}
+                      className="text-sm mt-5 text-blue-600 font-medium underline hover:text-blue-800"
+                    >
+                      Show Details
+                    </Link>
+                  </div>
+
+                  {/* Divider */}
+                  {index !== orders.length - 1 && (
+                    <hr className="border-t border-gray-300" />
+                  )}
                 </div>
-
-                {/* Total */}
-                <div className="flex justify-between text-base font-semibold text-theme-dark-blue">
-                  <span>Total:</span>
-                  <span>Rs {total}</span>
-                </div>
-
-                {/* Address */}
-                <div>
-                  <p className="text-sm font-semibold text-theme-dark-blue">
-                    Delivering to:
-                  </p>
-                  <p className="text-sm text-gray-700">{order.address}</p>
-                </div>
-
-             {/* Status and Show Details Button */}
-<div className="flex items-center justify-between mt-2">
-  <div>
-    <p className="text-sm font-semibold text-theme-dark-blue">Status:</p>
-    <span className="inline-block mt-1 px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
-      {order.status}
-    </span>
-  </div>
-
-  <Link
-  href="/user/orders/1/delivery"
-  className="text-sm mt-5 text-blue-600 font-medium underline hover:text-blue-800"
->
-  Show Details
-</Link>
-
-</div>
-
-
-                {/* Divider */}
-                {index !== orders.length - 1 && (
-                  <hr className="border-t border-gray-300" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
