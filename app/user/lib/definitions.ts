@@ -26,3 +26,13 @@ export type Order = {
   delivery_fee: number;
   items: OrderItem[];
 };
+
+export type MenuItem = {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  status: "Available" | "Unavailable";
+  image: string | null;
+  category: string;
+};

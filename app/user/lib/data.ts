@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import { User } from "./definitions";
 import { Order } from "./definitions";
+import { MenuItem } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -211,4 +212,23 @@ export async function getRestaurantDetails() {
     LIMIT 1;
   `;
   return result[0];
+}
+
+export async function getAllMenuItems(): Promise<MenuItem[]> {
+  const result = await sql`
+    SELECT id, name, description, price, status, image
+    FROM Items
+    WHERE status = 'Available'
+    ORDER BY id ASC;
+  `;
+
+  return result.map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: parseFloat(row.price),
+    status: row.status,
+    image: row.image,
+    category: row.category,
+  }));
 }
