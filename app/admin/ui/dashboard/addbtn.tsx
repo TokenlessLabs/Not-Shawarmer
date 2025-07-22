@@ -38,9 +38,8 @@ export default function FloatingButton() {
 
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="bg-theme-blue text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-theme-dark-blue transition"
-            title="Actions"
-          >
+            className="bg-theme-blue text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-theme-dark-blue transition text-4xl"
+            title="Actions"      >
             +
           </button>
         </div>
