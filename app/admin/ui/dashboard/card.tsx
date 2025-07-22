@@ -2,8 +2,12 @@
 import Image from "next/image";
 import { useState } from "react";
 
+type CardProps = {
+  itemname: string;
+  itemprice: number;
+};
 
-export default function Card() {
+export default function Card({ itemname, itemprice }: CardProps) {
 const [showEdit , setshowEdit] =useState(false);
  const [showUpload, setShowUpload] = useState(false);
  const [statusIndex, setStatusIndex] = useState(0);
@@ -55,8 +59,9 @@ const [showEdit , setshowEdit] =useState(false);
         </div>
 
         <div className="p-4 flex flex-row justify-between items-center">
-          <p className="text-lg font-semibold text-gray-800">Item name</p>
-          <p className="text-lg text-gray-600">Rs. 2,500</p>
+         <p className="text-lg font-semibold text-gray-800">{itemname}</p> 
+         <p className="text-lg text-gray-600">Rs. {itemprice.toLocaleString()}</p>
+
           <button onClick={() => setshowEdit(true)}>
              <svg
               xmlns="http://www.w3.org/2000/svg"
