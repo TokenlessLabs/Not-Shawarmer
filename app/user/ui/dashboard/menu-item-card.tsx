@@ -12,7 +12,7 @@ export default function Card({ item, onClick }: CardProps) {
   return (
     <div className="max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer" onClick={onClick}>
       <Image
-        src={item.image || "/images/placeholder.jpg"}
+  src={item.image && item.image.trim() !== "" ? item.image : "/images/placeholder.jpg"}
         alt={item.name}
         width={400}
         height={300}

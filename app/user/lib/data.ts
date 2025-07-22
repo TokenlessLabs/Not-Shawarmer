@@ -216,10 +216,19 @@ export async function getRestaurantDetails() {
 
 export async function getAllMenuItems(): Promise<MenuItem[]> {
   const result = await sql`
-    SELECT id, name, description, price, status, image
-    FROM Items
-    WHERE status = 'Available'
-    ORDER BY id ASC;
+    SELECT 
+      i.id, 
+      i.name, 
+      i.description, 
+      i.price, 
+      i.status, 
+      i.image,
+      c.name AS category
+    FROM Items i
+    JOIN ItemsCategory ic ON i.id = ic.itemId
+    JOIN Categories c ON ic.categoryId = c.id
+    WHERE i.status = 'Available'
+    ORDER BY i.id ASC;
   `;
 
   return result.map((row: any) => ({
@@ -231,4 +240,46 @@ export async function getAllMenuItems(): Promise<MenuItem[]> {
     image: row.image,
     category: row.category,
   }));
+}
+
+export async function getItemsGroupedByCategory(): Promise<
+  Record<string, MenuItem[]>
+> {
+  const rows = await sql<
+    {
+      category_name: string;
+      id: number;
+      name: string;
+      price: number;
+      image: string | null;
+    }[]
+  >`
+    SELECT 
+      c.name AS category_name,
+      i.id,
+      i.name,
+      i.price,
+      i.image
+    FROM Items i
+    JOIN ItemCategories ic ON i.id = ic.itemId
+    JOIN Categories c ON c.id = ic.categoryId
+    ORDER BY c.name, i.name;
+  `;
+
+  // Group by category name
+  const grouped: Record<string, MenuItem[]> = {};
+
+  for (const row of rows) {
+    if (!grouped[row.category_name]) {
+      grouped[row.category_name] = [];
+    }
+    grouped[row.category_name].push({
+      id: row.id,
+      name: row.name,
+      price: row.price,
+      image: row.image,
+    });
+  }
+
+  return grouped;
 }
