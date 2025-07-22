@@ -53,7 +53,7 @@ const AdminSidebarPage = () => {
       {/* Navigation */}
       <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
         {menuItems.map(({ name, href, icon: Icon }) => {
-          const isActive = pathname === href;
+          const isActive = pathname.startsWith(href);
 
           return (
             <Link
