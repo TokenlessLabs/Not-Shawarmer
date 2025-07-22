@@ -1,12 +1,12 @@
-
 "use client";
 
 import React, { useRef, useState } from "react";
 import AddressBar from "../ui/dashboard/address-bar";
-import Card from "../ui/dashboard/menu-item-card";
+import Card from "../ui/dashboard/menu-item-card"; 
 import Cart from "../ui/dashboard/cart";
 import OrderHandle from "../ui/dashboard/order-handle";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
+
 
 const categories: string[] = [
   "Starters", "Main Course", "Drinks", "Desserts",
@@ -46,7 +46,6 @@ export default function DashboardClient() {
     <>
       <AddressBar />
 
-    
       <div className="flex justify-center mt-7">
         <div className="flex items-center gap-2 w-full max-w-5xl mx-auto mt-8 px-4">
           <MagnifyingGlassIcon className="text-gray-500 w-8 h-8" />
@@ -58,11 +57,10 @@ export default function DashboardClient() {
         </div>
       </div>
 
-      
       <div
         ref={categoryBarRef}
         className="sticky top-0 bg-white z-10 overflow-x-auto whitespace-nowrap py-3 shadow-sm border-b my-6 pl-6 md:pl-10"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div className="flex gap-4 w-max">
           {categories.map((category, idx) => (
@@ -85,14 +83,15 @@ export default function DashboardClient() {
         </div>
       </div>
 
+      {/* ✅ UPDATED SECTION — passing onClick properly to each Card */}
       <div className="px-6 md:px-10">
         {categories.map((category, idx) => (
           <div key={idx} id={category} className="mb-12 scroll-mt-24">
             <h2 className="text-2xl my-5 border-b-2">{category}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              <Card />
-              <Card />
-              <Card />
+              <Card onClick={() => console.log(`Clicked 1 in ${category}`)} />
+              <Card onClick={() => console.log(`Clicked 2 in ${category}`)} />
+              <Card onClick={() => console.log(`Clicked 3 in ${category}`)} />
             </div>
           </div>
         ))}
