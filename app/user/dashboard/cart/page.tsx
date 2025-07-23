@@ -12,16 +12,34 @@ type CartItem = {
 
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState("Emporium Mall");
+  const [savedAddress, setSavedAddress] = useState("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+  // Load cart items from localStorage
+  const storedCart = localStorage.getItem("cart");
+  if (storedCart) {
+    setCartItems(JSON.parse(storedCart));
+  }
+
+  // Fetch address from API
+  async function fetchAddress() {
+    try {
+      const res = await fetch("/api/address");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.address) {
+          setSavedAddress(data.address);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch address", error);
     }
-  }, []);
+  }
+
+  fetchAddress();
+}, []);
 
   // Calculate subtotal
   const subtotal = cartItems.reduce(

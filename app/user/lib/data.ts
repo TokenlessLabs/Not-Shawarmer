@@ -1,6 +1,5 @@
 import postgres from "postgres";
 import { User, Order, MenuItem } from "./definitions";
-// import { FooterRestDetails } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -290,13 +289,3 @@ export async function getUserAddress(): Promise<string | null> {
   `;
   return result.length > 0 ? result[0].address : null;
 }
-
-// export async function getRestDetails(): Promise<FooterRestDetails> {
-//   const result = await sql<FooterRestDetails[]>`
-//     SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd
-//     FROM RestDetails
-//     WHERE id = 1
-//     LIMIT 1;
-//   `;
-//   return result[0];
-// }
