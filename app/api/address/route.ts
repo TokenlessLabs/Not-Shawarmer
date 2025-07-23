@@ -1,4 +1,3 @@
-// app/api/address/route.ts
 import { NextResponse } from "next/server";
 import { getUserAddress } from "@/app/user/lib/data";
 
