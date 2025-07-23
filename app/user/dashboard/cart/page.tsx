@@ -1,12 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import AddressModal from "../../ui/dashboard/address-modal";
 
+type CartItem = {
+  name: string;
+  price: number;
+  quantity: number;
+};
+
 const CartPage = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [savedAddress, setSavedAddress] = useState<string>("Emporium Mall");
+  const [openModal, setOpenModal] = useState(false);
+  const [savedAddress, setSavedAddress] = useState("Emporium Mall");
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  // Load cart items from localStorage when component mounts
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCartItems(JSON.parse(storedCart));
+    }
+  }, []);
+
+  // Calculate subtotal
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  const deliveryFee = 250;
+  const total = subtotal + deliveryFee;
+
+  // Clear cart on placing order
+  const handlePlaceOrder = () => {
+    localStorage.removeItem("cart");
+    setCartItems([]);
+    alert("Order placed successfully!");
+  };
+
   return (
     <>
       {openModal && (
@@ -16,11 +48,9 @@ const CartPage = () => {
           onSave={(add) => setSavedAddress(add)}
         />
       )}
-      <div className="max-h-screen overflow-y-hidden p-6  text-theme-dark-blue flex flex-col">
-        {/* Cart Heading */}
+      <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
         <h1 className="text-3xl font-bold mb-10">My Cart</h1>
 
-        {/* Grid Layout */}
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-7xl mx-auto flex-grow">
           {/* Left Section */}
           <div className="flex-1 space-y-6">
@@ -28,18 +58,20 @@ const CartPage = () => {
             <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               <ul className="space-y-3">
-                <li className="flex justify-between">
-                  <span>Chicken Shawarma x2</span>
-                  <span>PKR 1200</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Fries x1</span>
-                  <span>PKR 300</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Drink x1</span>
-                  <span>PKR 150</span>
-                </li>
+                {cartItems.length === 0 ? (
+                  <p className="text-sm text-theme-dark-blue/70">
+                    Your cart is empty.
+                  </p>
+                ) : (
+                  cartItems.map((item, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span>
+                        {item.name} x{item.quantity}
+                      </span>
+                      <span>PKR {item.price * item.quantity}</span>
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
 
@@ -76,33 +108,33 @@ const CartPage = () => {
 
             <div className="flex justify-between mb-2">
               <span>Subtotal</span>
-              <span>PKR 1650</span>
+              <span>PKR {subtotal}</span>
             </div>
 
             <div className="flex justify-between mb-4">
               <span>Delivery</span>
-              <span>PKR 250</span>
+              <span>PKR {deliveryFee}</span>
             </div>
 
             <hr className="border-theme-dark-blue/20 mb-4" />
 
             <div className="flex justify-between text-lg font-bold mb-6">
               <span>Total</span>
-              <span>PKR 1900</span>
+              <span>PKR {total}</span>
             </div>
 
             <div className="flex flex-col w-full gap-1">
-              {/* Payment Instruction */}
               <div className="bg-theme-blue/10 border border-theme-dark-blue/30 rounded-md px-4 py-3 mb-4 text-sm text-theme-dark-blue">
                 <strong>Payment:</strong> Cash on Delivery
               </div>
 
-              <Link
-                href="/user/orders/1/delivery"
+              <button
+                onClick={handlePlaceOrder}
                 className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
+                disabled={cartItems.length === 0}
               >
                 Place Order
-              </Link>
+              </button>
             </div>
           </div>
         </div>
