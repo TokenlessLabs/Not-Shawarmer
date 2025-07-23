@@ -2,31 +2,17 @@
 
 import bcrypt from "bcryptjs";
 import postgres from "postgres";
-import {signupSchema , loginSchema } from "./schema"
-
+import {signupSchema } from "./schema"
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+import { ErrorState } from "../user/lib/actions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-export interface SignupErrorState {
-  message: string | null;
-  success: boolean;
-  errors?: string[];
-}
-
-export interface LoginErrorState {
-  message: string | null;
-  success: boolean;
-  errors?: string[];
-}
-
-
-
-
-
 export async function signupUser(
-  prevState: SignupErrorState,
+  prevState: ErrorState,
   formData: FormData
-): Promise<SignupErrorState> {
+): Promise<ErrorState> {
   const rawData = {
   name: formData.get('name')?.toString().trim() || '',
   email: formData.get('email')?.toString().trim() || '',
@@ -80,56 +66,21 @@ export async function signupUser(
   }
 }
 
-
-
-export async function loginUser(
-  prevState: LoginErrorState,
-  formData: FormData
-): Promise<LoginErrorState> {
-  const rawData = {
-    email: formData.get("email")?.toString() || "",
-    password: formData.get("password")?.toString() || "",
-  };
-
-  const result = loginSchema.safeParse(rawData);
-  if (!result.success) {
-    const errors = result.error.issues.map((e) => e.message);
-    return { message: null, success: false, errors };
-  }
-
-  const { email, password } = result.data;
-
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
   try {
-    const users = await sql`
-      SELECT * FROM users WHERE email = ${email}
-    `;
-
-    if (users.length === 0) {
-      return {
-        message: "No user found with this email.",
-        success: false,
-      };
-    }
-
-    const user = users[0];
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return {
-        message: "Invalid password.",
-        success: false,
-      };
-    }
-
-    return {
-      message: null,
-      success: true,
-    };
+    await signIn('credentials', formData);
   } catch (error) {
-    console.error("Login Error:", error);
-    return {
-      message: "Something went wrong. Please try again later.",
-      success: false,
-    };
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }
