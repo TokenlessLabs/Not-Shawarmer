@@ -21,8 +21,6 @@ export async function signupUser(
   confirmPassword: formData.get('confirmPassword')?.toString().trim() || '',
 };
 
-
-
   const result = signupSchema.safeParse(rawData);
 
   if (!result.success) {
