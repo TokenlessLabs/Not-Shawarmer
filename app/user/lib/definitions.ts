@@ -27,20 +27,11 @@ export type Order = {
   items: OrderItem[];
 };
 
-export type Category = {
-  id: number;
-  name: string;
-};
-
-export type ItemCategory = {
-  itemId: number;
-  categoryId: number;
-};
-
-// definitions.ts
 export type MenuItem = {
   id: number;
   name: string;
+  description: string;
   price: number;
   image: string | null;
+  category: string;
 };

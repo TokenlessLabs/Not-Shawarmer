@@ -1,12 +1,10 @@
 import postgres from "postgres";
-import { User } from "./definitions";
-import { Order } from "./definitions";
-import { MenuItem } from "./definitions";
+import { User, Order, MenuItem } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export async function getUserData(): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
   const result = await sql<User[]>`
     SELECT id, username, email, contact, role, address
     FROM Users
@@ -214,72 +212,23 @@ export async function getRestaurantDetails() {
   return result[0];
 }
 
-export async function getAllMenuItems(): Promise<MenuItem[]> {
-  const result = await sql`
-    SELECT 
-      i.id, 
-      i.name, 
-      i.description, 
-      i.price, 
-      i.status, 
-      i.image,
-      c.name AS category
-    FROM Items i
-    JOIN ItemsCategory ic ON i.id = ic.itemId
-    JOIN Categories c ON ic.categoryId = c.id
-    WHERE i.status = 'Available'
-    ORDER BY i.id ASC;
+export async function getCategories(): Promise<string[]> {
+  const result = await sql<{ name: string }[]>`
+    SELECT name
+    FROM Categories
+    ORDER BY id ASC;
   `;
-
-  return result.map((row: any) => ({
-    id: row.id,
-    name: row.name,
-    description: row.description,
-    price: parseFloat(row.price),
-    status: row.status,
-    image: row.image,
-    category: row.category,
-  }));
+  return result.map(row => row.name);
 }
 
-export async function getItemsGroupedByCategory(): Promise<
-  Record<string, MenuItem[]>
-> {
-  const rows = await sql<
-    {
-      category_name: string;
-      id: number;
-      name: string;
-      price: number;
-      image: string | null;
-    }[]
-  >`
-    SELECT 
-      c.name AS category_name,
-      i.id,
-      i.name,
-      i.price,
-      i.image
-    FROM Items i
-    JOIN ItemCategories ic ON i.id = ic.itemId
-    JOIN Categories c ON c.id = ic.categoryId
-    ORDER BY c.name, i.name;
+export async function getMenuItems(): Promise<MenuItem[]> {
+  const result = await sql<MenuItem[]>`
+    SELECT Items.ID, Items.Name, Items.Description, Items.Price, Items.Image, Categories.Name as Category
+    FROM Items
+    LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
+    LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
+    WHERE status = ${'Available'}
+    ORDER BY id ASC;
   `;
-
-  // Group by category name
-  const grouped: Record<string, MenuItem[]> = {};
-
-  for (const row of rows) {
-    if (!grouped[row.category_name]) {
-      grouped[row.category_name] = [];
-    }
-    grouped[row.category_name].push({
-      id: row.id,
-      name: row.name,
-      price: row.price,
-      image: row.image,
-    });
-  }
-
-  return grouped;
+  return result;
 }
