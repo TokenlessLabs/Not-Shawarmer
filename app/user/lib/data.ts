@@ -231,6 +231,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     ORDER BY id ASC;
   `;
   return result;
+}
 
 export async function getOrderById(orderId: number): Promise<Order | null> {
   const result = await sql`
