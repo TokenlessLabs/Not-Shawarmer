@@ -2,7 +2,6 @@
 "use client";
 import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
-import { getImageUrl } from "../../lib/utils";
 
 type CardProps = {
   item: MenuItem;
@@ -10,13 +9,14 @@ type CardProps = {
 };
 
 export default function Card({ item, onClick }: CardProps) {
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
   return (
     <div
       className="max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
       onClick={onClick}
     >
       <Image
-        src={getImageUrl(item.image)}
+        src={imageUrl}
         alt={item.name}
         width={400}
         height={300}
