@@ -1,7 +1,6 @@
 import { PhoneIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getRestaurantDetails } from "../lib/data";
 
-
 export default async function Footer() {
   const restDetails = await getRestaurantDetails();
 
@@ -31,7 +30,9 @@ export default async function Footer() {
         </p>
         <p className="flex items-center justify-end gap-1">
           <ClockIcon className="w-4 h-4" />
-     {`${restDetails.operatinghoursstart?.slice(0, 5) || "N/A"} – ${restDetails.operatinghoursend?.slice(0, 5) || "N/A"}`}
+          {`${restDetails.operatinghoursstart?.slice(0, 5) || "N/A"} – ${
+            restDetails.operatinghoursend?.slice(0, 5) || "N/A"
+          }`}
         </p>
       </div>
     </footer>

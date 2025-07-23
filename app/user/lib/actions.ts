@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
@@ -35,14 +36,24 @@ export async function updateUserAddress(
         errors: ["Address cannot be empty."],
       };
     }
+  const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return {
+        success: false,
+        message: "User doesn't exist.",
+        errors: [""],
+      };
 
     await sql`
       UPDATE users
       SET address = ${newAddress}
-      WHERE id = ${1}
+      WHERE id = ${userId}
     `;
 
     revalidatePath("/user/profile");
+    revalidatePath("/admin/profile");
 
     return {
       success: true,
@@ -74,10 +85,20 @@ export async function updateUser(
       };
     }
 
+    const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return {
+      success: false,
+      message: "User does not exist.",
+      errors: [],
+    };
+
     // Uniqueness check (excluding current user)
     const [existingUser] = await sql`
       SELECT * FROM users
-      WHERE (username = ${username} OR email = ${email}) AND id <> ${1}
+      WHERE (username = ${username} OR email = ${email}) AND id <> ${userId}
     `;
 
     const errors: string[] = [];
@@ -98,10 +119,11 @@ export async function updateUser(
     await sql`
       UPDATE users
       SET username = ${username}, email = ${email}, contact = ${contact}
-      WHERE id = ${1}
+      WHERE id = ${userId}
     `;
 
     revalidatePath("/user/profile");
+    revalidatePath("/admin/profile");
 
     return {
       success: true,
@@ -141,8 +163,18 @@ export async function changePassword(
     };
   }
 
+  const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return {
+      success: false,
+      message: "User does not exist.",
+      errors: [],
+    };
+
   try {
-    const users = await sql`SELECT * FROM users WHERE id = ${1}`; // Replace with session user
+    const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
     const user = users[0];
 
     if (!user) return { message: "User not found" };
@@ -151,7 +183,7 @@ export async function changePassword(
     if (!isMatch) return { message: "Current password is incorrect" };
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    await sql`UPDATE users SET password = ${hashed} WHERE id = ${1}`;
+    await sql`UPDATE users SET password = ${hashed} WHERE id = ${userId}`;
 
     return { success: true };
   } catch (err) {
