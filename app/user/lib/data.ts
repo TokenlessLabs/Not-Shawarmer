@@ -260,52 +260,12 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
   };
 }
 
-// func:
-// export async function getOrderById(orderId: number): Promise<Order | null> {
-//   const orderResult = await sql
-//     SELECT
-//       id,
-//       "id" AS user_id,
-//       "createdAt" AS created_at,
-//       "deliveredAt" AS delivered_at,
-//       status,
-//       instructions,
-//       address
-//     FROM Orders
-//     WHERE id = ${orderId}
-//   ;
-
-//   if (orderResult.length === 0) return null;
-
-//   const order = orderResult[0];
-
-//   const itemsResult = await sql
-//     SELECT
-//       i.id AS item_id,
-//       i.name,
-//       i.price,
-//       od.quantity
-//     FROM OrderDetails od
-//     JOIN Items i ON od.itemId = i.id
-//     WHERE od.orderId = ${orderId}
-//   ;
-
-//   const items = itemsResult.map((item) => ({
-//     itemId: item.item_id,
-//     name: item.name,
-//     price: item.price,
-//     quantity: item.quantity,
-//   }));
-
-//   return {
-//     id: order.id,
-//     userId: order.user_id,
-//     createdat: order.created_at,
-//     deliveredat: order.delivered_at,
-//     status: order.status,
-//     instructions: order.instructions,
-//     address: order.address,
-//     delivery_fee: 0,
-//     items,
-//   };
-// }
+export async function getUserAddress(): Promise<string | null> {
+  const result = await sql`
+    SELECT address
+    FROM Users
+    WHERE id = ${1}
+    LIMIT 1;
+  `;
+  return result.length > 0 ? result[0].address : null;
+}
