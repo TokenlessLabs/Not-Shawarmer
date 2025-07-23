@@ -212,3 +212,100 @@ export async function getRestaurantDetails() {
   `;
   return result[0];
 }
+
+export async function getOrderById(orderId: number): Promise<Order | null> {
+  const result = await sql`
+    SELECT 
+      o.id AS id,
+      o."id" AS userId,
+      o."createdat" AS createdat,
+      o."deliveredat" AS deliveredat,
+      o.status,
+      o.instructions,
+      o.address,
+      r.delivery_fee,
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'itemId', i.id,
+            'name', i.name,
+            'price', i.price,
+            'quantity', od.quantity
+          )
+        ) FILTER (WHERE i.id IS NOT NULL),
+        '[]'
+      ) AS items
+    FROM Orders o
+    LEFT JOIN OrderDetails od ON o.id = od.orderId
+    LEFT JOIN Items i ON i.id = od.itemId
+    LEFT JOIN RestDetails r ON r.id = 1 -- assuming one restaurant
+    WHERE o.id = ${orderId}
+    GROUP BY o.id, r.delivery_fee
+  `;
+
+  if (result.length === 0) return null;
+
+  const order = result[0];
+
+  return {
+    id: order.id,
+    userId: order.userId,
+    createdat: order.createdat,
+    deliveredat: order.deliveredat,
+    status: order.status,
+    instructions: order.instructions,
+    address: order.address,
+    delivery_fee: parseFloat(order.delivery_fee),
+    items: order.items ?? [],
+  };
+}
+
+// func:
+// export async function getOrderById(orderId: number): Promise<Order | null> {
+//   const orderResult = await sql
+//     SELECT
+//       id,
+//       "id" AS user_id,
+//       "createdAt" AS created_at,
+//       "deliveredAt" AS delivered_at,
+//       status,
+//       instructions,
+//       address
+//     FROM Orders
+//     WHERE id = ${orderId}
+//   ;
+
+//   if (orderResult.length === 0) return null;
+
+//   const order = orderResult[0];
+
+//   const itemsResult = await sql
+//     SELECT
+//       i.id AS item_id,
+//       i.name,
+//       i.price,
+//       od.quantity
+//     FROM OrderDetails od
+//     JOIN Items i ON od.itemId = i.id
+//     WHERE od.orderId = ${orderId}
+//   ;
+
+//   const items = itemsResult.map((item) => ({
+//     itemId: item.item_id,
+//     name: item.name,
+//     price: item.price,
+//     quantity: item.quantity,
+//   }));
+
+//   return {
+//     id: order.id,
+//     userId: order.user_id,
+//     createdat: order.created_at,
+//     deliveredat: order.delivered_at,
+//     status: order.status,
+//     instructions: order.instructions,
+//     address: order.address,
+//     delivery_fee: 0,
+//     items,
+//   };
+// }
