@@ -1,11 +1,10 @@
 import postgres from "postgres";
-import { User } from "./definitions";
-import { Order } from "./definitions";
+import { User, Order, MenuItem } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 export async function getUserData(): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
   const result = await sql<User[]>`
     SELECT id, username, email, contact, role, address
     FROM Users
@@ -212,6 +211,26 @@ export async function getRestaurantDetails() {
   `;
   return result[0];
 }
+
+export async function getCategories(): Promise<string[]> {
+  const result = await sql<{ name: string }[]>`
+    SELECT name
+    FROM Categories
+    ORDER BY id ASC;
+  `;
+  return result.map(row => row.name);
+}
+
+export async function getMenuItems(): Promise<MenuItem[]> {
+  const result = await sql<MenuItem[]>`
+    SELECT Items.ID, Items.Name, Items.Description, Items.Price, Items.Image, Categories.Name as Category
+    FROM Items
+    LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
+    LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
+    WHERE status = ${'Available'}
+    ORDER BY id ASC;
+  `;
+  return result;
 
 export async function getOrderById(orderId: number): Promise<Order | null> {
   const result = await sql`
