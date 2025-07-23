@@ -1,9 +1,14 @@
-import { getCurrentOrders } from "@/app/user/lib/data";
-import DeliveryClient from "../../../ui/delivery-client"; // You'll write this inline below
+import { getOrderById } from "@/app/user/lib/data"; 
+import DeliveryClient from "@/app/user/ui/delivery-client";
+import { notFound } from "next/navigation";
 
-export default async function DeliveryPage() {
-  const orders = await getCurrentOrders();
-  const currentOrder = orders.length > 0 ? orders[0] : null;
+export default async function DeliveryPage({ params }: { params: { orderid: string } }) {
+  const orderId = parseInt(params.orderid, 10);
+  if (isNaN(orderId)) return notFound();
 
-  return <DeliveryClient order={currentOrder} />;
+  const order = await getOrderById(orderId); 
+
+  if (!order) return notFound();
+
+  return <DeliveryClient order={order} />;
 }

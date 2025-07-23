@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getCurrentOrders } from "@/app/user/lib/data"; // adjust the path if necessary
+import { getCurrentOrders } from "@/app/user/lib/data"; 
 import { Order } from "@/app/user/lib/definitions";
 
 const OrderHandle = () => {
