@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { User, Order, MenuItem } from "./definitions";
+// import { FooterRestDetails } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -218,7 +219,7 @@ export async function getCategories(): Promise<string[]> {
     FROM Categories
     ORDER BY id ASC;
   `;
-  return result.map(row => row.name);
+  return result.map((row) => row.name);
 }
 
 export async function getMenuItems(): Promise<MenuItem[]> {
@@ -227,7 +228,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     FROM Items
     LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
     LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
-    WHERE status = ${'Available'}
+    WHERE status = ${"Available"}
     ORDER BY id ASC;
   `;
   return result;
@@ -289,3 +290,13 @@ export async function getUserAddress(): Promise<string | null> {
   `;
   return result.length > 0 ? result[0].address : null;
 }
+
+// export async function getRestDetails(): Promise<FooterRestDetails> {
+//   const result = await sql<FooterRestDetails[]>`
+//     SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd
+//     FROM RestDetails
+//     WHERE id = 1
+//     LIMIT 1;
+//   `;
+//   return result[0];
+// }
