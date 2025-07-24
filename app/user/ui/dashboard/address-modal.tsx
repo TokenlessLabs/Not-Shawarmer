@@ -106,7 +106,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
   }, [humanLocation, editing]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50">
       <div className="w-full max-w-lg bg-white rounded-xl overflow-hidden shadow-xl flex flex-col h-auto">
         {/* Map Section */}
         <div className="h-[300px] relative">

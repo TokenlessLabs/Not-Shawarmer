@@ -78,14 +78,14 @@ async function createTables() {
 `;
 
   await sql`
-  CREATE TABLE OrderDetails (
-    orderId INTEGER NOT NULL,
-    itemId INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    PRIMARY KEY (orderId, itemId),
-    FOREIGN KEY (orderId) REFERENCES Orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (itemId) REFERENCES Items(id) ON DELETE SET NULL ON UPDATE CASCADE
-  );
+CREATE TABLE OrderDetails (
+  id SERIAL PRIMARY KEY,
+  orderId INTEGER NOT NULL,
+  itemId INTEGER,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  FOREIGN KEY (orderId) REFERENCES Orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (itemId) REFERENCES Items(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
 `;
 }
 

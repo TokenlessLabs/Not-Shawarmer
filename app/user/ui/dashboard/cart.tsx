@@ -23,7 +23,7 @@ export default function Cart() {
       <Link
         href="/user/dashboard/cart"
         className={`w-16 h-16 rounded-full shadow-lg bg-theme-blue flex items-center justify-center transition-transform duration-300 ${
-          animate ? "scale-130" : ""
+          animate ? "scale-10" : ""
         }`}
       >
         <ShoppingCartIcon className="w-6 h-6 text-white" /> 

@@ -34,13 +34,11 @@ export type MenuItem = {
   price: number;
   image: string | null;
   category: string;
+  status?: string;
 };
 
-// export type FooterRestDetails = {
-//   name: string;
-//   address: string;
-//   about: string | null;
-//   contact: string;
-//   operatingHoursStart: string;
-//   operatingHoursEnd: string;
-// };
+export type ErrorState = {
+  success?: boolean;
+  message?: string | null;
+  errors?: string[];
+};

@@ -1,8 +1,10 @@
-"use client";
+
+import { updateUserAddress } from "../../lib/actions";
 import { useTransition } from "react";
 import React, { useEffect, useState } from "react"
 import AddressModal from "../../ui/dashboard/address-modal";
 import { placeOrder } from "../../lib/actions";
+
 
 type CartItem = {
   name: string;
@@ -12,17 +14,36 @@ type CartItem = {
 
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState("Emporium Mall");
+  const [savedAddress, setSavedAddress] = useState("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [instructions, setInstructions] = useState('');
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+  // Load cart items from localStorage
+  const storedCart = localStorage.getItem("cart");
+  if (storedCart) {
+    setCartItems(JSON.parse(storedCart));
+  }
+
+  // Fetch address from API
+  async function fetchAddress() {
+    try {
+      const res = await fetch("/api/address");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.address) {
+          setSavedAddress(data.address);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch address", error);
     }
-  }, []);
+  }
+
+  fetchAddress();
+}, []);
 
   // Calculate subtotal
   const subtotal = cartItems.reduce(
@@ -38,7 +59,7 @@ const CartPage = () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-    const result = await placeOrder(parsedCart , null); 
+    const result = await placeOrder(parsedCart , instructions , savedAddress); 
 
     if (result.success) {
       localStorage.removeItem("cart");
@@ -56,7 +77,15 @@ const CartPage = () => {
         <AddressModal
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
-          onSave={(add) => setSavedAddress(add)}
+          onSave={(newAddress) => {
+                     setOpenModal(false);
+         
+                     if (newAddress !== savedAddress) {
+                       setSavedAddress(newAddress);
+                       updateUserAddress(newAddress);
+                     }
+                    }
+                  }
         />
       )}
       <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
@@ -97,7 +126,7 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm">{savedAddress}</p>
+              <p className="text-sm" >{savedAddress} </p>
             </div>
 
             {/* Special Instructions */}
@@ -106,6 +135,7 @@ const CartPage = () => {
                 Special Instructions
               </h2>
               <textarea
+                onChange={(e) => setInstructions(e.target.value)}
                 rows={3}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
@@ -113,7 +143,6 @@ const CartPage = () => {
             </div>
           </div>
 
-          {/* Right Section: Summary */}
           <div className="w-full md:w-96 flex-shrink-0 bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 h-fit">
             <h2 className="text-xl font-semibold mb-4">Summary</h2>
 

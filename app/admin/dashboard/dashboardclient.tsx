@@ -2,12 +2,12 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Card from "../ui/dashboard/menu-item-card";
-import Cart from "../ui/dashboard/cart";
-import OrderHandle from "../ui/dashboard/order-handle";
-import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { MenuItem } from "../lib/definitions";
-import MenuItemModal from "../ui/dashboard/menu-item-modal";
+import Card from "@/app/user/ui/dashboard/menu-item-card";
+import { MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { MenuItem } from "@/app/user/lib/definitions";
+import UpdateMenuItemModal from "../ui/dashboard/update-menu-item-modal";
+import FloatingButton from "../ui/dashboard/addbtn";
+import DeleteCategoryModal from "../ui/dashboard/delete-category-modal";
 
 type DashboardClientProps = {
   categories: string[];
@@ -18,6 +18,11 @@ export default function DashboardClient({
   categories,
   menuItems,
 }: DashboardClientProps) {
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>(menuItems);
+  const [searchValue, setSearchValue] = useState("");
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
 
@@ -27,21 +32,32 @@ export default function DashboardClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
-  const [searchValue, setSearchValue] = useState(searchQuery);
 
-  const filteredItems = menuItems.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    setSearchValue(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const value = searchValue.toLowerCase();
+    const filtered = menuItems.filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(value);
+      const matchesAvailability =
+        availabilityFilter === "all" ||
+        (availabilityFilter === "available" && item.status === "Available") ||
+        (availabilityFilter === "unavailable" && item.status === "Unavailable");
+      return matchesSearch && matchesAvailability;
+    });
+    setFilteredItems(filtered);
+  }, [searchValue, availabilityFilter, menuItems]);
 
   useEffect(() => {
     const debounce = setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams(searchParams.toString());
       searchValue ? params.set("query", searchValue) : params.delete("query");
       router.replace(`?${params.toString()}`);
     }, 300);
-
     return () => clearTimeout(debounce);
-  }, [searchValue]);
+  }, [searchValue, searchParams, router]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -66,27 +82,16 @@ export default function DashboardClient({
     }
   };
 
+  const handleDeleteCategory = (categoryName: string) => {
+    setCategoryToDelete(categoryName);
+  };
+
   return (
     <>
-      {/* Search bar */}
-      <div className="flex justify-center mt-7">
-        <div className="flex items-center gap-2 w-full max-w-5xl mx-auto mt-8 px-4">
-          <MagnifyingGlassIcon className="text-gray-500 w-8 h-8" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={handleSearchChange}
-            className="flex-grow px-4 py-2 rounded-full border border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400"
-          />
-        </div>
-      </div>
-
       {/* Category bar */}
       <div
         ref={categoryBarRef}
-        className="sticky top-0 bg-white z-10 overflow-x-auto whitespace-nowrap py-3 shadow-sm border-t border-b my-6 pl-6 md:pl-10"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="sticky top-0 bg-white z-10 overflow-x-auto whitespace-nowrap py-3 shadow-sm border-t border-b mb-6 pl-6 md:pl-10"
       >
         <div className="flex gap-4 w-max">
           {categories.map((category, idx) => (
@@ -108,9 +113,34 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Items */}
+      {/* Search + Filter */}
+      <div className="flex justify-center mt-7 px-4 pt-5">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-4xl">
+          <div className="flex items-center gap-2 w-full md:w-3/4">
+            <MagnifyingGlassIcon className="text-gray-500 w-6 h-6" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              className="w-full px-4 py-2 rounded-full border border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 placeholder-gray-400"
+            />
+          </div>
+          <select
+            value={availabilityFilter}
+            onChange={(e) => setAvailabilityFilter(e.target.value)}
+            className="w-42 px-3 py-2 border border-gray-300 rounded-full bg-white text-gray-700"
+          >
+            <option value="all">Filter: All</option>
+            <option value="available">Filter: Available</option>
+            <option value="unavailable">Filter: Unavailable</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Menu Items */}
       <div className="px-6 md:px-10">
-        {searchQuery ? (
+        {searchValue ? (
           <div className="mb-12 scroll-mt-24">
             <h2 className="text-2xl my-5 border-b-2">Search Results</h2>
             {filteredItems.length === 0 ? (
@@ -121,9 +151,7 @@ export default function DashboardClient({
                   <Card
                     key={item.id}
                     item={item}
-                    onClick={() => {
-                      setSelectedItem(item);
-                    }}
+                    onClick={() => setSelectedItem(item)}
                   />
                 ))}
               </div>
@@ -131,22 +159,25 @@ export default function DashboardClient({
           </div>
         ) : (
           categories.map((category, idx) => {
-            const itemsInCategory = menuItems.filter(
+            const itemsInCategory = filteredItems.filter(
               (item) => item.category === category
             );
-
             return (
               <div key={idx} id={category} className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl my-5 border-b-2">{category}</h2>
+                <div className="flex items-center justify-between my-5 border-b-2">
+                  <h2 className="text-2xl">{category}</h2>
+                  <TrashIcon
+                    className="h-6 w-6 text-red-500 cursor-pointer hover:text-red-700 transition"
+                    onClick={() => setCategoryToDelete(category)}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {itemsInCategory.length > 0 ? (
                     itemsInCategory.map((item) => (
                       <Card
                         key={item.id}
                         item={item}
-                        onClick={() => {
-                          setSelectedItem(item);
-                        }}
+                        onClick={() => setSelectedItem(item)}
                       />
                     ))
                   ) : (
@@ -161,16 +192,24 @@ export default function DashboardClient({
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal for editing item */}
       {selectedItem && (
-        <MenuItemModal
+        <UpdateMenuItemModal
           item={selectedItem}
+          categories={categories}
           onClose={() => setSelectedItem(undefined)}
         />
       )}
 
-      <Cart />
-      <OrderHandle />
+      {/* Modal for deleting category */}
+      {categoryToDelete && (
+        <DeleteCategoryModal
+          category={categoryToDelete}
+          onClose={() => setCategoryToDelete(null)}
+        />
+      )}
+
+      <FloatingButton categories={categories} />
     </>
   );
 }

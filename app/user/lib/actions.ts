@@ -5,6 +5,7 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { ErrorState } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -276,12 +277,18 @@ export async function updateRestaurant(
       errors: [],
     };
   }
-} // ✅ This brace was missing
+}
 
-// ✅ Now define placeOrder outside
+type CartItem = {
+  name: string;
+  quantity: number;
+  price: number;
+};
+
 export async function placeOrder(
   cartItems: CartItem[],
-  instructions?: string | null
+  address: string,
+  instructions?: string
 ) {
   try {
     if (!cartItems.length) {
@@ -289,10 +296,10 @@ export async function placeOrder(
     }
 
     const orderResult = await sql`
-      INSERT INTO Orders (userid, createdat, status, instructions, address)
-      VALUES (${1}, ${"2025-07-24"}, ${"Cooking"}, ${
+      INSERT INTO Orders (userid,createdat, status ,  instructions, address)
+      VALUES (${1},${"2025-07-24"},${"Cooking"},${
       instructions || null
-    }, ${"address"})
+    },${address})
       RETURNING id;
     `;
 
