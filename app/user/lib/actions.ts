@@ -5,12 +5,11 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { ErrorState } from "./definitions";
 
 
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
-
-
 
 export type ErrorState = {
   success?: boolean;

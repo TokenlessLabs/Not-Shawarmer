@@ -3,16 +3,16 @@
 import React, { useState ,useEffect } from "react";
 import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
-import { getImageUrl } from "../../lib/utils";
 
 type MenuItemModalProps = {
   item: MenuItem;
   onClose: () => void;
 };
 
-
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
+
  const handleAddToCart = () => {
   const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -34,7 +34,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md relative overflow-hidden">
         <div className="w-full h-52 relative">
           <Image
-            src={getImageUrl(item.image)}
+            src={imageUrl}
             alt={item.name}
             width={400}
             height={300}
@@ -73,13 +73,13 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
               Close
             </button>
             <button
-               
-               onClick={handleAddToCart}
+              onClick={handleAddToCart}
               className="bg-theme-blue text-white font-bold px-4 py-2 rounded shadow-xl hover:px-5 hover:bg-theme-dark-blue transition-all duration-200"
             >
               Add to Cart{" "}
-              <span className="ml-3">Rs. {Math.floor(item.price * quantity * 100) / 100}
-</span>
+              <span className="ml-3">
+                Rs. {Math.floor(item.price * quantity * 100) / 100}
+              </span>
             </button>
           </div>
         </div>
