@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import AddressModal from "../../ui/dashboard/address-modal";
+import { updateUserAddress } from "../../lib/actions";
 
 type CartItem = {
   name: string;
@@ -45,7 +45,15 @@ const CartPage = () => {
         <AddressModal
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
-          onSave={(add) => setSavedAddress(add)}
+          onSave={(newAddress) => {
+                     setOpenModal(false);
+         
+                     if (newAddress !== savedAddress) {
+                       setSavedAddress(newAddress);
+                       updateUserAddress(newAddress);
+                     }
+                    }
+                  }
         />
       )}
       <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
