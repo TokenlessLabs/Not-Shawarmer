@@ -1,13 +1,11 @@
 import { PhoneIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { getRestaurantDetails } from "../lib/data";
 
-const footerInfo = {
-  about: "Serving delicious food since 1999",
-  contact: "+92 300 1234567",
-  location: "123 Food Street, Lahore",
-  hours: "12PM – 11PM",
-};
+export default async function Footer() {
+  const restDetails = await getRestaurantDetails();
 
-export default function Footer() {
+  if (!restDetails) return null;
+
   return (
     <footer className="w-full h-[90px] bg-theme-light-blue border-t-3 border-theme-dark-blue px-6 flex items-center justify-between text-theme-dark-blue text-sm">
       {/* Left: Logo Only */}
@@ -17,22 +15,24 @@ export default function Footer() {
 
       {/* Center: About Us */}
       <div className="text-center hidden sm:block">
-        <p className="text-lg font-medium">{footerInfo.about}</p>
+        <p className="text-lg font-medium">{restDetails.about}</p>
       </div>
 
       {/* Right: Contact Info */}
       <div className="flex flex-col text-right leading-tight text-xs sm:text-sm gap-0.5">
         <p className="flex items-center justify-end gap-1">
           <PhoneIcon className="w-4 h-4" />
-          {footerInfo.contact}
+          {restDetails.contact}
         </p>
         <p className="flex items-center justify-end gap-1">
           <MapPinIcon className="w-4 h-4" />
-          {footerInfo.location}
+          {restDetails.address}
         </p>
         <p className="flex items-center justify-end gap-1">
           <ClockIcon className="w-4 h-4" />
-          {footerInfo.hours}
+          {`${restDetails.operatinghoursstart?.slice(0, 5) || "N/A"} – ${
+            restDetails.operatinghoursend?.slice(0, 5) || "N/A"
+          }`}
         </p>
       </div>
     </footer>
