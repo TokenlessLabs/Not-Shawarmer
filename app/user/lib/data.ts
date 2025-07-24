@@ -1,21 +1,32 @@
 import postgres from "postgres";
 import { User, Order, MenuItem } from "./definitions";
+import { auth } from "@/auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-export async function getUserData(): Promise<User> {
-  // await new Promise((resolve) => setTimeout(resolve, 3000));
+export async function getUserData(): Promise<User | null> {
+  const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return null;
+
   const result = await sql<User[]>`
     SELECT id, username, email, contact, role, address
     FROM Users
-    WHERE id = ${1}
+    WHERE id = ${userId}
     LIMIT 1;
   `;
-  return result[0];
+
+  return result[0] || null;
 }
 
-export async function getPastOrders(): Promise<Order[]> {
-  const userId = 1;
+export async function getPastOrders(): Promise<Order[] | null> {
+   const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return null;
 
   const result = await sql`
     SELECT 
@@ -62,8 +73,12 @@ export async function getPastOrders(): Promise<Order[]> {
   return orders;
 }
 
-export async function getCurrentOrders(): Promise<Order[]> {
-  const userId = 1;
+export async function getCurrentOrders(): Promise<Order[] | null> {
+     const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return null;
 
   const result = await sql`
     SELECT 
@@ -281,10 +296,16 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
 }
 
 export async function getUserAddress(): Promise<string | null> {
+  const session = await auth();
+
+  const userId = session?.user?.id;
+
+  if (!userId) return null;
+
   const result = await sql`
     SELECT address
     FROM Users
-    WHERE id = ${1}
+    WHERE id = ${userId}
     LIMIT 1;
   `;
   return result.length > 0 ? result[0].address : null;

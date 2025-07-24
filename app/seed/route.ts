@@ -18,7 +18,7 @@ async function createTables() {
     email VARCHAR(100) NOT NULL UNIQUE,
     contact VARCHAR(20) NOT NULL,
     password TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'Customer' CHECK (role IN ('Customer', 'Admin')),
+    role VARCHAR(20) NOT NULL DEFAULT 'User' CHECK (role IN ('User', 'Admin')),
     address TEXT
   );
 `;
@@ -96,7 +96,7 @@ async function seedUsers() {
       email: "john@example.com",
       contact: "1234567890",
       password: await bcrypt.hash("password123", 10),
-      role: "Customer",
+      role: "User",
       address: "123 Main Street",
     },
     {
@@ -121,7 +121,7 @@ async function seedRestaurants() {
   await sql`
     INSERT INTO RestDetails (name, address, operatingHoursStart, operatingHoursEnd, about, contact, delivery_fee)
     VALUES 
-      ('Not Shawarmer', '12 Italy Street', '10:00', '22:00', 'Authentic Arabian Cuisine', '03334567898', 200),
+      ('Not Shawarmer', '12 Italy Street', '10:00', '22:00', 'Authentic Arabian Cuisine', '03334567898', 200)
   `;
 }
 
@@ -135,12 +135,12 @@ async function seedCategories() {
 
 async function seedItems() {
   await sql`
-    INSERT INTO Items (name, description, price, status, image)
+    INSERT INTO Items (name, description, price, status)
     VALUES 
-      ('Cheeseburger', 'Grilled beef patty with cheese and pickles', 499.99, 'Available', 'burger.jpg'),
-      ('Spaghetti Carbonara', 'Classic Italian pasta with bacon and egg', 899.99, 'Available', 'carbonara.jpg'),
-      ('Coke', 'Chilled soft drink', 99.00, 'Available', 'coke.jpg'),
-      ('Tiramisu', 'Coffee-flavored Italian dessert', 399.00, 'Available', 'tiramisu.jpg');
+      ('Cheeseburger', 'Grilled beef patty with cheese and pickles', 499.99, 'Available'),
+      ('Spaghetti Carbonara', 'Classic Italian pasta with bacon and egg', 899.99, 'Available'),
+      ('Coke', 'Chilled soft drink', 99.00, 'Available'),
+      ('Tiramisu', 'Coffee-flavored Italian dessert', 399.00, 'Available');
   `;
 }
 

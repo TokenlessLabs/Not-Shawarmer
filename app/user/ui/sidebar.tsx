@@ -1,78 +1,74 @@
-"use client";
-
 import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Squares2X2Icon,
-  ShoppingBagIcon,
-  UserCircleIcon,
-  ArrowRightStartOnRectangleIcon,
-} from "@heroicons/react/24/outline";
+import NavLinks from "@/app/ui/sidebar/navlinks";
+import { signOut, auth } from "@/auth";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
-const menuItems = [
+const userLinks = [
   {
     name: "Dashboard",
     href: "/user/dashboard",
-    icon: Squares2X2Icon,
   },
   {
     name: "Orders",
     href: "/user/orders",
-    icon: ShoppingBagIcon,
   },
   {
     name: "Profile",
     href: "/user/profile",
-    icon: UserCircleIcon,
   },
 ];
 
-const Sidebar = () => {
-  const pathname = usePathname();
+const adminLinks = [
+  {
+    name: "Dashboard",
+    href: "/admin/dashboard",
+  },
+  {
+    name: "Orders",
+    href: "/admin/orders",
+  },
+  {
+    name: "Edit Restaurant",
+    href: "/admin/editrestaurant",
+  },
+  {
+    name: "Statistics",
+    href: "/admin/statistics",
+  },
+  {
+    name: "Profile",
+    href: "/admin/profile",
+  },
+];
+
+const Sidebar = async () => {
+  const session = await auth();
+
+  const role = session?.user?.role;
+
+  const navItems = role === "Admin" ? adminLinks : userLinks;
 
   return (
     <aside className="h-full w-full bg-theme-light-blue text-white px-2 pt-6 pb-3 flex flex-col border-r-3 border-theme-dark-blue">
-      <img src="/logo.svg" alt="Logo" className="my-3" />
+      <img src="/Logo.svg" alt="Logo" className="my-3" />
 
-      {/* Separator above menu */}
       <div className="border-t-3 border-theme-dark-blue mt-6 mb-6 -mx-2"></div>
 
-      {/* Navigation */}
-      <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
-        {menuItems.map(({ name, href, icon: Icon }) => {
-          const isActive = pathname.startsWith(href);
+      <NavLinks items={navItems} />
 
-          return (
-            <Link
-              key={name}
-              href={href}
-              className={`w-full rounded-lg transition-all duration-200 ${
-                isActive ? "bg-theme-blue text-white" : "hover:bg-blue-200"
-              }`}
-            >
-              <div className="flex items-center gap-4 text-xl px-4 py-3 font-medium">
-                <Icon className="h-10 w-10" />
-                <span>{name}</span>
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Thicker separator before logout */}
       <div className="border-t-3 border-theme-dark-blue mt-4 mb-3 -mx-2"></div>
 
-      {/* Logout */}
-      <Link
-        href="/logout"
-        className="w-full rounded-lg hover:bg-red-500/20 transition"
+      <form
+        action={async () => {
+          "use server";
+          await signOut({ redirectTo: "/" });
+        }}
       >
-        <div className="flex items-center gap-4 text-xl px-4 py-3 text-red-400 font-medium">
+        <button className="flex items-center gap-4 text-xl px-4 py-3 rounded-lg transition-all duration-200 text-red-400 hover:text-white hover:bg-red-400 font-medium w-full text-left">
           <ArrowRightStartOnRectangleIcon className="h-10 w-10" />
           <span>Logout</span>
-        </div>
-      </Link>
+        </button>
+      </form>
     </aside>
   );
 };
