@@ -270,7 +270,9 @@ export async function updateRestaurant(
       message: "Update failed due to a server error. Please try again later.",
       errors: [],
     };
-  }
+  }};
+
+
 
 
 type CartItem = {
@@ -281,8 +283,8 @@ type CartItem = {
 
 export async function placeOrder(
   cartItems: CartItem[],
-  //address: string,
-  instructions?: string |null
+  address: string,
+  instructions?: string 
 ) {
   try {
     if (!cartItems.length) {
@@ -292,7 +294,7 @@ export async function placeOrder(
     // 1. Insert into Orders table
     const orderResult = await sql`
       INSERT INTO Orders (userid,createdat, status ,  instructions, address)
-      VALUES (${1},${"2025-07-24"},${"Cooking"},${instructions || null},${"address"})
+      VALUES (${1},${"2025-07-24"},${"Cooking"},${instructions || null},${address})
       RETURNING id;
     `;
 
@@ -328,5 +330,4 @@ export async function placeOrder(
     console.error("❌ Error placing order:", error.message);
     return { success: false, error: error.message || "Unknown error" };
   }
-}
-
+};
