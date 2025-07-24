@@ -5,7 +5,11 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import AddItemModal from "./add-item-modal";
 import AddCategoryModal from "./add-category-modal";
 
-export default function FloatingButton() {
+type FloatingButtonProps = {
+  categories: string[];
+};
+
+export default function FloatingButton({ categories }: FloatingButtonProps) {
   const [showOptions, setShowOptions] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -51,7 +55,10 @@ export default function FloatingButton() {
       </div>
 
       {showAddItemModal && (
-        <AddItemModal onClose={() => setShowAddItemModal(false)} />
+        <AddItemModal
+          categories={categories}
+          onClose={() => setShowAddItemModal(false)}
+        />
       )}
 
       {showAddCategoryModal && (

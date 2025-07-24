@@ -5,7 +5,7 @@ import postgres from "postgres";
 import {signupSchema } from "./schema"
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { ErrorState } from "../user/lib/actions";
+import { ErrorState } from "../user/lib/definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 

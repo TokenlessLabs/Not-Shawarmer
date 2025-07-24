@@ -5,15 +5,10 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { ErrorState } from "./definitions";
 
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
-
-export type ErrorState = {
-  success?: boolean;
-  message?: string | null;
-  errors?: string[];
-};
 
 const userSchema = z.object({
   username: z.string().min(1, "Name is required"),

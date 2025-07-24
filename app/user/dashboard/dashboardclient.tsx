@@ -139,15 +139,21 @@ export default function DashboardClient({
               <div key={idx} id={category} className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl my-5 border-b-2">{category}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {itemsInCategory.map((item) => (
-                    <Card
-                      key={item.id}
-                      item={item}
-                      onClick={() => {
-                        setSelectedItem(item);
-                      }}
-                    />
-                  ))}
+                  {itemsInCategory.length > 0 ? (
+                    itemsInCategory.map((item) => (
+                      <Card
+                        key={item.id}
+                        item={item}
+                        onClick={() => {
+                          setSelectedItem(item);
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center text-gray-500 italic">
+                      No items in this category.
+                    </div>
+                  )}
                 </div>
               </div>
             );
