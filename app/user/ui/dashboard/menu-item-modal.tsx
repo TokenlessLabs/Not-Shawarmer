@@ -11,27 +11,24 @@ type MenuItemModalProps = {
 
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
-  
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
+
   const handleAddToCart = () => {
-    // Get existing cart from localStorage or start with an empty array
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-  const newItem = {
-    name: item.name,
-    price: item.price,
-    quantity: quantity,
+    const newItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: quantity,
+    };
+
+    const updatedCart = [...existingCart, newItem];
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // 🔔 Dispatch animation event instead of alert
+    window.dispatchEvent(new Event("cart-add"));
   };
-  
-
-  const updatedCart = [...existingCart, newItem];
-    // Add new item to cart
-    
-
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-   
-
-  alert("Item added to cart!");
-};
 
     
 

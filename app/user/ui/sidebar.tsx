@@ -14,7 +14,7 @@ const userLinks = [
   },
   {
     name: "Profile",
-    href: "/user/profile",
+    href: "/profile",
   },
 ];
 
@@ -37,7 +37,7 @@ const adminLinks = [
   },
   {
     name: "Profile",
-    href: "/admin/profile",
+    href: "/profile",
   },
 ];
 

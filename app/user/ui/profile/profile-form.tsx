@@ -76,7 +76,7 @@ export default function ProfileForm({
               ********
             </p>
             <Link
-              href="/user/profile/changepassword"
+              href="/profile/changepassword"
               className="text-theme-blue hover:underline text-left text-sm"
             >
               Change Password

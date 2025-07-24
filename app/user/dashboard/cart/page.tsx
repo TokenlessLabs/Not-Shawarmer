@@ -1,4 +1,6 @@
 "use client";
+
+import { updateUserAddress } from "../../lib/actions";
 import { useTransition } from "react";
 import React, { useEffect, useState } from "react";
 import AddressModal from "../../ui/dashboard/address-modal";
@@ -16,34 +18,33 @@ const CartPage = () => {
   const [savedAddress, setSavedAddress] = useState("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
-  const [instructions, setInstructions] = useState('');
-  
+  const [instructions, setInstructions] = useState("");
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
-  // Load cart items from localStorage
-  const storedCart = localStorage.getItem("cart");
-  if (storedCart) {
-    setCartItems(JSON.parse(storedCart));
-  }
-
-  // Fetch address from API
-  async function fetchAddress() {
-    try {
-      const res = await fetch("/api/address");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.address) {
-          setSavedAddress(data.address);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch address", error);
+    // Load cart items from localStorage
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCartItems(JSON.parse(storedCart));
     }
-  }
 
-  fetchAddress();
-}, []);
+    // Fetch address from API
+    async function fetchAddress() {
+      try {
+        const res = await fetch("/api/address");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.address) {
+            setSavedAddress(data.address);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch address", error);
+      }
+    }
+
+    fetchAddress();
+  }, []);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -54,6 +55,7 @@ const CartPage = () => {
   const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = () => {
+
   startTransition(async () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
@@ -69,7 +71,6 @@ const CartPage = () => {
     }
   });
 };
-
 
 const handleRemove = (name: string) => {
   const updatedCart = cartItems.filter((item) => item.name !== name);
@@ -94,14 +95,13 @@ const groupedItems = cartItems.reduce((acc, item) => {
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
           onSave={(newAddress) => {
-                     setOpenModal(false);
-         
-                     if (newAddress !== savedAddress) {
-                       setSavedAddress(newAddress);
-                       updateUserAddress(newAddress);
-                     }
-                    }
-                  }
+            setOpenModal(false);
+
+            if (newAddress !== savedAddress) {
+              setSavedAddress(newAddress);
+              updateUserAddress(newAddress);
+            }
+          }}
         />
       )}
       <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
@@ -195,13 +195,13 @@ const groupedItems = cartItems.reduce((acc, item) => {
                 <strong>Payment:</strong> Cash on Delivery
               </div>
 
-             <button
-  onClick={handlePlaceOrder}
-  className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
-  disabled={cartItems.length === 0 || isPending}
->
-  {isPending ? "Placing Order..." : "Place Order"}
-</button>
+              <button
+                onClick={handlePlaceOrder}
+                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
+                disabled={cartItems.length === 0 || isPending}
+              >
+                {isPending ? "Placing Order..." : "Place Order"}
+              </button>
             </div>
           </div>
         </div>
