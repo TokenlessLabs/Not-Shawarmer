@@ -9,18 +9,6 @@ import { ErrorState } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-export type ErrorState = {
-  success?: boolean;
-  message?: string | null;
-  errors?: string[];
-};
-
-type CartItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
-
 const userSchema = z.object({
   username: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -196,6 +184,7 @@ export async function changePassword(
 
     return { success: true };
   } catch (err) {
+    console.error(err);
     return { message: "Something went wrong" };
   }
 }
