@@ -254,7 +254,7 @@ type CartItem = {
 export async function placeOrder(
   cartItems: CartItem[],
   //address: string,
-  instructions?: string |null
+  instructions?: string 
 ) {
   try {
     if (!cartItems.length) {

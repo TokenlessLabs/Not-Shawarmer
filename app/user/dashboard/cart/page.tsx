@@ -15,6 +15,7 @@ const CartPage = () => {
   const [savedAddress, setSavedAddress] = useState("Emporium Mall");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [instructions, setInstructions] = useState('');
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
@@ -37,8 +38,9 @@ const CartPage = () => {
   startTransition(async () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+    const instruction =  instructions ; 
 
-    const result = await placeOrder(parsedCart , null); 
+    const result = await placeOrder(parsedCart , instruction); 
 
     if (result.success) {
       localStorage.removeItem("cart");
@@ -107,6 +109,8 @@ const CartPage = () => {
               </h2>
               <textarea
                 rows={3}
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
               />
