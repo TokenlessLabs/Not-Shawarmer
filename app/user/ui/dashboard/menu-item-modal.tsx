@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState ,useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
 import { getImageUrl } from "../../lib/utils";
@@ -10,24 +10,25 @@ type MenuItemModalProps = {
   onClose: () => void;
 };
 
-
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
- const handleAddToCart = () => {
-  const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-  const newItem = {
-    name: item.name,
-    price: item.price,
-    quantity: quantity,
+  const handleAddToCart = () => {
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    const newItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: quantity,
+    };
+
+    const updatedCart = [...existingCart, newItem];
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // 🔔 Dispatch animation event instead of alert
+    window.dispatchEvent(new Event("cart-add"));
   };
-
-  const updatedCart = [...existingCart, newItem];
-
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-  alert("Item added to cart!");
-};
 
   return (
     <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md flex justify-center items-center">
@@ -73,13 +74,13 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
               Close
             </button>
             <button
-               
-               onClick={handleAddToCart}
+              onClick={handleAddToCart}
               className="bg-theme-blue text-white font-bold px-4 py-2 rounded shadow-xl hover:px-5 hover:bg-theme-dark-blue transition-all duration-200"
             >
               Add to Cart{" "}
-              <span className="ml-3">Rs. {Math.floor(item.price * quantity * 100) / 100}
-</span>
+              <span className="ml-3">
+                Rs. {Math.floor(item.price * quantity * 100) / 100}
+              </span>
             </button>
           </div>
         </div>

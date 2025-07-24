@@ -6,16 +6,18 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 
-
-
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
-
-
 
 export type ErrorState = {
   success?: boolean;
   message?: string | null;
   errors?: string[];
+};
+
+type CartItem = {
+  name: string;
+  quantity: number;
+  price: number;
 };
 
 const userSchema = z.object({
@@ -39,11 +41,12 @@ export async function updateUserAddress(
         errors: ["Address cannot be empty."],
       };
     }
-  const session = await auth();
+    const session = await auth();
 
-  const userId = session?.user?.id;
+    const userId = session?.user?.id;
 
-  if (!userId) return {
+    if (!userId)
+      return {
         success: false,
         message: "User doesn't exist.",
         errors: [""],
@@ -90,13 +93,14 @@ export async function updateUser(
 
     const session = await auth();
 
-  const userId = session?.user?.id;
+    const userId = session?.user?.id;
 
-  if (!userId) return {
-      success: false,
-      message: "User does not exist.",
-      errors: [],
-    };
+    if (!userId)
+      return {
+        success: false,
+        message: "User does not exist.",
+        errors: [],
+      };
 
     // Uniqueness check (excluding current user)
     const [existingUser] = await sql`
@@ -170,7 +174,8 @@ export async function changePassword(
 
   const userId = session?.user?.id;
 
-  if (!userId) return {
+  if (!userId)
+    return {
       success: false,
       message: "User does not exist.",
       errors: [],
@@ -271,55 +276,48 @@ export async function updateRestaurant(
       errors: [],
     };
   }
+} // ✅ This brace was missing
 
-
-type CartItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
-
+// ✅ Now define placeOrder outside
 export async function placeOrder(
   cartItems: CartItem[],
-  //address: string,
-  instructions?: string |null
+  instructions?: string | null
 ) {
   try {
     if (!cartItems.length) {
       throw new Error("Cart is empty");
     }
 
-    // 1. Insert into Orders table
     const orderResult = await sql`
-      INSERT INTO Orders (userid,createdat, status ,  instructions, address)
-      VALUES (${1},${"2025-07-24"},${"Cooking"},${instructions || null},${"address"})
+      INSERT INTO Orders (userid, createdat, status, instructions, address)
+      VALUES (${1}, ${"2025-07-24"}, ${"Cooking"}, ${
+      instructions || null
+    }, ${"address"})
       RETURNING id;
     `;
 
     const orderId = orderResult[0].id;
 
-    // 2. Get item IDs from Items table
     const itemNames = cartItems.map((item) => item.name);
     const itemRows = await sql`
       SELECT id, name FROM items WHERE name = ANY(${itemNames});
     `;
 
     const itemIdMap = new Map<string, number>();
-   for (const row of itemRows) {  
-  itemIdMap.set(row.name, row.id);
-}
+    for (const row of itemRows) {
+      itemIdMap.set(row.name, row.id);
+    }
 
-    // 3. Insert into OrderDetails table
     for (const item of cartItems) {
       const itemId = itemIdMap.get(item.name);
       if (!itemId) {
         throw new Error(`Item not found: ${item.name}`);
       }
 
-       await sql`
-    INSERT INTO OrderDetails (orderid, itemid, quantity)
-    VALUES (${orderId}, ${itemId}, ${item.quantity});
-  `;
+      await sql`
+        INSERT INTO OrderDetails (orderid, itemid, quantity)
+        VALUES (${orderId}, ${itemId}, ${item.quantity});
+      `;
     }
 
     console.log("✅ Order placed successfully with ID:", orderId);
@@ -329,4 +327,3 @@ export async function placeOrder(
     return { success: false, error: error.message || "Unknown error" };
   }
 }
-
