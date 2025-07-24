@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { useState, useTransition } from "react";
-import { Order } from "@/app/user/lib/definitions";
-import { updateOrderStatus, cancelOrder } from "@/app/user/lib/actions";
+import { Order } from "@/app/lib/definitions";
+import { updateOrderStatus, cancelOrder } from "../../lib/actions";
 
 type Props = {
   order: Order;
@@ -14,13 +14,31 @@ export default function OrderComponent({ order }: Props) {
   const [isCancelling, startCancelTransition] = useTransition();
 
   const statuses = [
-    { label: "Preparing", value: "Preparing", color: "bg-yellow-100 text-yellow-800" },
-    { label: "Cooking", value: "Cooking", color: "bg-orange-100 text-orange-800" },
-    { label: "Dispatched", value: "Dispatched", color: "bg-blue-100 text-blue-800" },
-    { label: "Delivered", value: "Delivered", color: "bg-green-100 text-green-800" },
+    {
+      label: "Preparing",
+      value: "Preparing",
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      label: "Cooking",
+      value: "Cooking",
+      color: "bg-orange-100 text-orange-800",
+    },
+    {
+      label: "Dispatched",
+      value: "Dispatched",
+      color: "bg-blue-100 text-blue-800",
+    },
+    {
+      label: "Delivered",
+      value: "Delivered",
+      color: "bg-green-100 text-green-800",
+    },
   ];
 
-  const currentStatusIndex = statuses.findIndex(s => s.value === order.status);
+  const currentStatusIndex = statuses.findIndex(
+    (s) => s.value === order.status
+  );
   const currentStatus = statuses[currentStatusIndex] ?? statuses[0];
 
   const handleStatusClick = () => {
@@ -39,10 +57,9 @@ export default function OrderComponent({ order }: Props) {
   };
 
   const deliveryCharges = order.delivery_fee ?? 0;
-  const subtotal = order.items?.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  ) ?? 0;
+  const subtotal =
+    order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+    0;
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-4 mb-4 border-l-4 border-blue-500 transition-all duration-300">
@@ -62,12 +79,17 @@ export default function OrderComponent({ order }: Props) {
             <span>{currentStatus.label}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              fill="none" viewBox="0 0 24 24"
+              fill="none"
+              viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
               className="w-4 h-4"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69Z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69Z"
+              />
             </svg>
           </div>
 

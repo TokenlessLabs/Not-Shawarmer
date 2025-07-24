@@ -2,9 +2,9 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Card from "@/app/user/ui/dashboard/menu-item-card";
+import Card from "@/app/ui/menu/menu-item-card";
 import { MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { MenuItem } from "@/app/user/lib/definitions";
+import { MenuItem } from "@/app/lib/definitions";
 import UpdateMenuItemModal from "../ui/dashboard/update-menu-item-modal";
 import FloatingButton from "../ui/dashboard/addbtn";
 import DeleteCategoryModal from "../ui/dashboard/delete-category-modal";

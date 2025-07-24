@@ -2,26 +2,25 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getCurrentOrders } from "@/app/user/lib/data"; 
-import { Order } from "@/app/user/lib/definitions";
+import { getCurrentOrders } from "@/app/user/lib/data";
+import { Order } from "@/app/lib/definitions";
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
 
-useEffect(() => {
-  async function fetchOrders() {
-    try {
-      const res = await fetch("/api/current-orders");
-      const data = await res.json();
-      setOrders(data);
-    } catch (error) {
-      console.error("Failed to fetch current orders:", error);
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const res = await fetch("/api/current-orders");
+        const data = await res.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("Failed to fetch current orders:", error);
+      }
     }
-  }
-  fetchOrders();
-}, []);
-
+    fetchOrders();
+  }, []);
 
   return (
     <>
@@ -80,7 +79,9 @@ useEffect(() => {
                   {/* Status and Show Details Button */}
                   <div className="flex items-center justify-between mt-2">
                     <div>
-                      <p className="text-sm font-semibold text-theme-dark-blue">Status:</p>
+                      <p className="text-sm font-semibold text-theme-dark-blue">
+                        Status:
+                      </p>
                       <span className="inline-block mt-1 px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
                         {order.status}
                       </span>

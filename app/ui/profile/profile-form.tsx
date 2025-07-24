@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { User } from "../../lib/definitions";
-import AddressModal from "../dashboard/address-modal";
+import AddressModal from "../address/address-modal";
 import Link from "next/link";
-import { updateUserAddress } from "../../lib/actions";
+import { updateAddress } from "@/app/lib/actions";
 
 export default function ProfileForm({
   formData,
@@ -76,7 +76,7 @@ export default function ProfileForm({
               ********
             </p>
             <Link
-              href="/user/profile/changepassword"
+              href="/profile/changepassword"
               className="text-theme-blue hover:underline text-left text-sm"
             >
               Change Password
@@ -99,7 +99,7 @@ export default function ProfileForm({
 
             if (newAddress !== formData.address) {
               formData.address = newAddress;
-              updateUserAddress(newAddress);
+              updateAddress(newAddress);
             }
           }}
         />

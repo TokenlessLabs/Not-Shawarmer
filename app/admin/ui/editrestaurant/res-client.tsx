@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import RestaurantForm from "./res-form";
-import { updateRestaurant } from "@/app/user/lib/actions"; 
+import { updateRestaurant } from "../../lib/actions";
 import { useActionState } from "react";
 
 export type Restaurant = {
@@ -14,16 +14,19 @@ export type Restaurant = {
   contact: string;
 };
 
-export default function RestaurantClient({ restaurant }: { restaurant: Restaurant }) {
+export default function RestaurantClient({
+  restaurant,
+}: {
+  restaurant: Restaurant;
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Restaurant>(restaurant);
 
-const [state, formAction] = useActionState(updateRestaurant, {
-  success: false,
-  message: null,
-  errors: [],
-});
-
+  const [state, formAction] = useActionState(updateRestaurant, {
+    success: false,
+    message: null,
+    errors: [],
+  });
 
   const handleChange = (field: keyof Restaurant, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -82,19 +85,17 @@ const [state, formAction] = useActionState(updateRestaurant, {
           )}
         </div>
 
-       {state?.message && (
-  <p className="text-sm text-center text-green-600">{state.message}</p>
-)}
+        {state?.message && (
+          <p className="text-sm text-center text-green-600">{state.message}</p>
+        )}
 
-{Array.isArray(state?.errors) && state.errors.length > 0 && (
-  <ul className="text-sm text-red-600 list-disc pl-6">
-    {state.errors.map((e, i) => (
-      <li key={i}>{e}</li>
-    ))}
-  </ul>
-)}
-
-
+        {Array.isArray(state?.errors) && state.errors.length > 0 && (
+          <ul className="text-sm text-red-600 list-disc pl-6">
+            {state.errors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        )}
       </form>
     </div>
   );

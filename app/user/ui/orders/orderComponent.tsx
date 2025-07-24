@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Order } from "../../lib/definitions";
-import { OrderItem } from "../../lib/definitions";
+import { Order } from "../../../lib/definitions";
+import { OrderItem } from "../../../lib/definitions";
 
 export default function OrderCompo({ order }: { order: Order }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const deliveryCharges = order.delivery_fee ?? 0;
 
-  const subtotal = order.items?.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  ) ?? 0;
+  const subtotal =
+    order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+    0;
 
   const total = subtotal + deliveryCharges;
 
@@ -58,9 +57,7 @@ export default function OrderCompo({ order }: { order: Order }) {
 
           <div className="mb-4">
             <h3 className="text-md font-semibold mb-1">Delivery Address:</h3>
-            <p className="text-sm text-gray-700">
-              {order.address}
-            </p>
+            <p className="text-sm text-gray-700">{order.address}</p>
           </div>
 
           <div className="border-t pt-4">

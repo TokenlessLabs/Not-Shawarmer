@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useActionState, useEffect } from "react";
 import Image from "next/image";
-import { ErrorState, MenuItem } from "@/app/user/lib/definitions";
+import { ErrorState, MenuItem } from "@/app/lib/definitions";
 import { updateMenuItem, deleteMenuItem } from "../../lib/actions";
 import { useTransition } from "react";
-import ConfirmModal from "../confirmation-modal";
+import ConfirmModal from "../../../ui/confirmation/confirmation-modal";
 
 type UpdateMenuItemModalProps = {
   item: MenuItem;

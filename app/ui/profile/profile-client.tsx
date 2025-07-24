@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { useActionState } from "react";
-import { updateUser, ErrorState } from "../../lib/actions";
-import { User } from "../../lib/definitions";
+import { updateUser } from "@/app/lib/actions";
 import ProfileForm from "./profile-form";
+import { User, ErrorState } from "../../lib/definitions";
 
 export default function ProfileClient({ user }: { user: User }) {
   const [isEditing, setIsEditing] = useState(false);

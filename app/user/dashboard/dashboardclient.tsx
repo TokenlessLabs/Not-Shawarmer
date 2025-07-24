@@ -2,11 +2,11 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Card from "../ui/dashboard/menu-item-card";
+import Card from "../../ui/menu/menu-item-card";
 import Cart from "../ui/dashboard/cart";
 import OrderHandle from "../ui/dashboard/order-handle";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { MenuItem } from "../lib/definitions";
+import { MenuItem } from "../../lib/definitions";
 import MenuItemModal from "../ui/dashboard/menu-item-modal";
 
 type DashboardClientProps = {

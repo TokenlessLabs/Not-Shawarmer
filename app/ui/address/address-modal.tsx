@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { LatLngExpression } from "leaflet";
 
-const DynamicMap = dynamic(() => import("../map"), { ssr: false });
+const DynamicMap = dynamic(() => import("./map"), { ssr: false });
 
 type Props = {
   savedAddress?: string;

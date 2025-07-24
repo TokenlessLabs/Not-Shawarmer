@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { LatLngExpression } from "leaflet";
 import dynamic from "next/dynamic";
-import { Order } from "@/app/user/lib/definitions";
+import { Order } from "@/app/lib/definitions";
 
-const DynamicMap = dynamic(() => import("../ui/map"), {
+const DynamicMap = dynamic(() => import("../../ui/address/map"), {
   ssr: false,
 });
 
@@ -26,7 +26,11 @@ export default function DeliveryClient({ order }: { order: Order | null }) {
   ];
 
   if (!order) {
-    return <div className="p-10 text-center text-red-500">No active delivery found.</div>;
+    return (
+      <div className="p-10 text-center text-red-500">
+        No active delivery found.
+      </div>
+    );
   }
 
   let currentFound = false;

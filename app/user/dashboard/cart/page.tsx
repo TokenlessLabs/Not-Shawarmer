@@ -1,9 +1,8 @@
 "use client";
 import { useTransition } from "react";
-import React, { useEffect, useState } from "react"
-import AddressModal from "../../ui/dashboard/address-modal";
+import React, { useEffect, useState } from "react";
+import AddressModal from "../../../ui/address/address-modal";
 import { placeOrder } from "../../lib/actions";
-
 
 type CartItem = {
   name: string;
@@ -16,7 +15,7 @@ const CartPage = () => {
   const [savedAddress, setSavedAddress] = useState("Emporium Mall");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
-  const [instructions, setInstructions] = useState('');
+  const [instructions, setInstructions] = useState("");
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
@@ -36,21 +35,21 @@ const CartPage = () => {
   const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = () => {
-  startTransition(async () => {
-    const storedCart = localStorage.getItem("cart");
-    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+    startTransition(async () => {
+      const storedCart = localStorage.getItem("cart");
+      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-    const result = await placeOrder(parsedCart , instructions , savedAddress); 
+      const result = await placeOrder(parsedCart, instructions, savedAddress);
 
-    if (result.success) {
-      localStorage.removeItem("cart");
-      setCartItems([]);
-      alert("✅ Order placed successfully!");
-    } else {
-      alert("❌ " + result.error || "Something went wrong");
-    }
-  });
-};
+      if (result.success) {
+        localStorage.removeItem("cart");
+        setCartItems([]);
+        alert("✅ Order placed successfully!");
+      } else {
+        alert("❌ " + result.error || "Something went wrong");
+      }
+    });
+  };
 
   return (
     <>
@@ -99,7 +98,7 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm" >{savedAddress} </p>
+              <p className="text-sm">{savedAddress} </p>
             </div>
 
             {/* Special Instructions */}
@@ -141,13 +140,13 @@ const CartPage = () => {
                 <strong>Payment:</strong> Cash on Delivery
               </div>
 
-             <button
-  onClick={handlePlaceOrder}
-  className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
-  disabled={cartItems.length === 0 || isPending}
->
-  {isPending ? "Placing Order..." : "Place Order"}
-</button>
+              <button
+                onClick={handlePlaceOrder}
+                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
+                disabled={cartItems.length === 0 || isPending}
+              >
+                {isPending ? "Placing Order..." : "Place Order"}
+              </button>
             </div>
           </div>
         </div>

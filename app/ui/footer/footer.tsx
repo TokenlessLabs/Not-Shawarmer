@@ -1,5 +1,5 @@
 import { PhoneIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { getRestaurantDetails } from "../lib/data";
+import { getRestaurantDetails } from "@/app/lib/data";
 
 export default async function Footer() {
   const restDetails = await getRestaurantDetails();

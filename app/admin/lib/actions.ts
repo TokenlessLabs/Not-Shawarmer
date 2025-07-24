@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import postgres from "postgres";
 import { v2 as cloudinary } from "cloudinary";
-import { ErrorState } from "@/app/user/lib/definitions";
+import { ErrorState } from "@/app/lib/definitions";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 
@@ -275,3 +275,79 @@ export async function deleteCategory(name: string): Promise<{ success: boolean; 
 
   return { success: true, message: 'Category deleted successfully.' };
 }
+
+export async function updateOrderStatus(
+  orderId: number,
+  newStatus: string
+): Promise<ErrorState> {
+  try {
+    await sql`
+      UPDATE Orders
+      SET status = ${newStatus}
+      WHERE id = ${orderId}
+    `;
+
+    revalidatePath("/admin/orders");
+    return { success: true, message: "Status updated" };
+  } catch (error) {
+    console.error("Failed to update order status:", error);
+    return { success: false, message: "Failed to update status" };
+  }
+}
+
+export async function cancelOrder(orderId: number): Promise<ErrorState> {
+  try {
+    await sql`
+      UPDATE Orders
+      SET status = 'Cancelled'
+      WHERE id = ${orderId}
+    `;
+
+    revalidatePath("/admin/orders/currentorders");
+    return { success: true, message: "Order cancelled" };
+  } catch (error) {
+    console.error("Failed to cancel order:", error);
+    return { success: false, message: "Failed to cancel order" };
+  }
+}
+
+export async function updateRestaurant(
+  prevState: { success: boolean; message: string | null; errors: string[] },
+  formData: FormData
+): Promise<{ success: boolean; message: string | null; errors: string[] }> {
+  try {
+    const name = formData.get("name")?.toString().trim() ?? "";
+    const address = formData.get("address")?.toString().trim() ?? "";
+    const about = formData.get("about")?.toString().trim() ?? "";
+    const startTime = formData.get("startTime")?.toString().trim() ?? "";
+    const endTime = formData.get("endTime")?.toString().trim() ?? "";
+    const contact = formData.get("contact")?.toString().trim() ?? "";
+
+    if (!name || !address || !startTime || !endTime || !contact) {
+      return {
+        success: false,
+        message: null,
+        errors: ["All fields except 'about' are required."],
+      };
+    }
+
+    await sql`
+      UPDATE RestDetails
+      SET name = ${name},
+          address = ${address},
+          about = ${about},
+          operatingHoursStart = ${startTime},
+          operatingHoursEnd = ${endTime},
+          contact = ${contact}
+      WHERE id = 1
+    `;
+
+    return { success: true, message: "Restaurant updated!", errors: [] };
+  } catch (error) {
+    console.error("Update error:", error);
+    return {
+      success: false,
+      message: "Update failed due to a server error. Please try again later.",
+      errors: [],
+    };
+  }};

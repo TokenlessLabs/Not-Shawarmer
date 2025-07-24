@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { changePassword, ErrorState } from "../../lib/actions";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline"; // or solid
+import { changePassword } from "@/app/lib/actions";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ErrorState } from "@/app/lib/definitions";
 
 export default function ChangePasswordForm() {
   const initialState: ErrorState = {
@@ -22,7 +23,7 @@ export default function ChangePasswordForm() {
         {/* Back link */}
         <div>
           <Link
-            href="/user/profile"
+            href="/profile"
             className="inline-flex items-center text-theme-blue hover:underline text-sm"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1" />

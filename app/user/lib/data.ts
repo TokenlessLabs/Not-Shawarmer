@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { User, Order, MenuItem } from "./definitions";
+import { User, Order, MenuItem } from "../../lib/definitions";
 import { auth } from "@/auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });

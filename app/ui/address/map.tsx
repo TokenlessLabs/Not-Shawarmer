@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
-import { toTuple } from "../lib/utils";
+import { toTuple } from "../../lib/utils";
 
 // Fix default Leaflet icon paths for Next.js
 delete (

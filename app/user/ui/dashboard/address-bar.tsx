@@ -1,8 +1,8 @@
 "use client";
 
-import AddressModal from "./address-modal";
+import AddressModal from "../../../ui/address/address-modal";
 import React, { useEffect, useState } from "react";
-import { updateUserAddress } from "../../lib/actions";
+import { updateAddress } from "@/app/lib/actions";
 
 export default function AddressBar() {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -35,7 +35,7 @@ export default function AddressBar() {
 
             if (newAddress !== savedAddress) {
               setSavedAddress(newAddress);
-              updateUserAddress(newAddress);
+              updateAddress(newAddress);
             }
           }}
         />
