@@ -293,14 +293,14 @@ export async function placeOrder(
 
     // 1. Insert into Orders table
     const orderResult = await sql`
-      INSERT INTO Orders (userid,createdat, status ,  instructions, address)
-      VALUES (${1},${"2025-07-24"},${"Cooking"},${instructions || null},${address})
+      INSERT INTO Orders (userid,createdat, status , instructions, address)
+      VALUES (${1},${"2025-07-24"},${"Cooking"},${instructions || null},${address })
       RETURNING id;
     `;
 
     const orderId = orderResult[0].id;
 
-    // 2. Get item IDs from Items table
+   
     const itemNames = cartItems.map((item) => item.name);
     const itemRows = await sql`
       SELECT id, name FROM items WHERE name = ANY(${itemNames});

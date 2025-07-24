@@ -17,7 +17,7 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
   const [instructions, setInstructions] = useState('');
-  const [instructions, setInstructions] = useState('');
+  
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
@@ -27,7 +27,6 @@ const CartPage = () => {
     }
   }, []);
 
-  // Calculate subtotal
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -40,9 +39,8 @@ const CartPage = () => {
   startTransition(async () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
-    const instruction =  instructions ; 
 
-    const result = await placeOrder(parsedCart , instructions , savedAddress); 
+    const result = await placeOrder(parsedCart, savedAddress , instructions); 
 
     if (result.success) {
       localStorage.removeItem("cart");
@@ -53,6 +51,23 @@ const CartPage = () => {
     }
   });
 };
+
+
+const handleRemove = (name: string) => {
+  const updatedCart = cartItems.filter((item) => item.name !== name);
+  setCartItems(updatedCart);
+  localStorage.setItem("cart", JSON.stringify(updatedCart));
+};
+
+const groupedItems = cartItems.reduce((acc, item) => {
+  const existing = acc.find((i) => i.name === item.name);
+  if (existing) {
+    existing.quantity += item.quantity;
+  } else {
+    acc.push({ ...item }); // clone item
+  }
+  return acc;
+}, [] as CartItem[]);
 
   return (
     <>
@@ -78,14 +93,24 @@ const CartPage = () => {
                     Your cart is empty.
                   </p>
                 ) : (
-                  cartItems.map((item, index) => (
-                    <li key={index} className="flex justify-between">
-                      <span>
-                        {item.name} x{item.quantity}
-                      </span>
-                      <span>PKR {item.price * item.quantity}</span>
-                    </li>
-                  ))
+                  <ul>
+  {groupedItems.map((item, index) => (
+    <li key={index} className="flex justify-between">
+      <span>
+        {item.name} x{item.quantity}
+      </span>
+      <span>
+        PKR {item.price * item.quantity}
+        <button
+          className="ml-5 text-sm text-blue-600 hover:underline font-medium"
+          onClick={() => handleRemove(item.name)}
+        >
+          Remove
+        </button>
+      </span>
+    </li>
+  ))}
+</ul>
                 )}
               </ul>
             </div>
@@ -113,7 +138,6 @@ const CartPage = () => {
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={3}
                 value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
               />
