@@ -42,12 +42,3 @@ export type ErrorState = {
   message?: string | null;
   errors?: string[];
 };
-
-// export type FooterRestDetails = {
-//   name: string;
-//   address: string;
-//   about: string | null;
-//   contact: string;
-//   operatingHoursStart: string;
-//   operatingHoursEnd: string;
-// };
