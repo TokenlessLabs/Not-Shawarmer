@@ -38,7 +38,7 @@ const CartPage = () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-    const result = await placeOrder(parsedCart, savedAddress, null); // pass userId if logged in
+    const result = await placeOrder(parsedCart , null); 
 
     if (result.success) {
       localStorage.removeItem("cart");
