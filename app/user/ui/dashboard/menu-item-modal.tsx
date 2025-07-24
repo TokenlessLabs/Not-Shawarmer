@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState ,useEffect } from "react";
 import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
 
@@ -11,28 +11,24 @@ type MenuItemModalProps = {
 
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
-  const handleAddToCart = () => {
-    // Get existing cart from localStorage or start with an empty array
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
 
-    // Create new item
-    const newItem = {
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: quantity,
-    };
+ const handleAddToCart = () => {
+  const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    // Add new item to cart
-    const updatedCart = [...existingCart, newItem];
-
-    // Save back to localStorage
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-    alert("Item added to cart!");
+  const newItem = {
+    name: item.name,
+    price: item.price,
+    quantity: quantity,
   };
 
-  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
+  const updatedCart = [...existingCart, newItem];
+
+  localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+  alert("Item added to cart!");
+};
+
   return (
     <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md flex justify-center items-center">
       <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md relative overflow-hidden">
