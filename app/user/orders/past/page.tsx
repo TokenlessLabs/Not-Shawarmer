@@ -3,7 +3,7 @@ import OrderCompo from "@/app/user/ui/orders/orderComponent";
 import Link from "next/link";
 
 export default async function Pastorder() {
-  const orders = await getPastOrders(); // ⬅️ fetch orders
+  const orders = await getPastOrders();
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -19,7 +19,7 @@ export default async function Pastorder() {
         </button>
       </div>
 
-      {orders.length === 0 ? (
+      {!orders || orders.length === 0 ? (
         <p className="text-center text-gray-500">No past orders found.</p>
       ) : (
         orders.map((order) => <OrderCompo key={order.id} order={order} />)

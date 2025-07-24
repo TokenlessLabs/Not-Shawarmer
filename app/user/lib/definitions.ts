@@ -35,3 +35,12 @@ export type MenuItem = {
   image: string | null;
   category: string;
 };
+
+// export type FooterRestDetails = {
+//   name: string;
+//   address: string;
+//   about: string | null;
+//   contact: string;
+//   operatingHoursStart: string;
+//   operatingHoursEnd: string;
+// };
