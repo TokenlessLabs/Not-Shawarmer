@@ -1,8 +1,10 @@
-"use client";
 
-import React, { useEffect, useState } from "react";
-import AddressModal from "../../ui/dashboard/address-modal";
 import { updateUserAddress } from "../../lib/actions";
+import { useTransition } from "react";
+import React, { useEffect, useState } from "react"
+import AddressModal from "../../ui/dashboard/address-modal";
+import { placeOrder } from "../../lib/actions";
+
 
 type CartItem = {
   name: string;
@@ -14,6 +16,7 @@ const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [savedAddress, setSavedAddress] = useState("Emporium Mall");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
@@ -32,12 +35,22 @@ const CartPage = () => {
   const deliveryFee = 250;
   const total = subtotal + deliveryFee;
 
-  // Clear cart on placing order
   const handlePlaceOrder = () => {
-    localStorage.removeItem("cart");
-    setCartItems([]);
-    alert("Order placed successfully!");
-  };
+  startTransition(async () => {
+    const storedCart = localStorage.getItem("cart");
+    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+
+    const result = await placeOrder(parsedCart , null); 
+
+    if (result.success) {
+      localStorage.removeItem("cart");
+      setCartItems([]);
+      alert("✅ Order placed successfully!");
+    } else {
+      alert("❌ " + result.error || "Something went wrong");
+    }
+  });
+};
 
   return (
     <>
@@ -136,13 +149,13 @@ const CartPage = () => {
                 <strong>Payment:</strong> Cash on Delivery
               </div>
 
-              <button
-                onClick={handlePlaceOrder}
-                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
-                disabled={cartItems.length === 0}
-              >
-                Place Order
-              </button>
+             <button
+  onClick={handlePlaceOrder}
+  className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
+  disabled={cartItems.length === 0 || isPending}
+>
+  {isPending ? "Placing Order..." : "Place Order"}
+</button>
             </div>
           </div>
         </div>
