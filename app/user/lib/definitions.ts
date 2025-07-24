@@ -37,6 +37,12 @@ export type MenuItem = {
   status?: string;
 };
 
+export type ErrorState = {
+  success?: boolean;
+  message?: string | null;
+  errors?: string[];
+};
+
 // export type FooterRestDetails = {
 //   name: string;
 //   address: string;

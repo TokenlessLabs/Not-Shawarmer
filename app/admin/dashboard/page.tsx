@@ -1,6 +1,5 @@
 import { getCategories } from "@/app/user/lib/data";
 import DashboardClient from "./dashboardclient";
-import AddressBar from "@/app/user/ui/dashboard/address-bar";
 import { getMenuItems } from "../lib/data";
 
 export default async function DashboardPage() {
@@ -9,7 +8,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <AddressBar />
       <DashboardClient menuItems={menuItems} categories={categories} />
     </>
   );
