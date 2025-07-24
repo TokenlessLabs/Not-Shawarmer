@@ -119,7 +119,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
           />
         </div>
 
-        {/* Location Display */}
+     
         <div className="px-4 pt-3 text-sm text-gray-600">
           <div className="relative">
             {editing ? (

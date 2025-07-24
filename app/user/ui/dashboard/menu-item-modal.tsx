@@ -30,6 +30,9 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
     window.dispatchEvent(new Event("cart-add"));
   };
 
+    
+
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
   return (
     <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md flex justify-center items-center">
       <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md relative overflow-hidden">

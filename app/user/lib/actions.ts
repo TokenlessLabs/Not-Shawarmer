@@ -276,8 +276,7 @@ export async function updateRestaurant(
       message: "Update failed due to a server error. Please try again later.",
       errors: [],
     };
-  }
-}
+  }};
 
 type CartItem = {
   name: string;
@@ -333,4 +332,4 @@ export async function placeOrder(
     console.error("❌ Error placing order:", error.message);
     return { success: false, error: error.message || "Unknown error" };
   }
-}
+};

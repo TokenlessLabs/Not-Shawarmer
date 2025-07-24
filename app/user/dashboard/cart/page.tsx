@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import React, { useEffect, useState } from "react";
 import AddressModal from "../../ui/dashboard/address-modal";
 import { placeOrder } from "../../lib/actions";
+import { updateUserAddress } from "../../lib/actions";
 
 type CartItem = {
   name: string;
@@ -45,7 +46,6 @@ const CartPage = () => {
     fetchAddress();
   }, []);
 
-  // Calculate subtotal
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -55,21 +55,38 @@ const CartPage = () => {
   const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = () => {
-    startTransition(async () => {
-      const storedCart = localStorage.getItem("cart");
-      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-      const result = await placeOrder(parsedCart, instructions, savedAddress);
+  startTransition(async () => {
+    const storedCart = localStorage.getItem("cart");
+    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-      if (result.success) {
-        localStorage.removeItem("cart");
-        setCartItems([]);
-        alert("✅ Order placed successfully!");
-      } else {
-        alert("❌ " + result.error || "Something went wrong");
-      }
-    });
-  };
+    const result = await placeOrder(parsedCart, savedAddress , instructions); 
+
+    if (result.success) {
+      localStorage.removeItem("cart");
+      setCartItems([]);
+      alert("✅ Order placed successfully!");
+    } else {
+      alert("❌ " + result.error || "Something went wrong");
+    }
+  });
+};
+
+const handleRemove = (name: string) => {
+  const updatedCart = cartItems.filter((item) => item.name !== name);
+  setCartItems(updatedCart);
+  localStorage.setItem("cart", JSON.stringify(updatedCart));
+};
+
+const groupedItems = cartItems.reduce((acc, item) => {
+  const existing = acc.find((i) => i.name === item.name);
+  if (existing) {
+    existing.quantity += item.quantity;
+  } else {
+    acc.push({ ...item }); // clone item
+  }
+  return acc;
+}, [] as CartItem[]);
 
   return (
     <>
@@ -102,14 +119,24 @@ const CartPage = () => {
                     Your cart is empty.
                   </p>
                 ) : (
-                  cartItems.map((item, index) => (
-                    <li key={index} className="flex justify-between">
-                      <span>
-                        {item.name} x{item.quantity}
-                      </span>
-                      <span>PKR {item.price * item.quantity}</span>
-                    </li>
-                  ))
+                  <ul>
+  {groupedItems.map((item, index) => (
+    <li key={index} className="flex justify-between">
+      <span>
+        {item.name} x{item.quantity}
+      </span>
+      <span>
+        PKR {item.price * item.quantity}
+        <button
+          className="ml-5 text-sm text-blue-600 hover:underline font-medium"
+          onClick={() => handleRemove(item.name)}
+        >
+          Remove
+        </button>
+      </span>
+    </li>
+  ))}
+</ul>
                 )}
               </ul>
             </div>
@@ -125,7 +152,7 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm">{savedAddress} </p>
+              <p className="text-sm" >{savedAddress} </p>
             </div>
 
             {/* Special Instructions */}
@@ -136,6 +163,7 @@ const CartPage = () => {
               <textarea
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={3}
+                value={instructions}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
               />
