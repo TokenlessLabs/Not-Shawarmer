@@ -4,9 +4,15 @@ import bcrypt from "bcryptjs";
 import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+
+type CartItem = {
+  name: string;
+  price: number;
+  quantity: number;
+};
 
 export type ErrorState = {
   success?: boolean;
@@ -235,5 +241,55 @@ export async function updateRestaurant(
       message: "Update failed due to a server error. Please try again later.",
       errors: [],
     };
+  }
+}
+
+
+export async function placeOrder(
+  cartItems: CartItem[],
+  userId: number | null,
+  instructions?: string
+) {
+  try {
+    if (!cartItems.length) throw new Error("Cart is empty");
+
+    
+    const orderResult = await sql`
+      INSERT INTO Orders (userId, address, instructions)
+      VALUES (${userId}, ${address}, ${instructions || null})
+      RETURNING id;
+    `;
+
+    const orderId = orderResult[0].id;
+
+
+    const itemNames = cartItems.map((item) => item.name);
+    const itemRows = await sql`
+      SELECT id, name FROM Items WHERE name = ANY(${itemNames});
+    `;
+
+    // Map item name → id for quick lookup
+    const itemIdMap = new Map<string, number>();
+    for (const row of itemRows.rows) {
+      itemIdMap.set(row.name, row.id);
+    }
+
+    // 3. Insert each item into OrderDetails
+    for (const item of cartItems) {
+      const itemId = itemIdMap.get(item.name);
+      if (!itemId) {
+        throw new Error(`Item not found in DB: ${item.name}`);
+      }
+
+      await sql`
+        INSERT INTO OrderDetails (orderId, itemId, quantity)
+        VALUES (${1}, ${itemId}, ${item.quantity});
+      `;
+    }
+
+    return { success: true, orderId };
+  } catch (error: any) {
+    console.error("❌ Place Order Error:", error);
+    return { success: false, error: error.message || "Unknown error" };
   }
 }
