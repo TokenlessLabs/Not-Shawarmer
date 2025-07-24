@@ -2,6 +2,7 @@
 
 import AddressModal from "./address-modal";
 import React, { useEffect, useState } from "react";
+import { updateUserAddress } from "../../lib/actions";
 
 export default function AddressBar() {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -29,12 +30,21 @@ export default function AddressBar() {
         <AddressModal
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
-          onSave={(add) => setSavedAddress(add)}
+          onSave={(newAddress) => {
+            setOpenModal(false);
+
+            if (newAddress !== savedAddress) {
+              setSavedAddress(newAddress);
+              updateUserAddress(newAddress);
+            }
+          }}
         />
       )}
       <div className="flex justify-center w-full">
         <nav className="bg-theme-blue p-4 rounded-b-lg shadow-md flex items-center gap-4 w-full">
-          <label className="text-white whitespace-nowrap">Current Address:</label>
+          <label className="text-white whitespace-nowrap">
+            Current Address:
+          </label>
 
           <div className="flex-grow px-4 py-2 bg-white text-black rounded-md border border-gray-300 focus:outline-none">
             {savedAddress}

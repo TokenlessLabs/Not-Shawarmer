@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
-import { getImageUrl } from "../../lib/utils";
 
 type MenuItemModalProps = {
   item: MenuItem;
@@ -12,6 +11,7 @@ type MenuItemModalProps = {
 
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
+  const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
 
   const handleAddToCart = () => {
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -35,7 +35,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md relative overflow-hidden">
         <div className="w-full h-52 relative">
           <Image
-            src={getImageUrl(item.image)}
+            src={imageUrl}
             alt={item.name}
             width={400}
             height={300}

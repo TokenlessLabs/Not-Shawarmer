@@ -32,7 +32,7 @@ useEffect(() => {
         }`}
       >
         <div className="p-6 overflow-y-auto h-full space-y-8">
-          {orders.length === 0 ? (
+          {!orders || orders.length === 0 ? (
             <p className="text-sm text-gray-500">No active orders found.</p>
           ) : (
             orders.map((order, index) => {

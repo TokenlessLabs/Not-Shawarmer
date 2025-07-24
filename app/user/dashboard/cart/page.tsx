@@ -17,6 +17,7 @@ const CartPage = () => {
   const [savedAddress, setSavedAddress] = useState("Emporium Mall");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [instructions, setInstructions] = useState('');
 
   // Load cart items from localStorage when component mounts
   useEffect(() => {
@@ -40,7 +41,7 @@ const CartPage = () => {
     const storedCart = localStorage.getItem("cart");
     const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-    const result = await placeOrder(parsedCart , null); 
+    const result = await placeOrder(parsedCart , instructions , savedAddress); 
 
     if (result.success) {
       localStorage.removeItem("cart");
@@ -107,7 +108,7 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm">{savedAddress}</p>
+              <p className="text-sm" >{savedAddress} </p>
             </div>
 
             {/* Special Instructions */}
@@ -116,6 +117,7 @@ const CartPage = () => {
                 Special Instructions
               </h2>
               <textarea
+                onChange={(e) => setInstructions(e.target.value)}
                 rows={3}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
@@ -123,7 +125,6 @@ const CartPage = () => {
             </div>
           </div>
 
-          {/* Right Section: Summary */}
           <div className="w-full md:w-96 flex-shrink-0 bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 h-fit">
             <h2 className="text-xl font-semibold mb-4">Summary</h2>
 
