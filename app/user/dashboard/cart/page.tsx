@@ -1,9 +1,9 @@
 "use client";
 import { useTransition } from "react";
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import AddressModal from "../../ui/dashboard/address-modal";
 import { placeOrder } from "../../lib/actions";
-
+import { updateUserAddress } from "../../lib/actions";
 
 type CartItem = {
   name: string;
@@ -75,7 +75,15 @@ const groupedItems = cartItems.reduce((acc, item) => {
         <AddressModal
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
-          onSave={(add) => setSavedAddress(add)}
+          onSave={(newAddress) => {
+                     setOpenModal(false);
+         
+                     if (newAddress !== savedAddress) {
+                       setSavedAddress(newAddress);
+                       updateUserAddress(newAddress);
+                     }
+                    }
+                  }
         />
       )}
       <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
