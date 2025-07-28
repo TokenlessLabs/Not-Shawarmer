@@ -57,22 +57,20 @@ export default function DeliveryClient({ order }: { order: Order | null }) {
             return (
               <div
                 key={label}
-                className={`flex items-center gap-4 ${
-                  isPast
+                className={`flex items-center gap-4 ${isPast
                     ? "text-gray-400"
                     : isFuture
-                    ? "text-gray-500/70"
-                    : "font-bold"
-                }`}
+                      ? "text-gray-500/70"
+                      : "font-bold"
+                  }`}
               >
                 <div
-                  className={`h-4 w-4 rounded-full ${
-                    isPast
+                  className={`h-4 w-4 rounded-full ${isPast
                       ? "bg-gray-400"
                       : isCurrent
-                      ? colorClass
-                      : "bg-gray-200"
-                  }`}
+                        ? colorClass
+                        : "bg-gray-200"
+                    }`}
                 ></div>
                 <span className="flex items-center gap-2">
                   {label}
@@ -92,8 +90,9 @@ export default function DeliveryClient({ order }: { order: Order | null }) {
         <div className="overflow-y-auto">
           <h3 className="text-xl font-semibold mb-3">Order Summary</h3>
           <ul className="space-y-2 text-sm">
-            {order.items.map((item) => (
-              <li key={item.itemId} className="flex justify-between">
+            {order.items.map((item, index) => (
+              <li key={`${item.itemId}-${index}`} className="flex justify-between">
+
                 <span>
                   {item.name} x{item.quantity}
                 </span>
