@@ -10,11 +10,11 @@ export default async function Pastorder() {
       <div className="flex justify-center mb-6 space-x-6">
         <Link
           href="/user/orders"
-          className="text-gray-600 hover:text-blue-600 font-semibold pb-1 border-b-2 border-transparent hover:border-blue-400"
+          className="text-gray-600 hover:text-theme-bluehighlighted font-semibold pb-1 border-b-2 border-transparent hover:border-theme-bluehighlighted"
         >
           Current Orders
         </Link>
-        <button className="text-blue-600 font-semibold border-b-2 border-blue-600 pb-1">
+        <button className="text-theme-blue hover:text-theme-bluehighlighted font-semibold border-b-2 border-theme-bluehighlighted pb-1">
           Past Orders
         </button>
       </div>

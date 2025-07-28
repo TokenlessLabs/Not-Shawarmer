@@ -138,10 +138,11 @@ export default function OrderComponent({ order }: Props) {
           </div>
         </div>
 
-        <div className="text-right">
+
+        <div className="flex justify-between items-center mt-2">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-sm text-blue-600 underline focus:outline-none"
+            className="text-sm text-theme-blue underline focus:outline-none"
           >
             {isExpanded ? "Hide Details" : "View Details"}
           </button>
@@ -211,5 +212,7 @@ export default function OrderComponent({ order }: Props) {
         )}
       </div>
     </>
+
+
   );
 }
