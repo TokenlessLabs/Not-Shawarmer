@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@mapbox/polyline": "^1.2.1",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "leaflet": "^1.9.4",

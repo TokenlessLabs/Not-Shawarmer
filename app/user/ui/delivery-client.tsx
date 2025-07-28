@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { LatLngExpression } from "leaflet";
 import { Order } from "@/app/user/lib/definitions";
 
-const DynamicMap = dynamic(() => import("../ui/map"), { ssr: false });
+const DynamicMap = dynamic(() => import("../ui/newmap"), { ssr: false });
 
 const deliveryLocation: LatLngExpression = [31.5204, 74.3587];
 
