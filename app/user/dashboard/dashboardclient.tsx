@@ -43,12 +43,52 @@ export default function DashboardClient({
     return () => clearTimeout(debounce);
   }, [searchValue]);
 
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-50% 0px -50% 0px",
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute("id");
+          if (sectionId) {
+            setActiveCategory(sectionId);
+          }
+          break;
+        }
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions
+    );
+
+    categories.forEach((category) => {
+      const section = document.getElementById(category);
+      if (section) {
+        observer.observe(section);
+      }
+    });
+
+    return () => {
+      categories.forEach((category) => {
+        const section = document.getElementById(category);
+        if (section) {
+          observer.unobserve(section);
+        }
+      });
+    };
+  }, [categories]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
 
   const scrollToCategory = (category: string, idx: number) => {
-    setActiveCategory(category);
     const section = document.getElementById(category);
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
 

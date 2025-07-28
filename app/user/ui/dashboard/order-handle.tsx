@@ -81,7 +81,31 @@ const OrderHandle = () => {
                       <p className="text-sm font-semibold text-theme-dark-blue">
                         Status:
                       </p>
-                      <span className="inline-block mt-1 px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
+                      <span
+                        className={`
+                          inline-block mt-1 px-3 py-1 text-xs font-semibold rounded-full
+                          ${
+                            order.status === "Cooking"
+                              ? "bg-yellow-200 text-yellow-800"
+                              : ""
+                          }
+                          ${
+                            order.status === "Dispatched"
+                              ? "bg-blue-200 text-blue-800"
+                              : ""
+                          }
+                          ${
+                            order.status === "Delivered"
+                              ? "bg-green-200 text-green-800"
+                              : ""
+                          }
+                          ${
+                            order.status === "Cancelled"
+                              ? "bg-red-200 text-red-800"
+                              : ""
+                          }
+                        `}
+                      >
                         {order.status}
                       </span>
                     </div>

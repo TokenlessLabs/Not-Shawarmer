@@ -14,10 +14,8 @@ export default function OrderCompo({ order }: { order: Order }) {
   const deliveryCharges = order.delivery_fee ?? 0;
 
   const subtotal =
-    order.items?.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    ) ?? 0;
+    order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
+    0;
 
   const total = subtotal + deliveryCharges;
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0);
@@ -29,15 +27,35 @@ export default function OrderCompo({ order }: { order: Order }) {
           <h2 className="text-xl font-semibold">Order</h2>
           <div className="flex items-center text-sm text-gray-500 gap-1">
             <ClockIcon className="h-4 w-4" />
-            <span>{new Date(order.createdat).toLocaleTimeString()}</span>
+            <span>
+              {" "}
+              {new Date(order.createdat).toLocaleString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
           </div>
           <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
             <ShoppingBagIcon className="h-4 w-4" />
-            <span>{totalItems} items • Rs. {total}</span>
+            <span>
+              {totalItems} items • Rs. {total}
+            </span>
           </div>
         </div>
 
-        <span className="bg-green-100 text-green-800 text-sm font-medium px-4 py-1 rounded-full">
+        <span
+          className={`
+            text-sm font-medium px-4 py-1 rounded-full
+            ${order.status === "Cooking" ? "bg-yellow-100 text-yellow-800" : ""}
+            ${order.status === "Dispatched" ? "bg-blue-100 text-blue-800" : ""}
+            ${order.status === "Delivered" ? "bg-green-100 text-green-800" : ""}
+            ${order.status === "Cancelled" ? "bg-red-100 text-red-800" : ""}
+          `}
+        >
           {order.status}
         </span>
       </div>
@@ -73,7 +91,8 @@ export default function OrderCompo({ order }: { order: Order }) {
             <div className="flex items-start gap-2 text-sm text-gray-700">
               <PencilIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
-                <span className="font-semibold">Instructions:</span> {order.instructions}
+                <span className="font-semibold">Instructions:</span>{" "}
+                {order.instructions}
               </div>
             </div>
           )}
@@ -81,19 +100,27 @@ export default function OrderCompo({ order }: { order: Order }) {
           <div className="flex items-start gap-2 text-sm text-gray-700">
             <MapPinIcon className="h-5 w-5 text-gray-500 mt-0.5" />
             <div>
-              <span className="font-semibold">Delivery Address:</span> {order.address}
+              <span className="font-semibold">Delivery Address:</span>{" "}
+              {order.address}
             </div>
           </div>
 
           {order.status === "Delivered" && order.deliveredat && (
-  <div className="flex items-start gap-2 text-sm text-gray-700">
-    <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
-    <div>
-      <span className="font-semibold">Delivered At:</span>{" "}
-      {new Date(order.deliveredat).toLocaleString()}
-    </div>
-  </div>
-)}
+            <div className="flex items-start gap-2 text-sm text-gray-700">
+              <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <span className="font-semibold">Delivered At:</span>{" "}
+                {new Date(order.deliveredat).toLocaleString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm mb-1">
