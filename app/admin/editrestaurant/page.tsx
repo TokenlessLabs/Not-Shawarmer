@@ -1,7 +1,20 @@
 import { getRestaurantDetails } from "@/app/user/lib/data";
 import RestaurantClient, { Restaurant } from "../ui/editrestaurant/res-client";
+import RestaurantSkeleton from "./loading";
+import { Suspense, useEffect, useState } from "react";
 
-export default async function RestaurantPage() {
+export default function RestaurantPageWrapper() {
+  return (
+    <Suspense fallback={<RestaurantSkeleton />}>
+      <RestaurantPage />
+    </Suspense>
+  );
+}
+
+async function RestaurantPage() {
+  // Optional: add artificial delay to see skeleton
+  await new Promise((resolve) => setTimeout(resolve, 3000)); // 1.5 second delay
+
   const rawData = await getRestaurantDetails();
 
   const restaurant: Restaurant = {
@@ -11,7 +24,7 @@ export default async function RestaurantPage() {
     startTime: rawData.operatinghoursstart,
     endTime: rawData.operatinghoursend,
     contact: rawData.contact,
-    delivery_fee: rawData.delivery_fee
+    delivery_fee: rawData.delivery_fee,
   };
 
   return <RestaurantClient restaurant={restaurant} />;
