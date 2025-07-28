@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
 import { toTuple } from "../lib/utils";
@@ -19,7 +25,7 @@ L.Icon.Default.mergeOptions({
 type Props = {
   location: LatLngExpression | null;
   onLocationChange: (loc: LatLngExpression) => void;
-  editable?: boolean; // new prop
+  editable?: boolean;
 };
 
 export default function Map({
@@ -53,9 +59,34 @@ export default function Map({
   }, [location, onLocationChange]);
 
   return currentLocation ? (
-    <div className="w-full h-full">
+    <div className="relative w-full h-full">
+      {/* 📍 Use My Location button */}
+      {editable && location && (
+        <button
+          onClick={() => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const userLoc: LatLngExpression = [
+                  pos.coords.latitude,
+                  pos.coords.longitude,
+                ];
+                setCurrentLocation(userLoc);
+                onLocationChange(userLoc);
+              },
+              () => {
+                alert("Unable to get your current location.");
+              }
+            );
+          }}
+          className="absolute top-2 right-2 z-[1000] bg-white p-2 rounded shadow hover:bg-gray-100 transition"
+          title="Use my current location"
+        >
+          📍
+        </button>
+      )}
+
       <MapContainer
-        key={currentLocation ? toTuple(currentLocation).join("-") : "map"}
+        key={toTuple(currentLocation).join("-")}
         center={currentLocation}
         zoom={13}
         scrollWheelZoom
@@ -93,7 +124,6 @@ function ClickToSetMarker({
   useMapEvents({
     click: (e: LeafletMouseEvent) => {
       const newLoc: LatLngExpression = [e.latlng.lat, e.latlng.lng];
-      console.log("Clicked location:", newLoc);
       setLocation(newLoc);
     },
   });
