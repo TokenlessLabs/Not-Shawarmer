@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { useActionState } from "react";
-import { updateUser, ErrorState } from "../../lib/actions";
+import { updateUser } from "../../lib/actions";
 import { User } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
+import { ErrorState } from "../../lib/definitions";
 
 export default function ProfileClient({ user }: { user: User }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -83,12 +84,14 @@ export default function ProfileClient({ user }: { user: User }) {
             >
               Edit
             </button>
-            <button
-              type="button"
-              className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600"
-            >
-              Delete Account
-            </button>
+            {user.role === "User" && (
+              <button
+                type="button"
+                className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600"
+              >
+                Delete Account
+              </button>
+            )}
           </div>
         )}
       </div>

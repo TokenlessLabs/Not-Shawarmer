@@ -31,10 +31,10 @@ const adminLinks = [
     name: "Edit Restaurant",
     href: "/admin/editrestaurant",
   },
-  {
-    name: "Statistics",
-    href: "/admin/statistics",
-  },
+  // {
+  //   name: "Statistics",
+  //   href: "/admin/statistics",
+  // },
   {
     name: "Profile",
     href: "/profile",

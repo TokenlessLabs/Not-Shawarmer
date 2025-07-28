@@ -45,25 +45,27 @@ export default function ProfileForm({
       ))}
 
       {/* Address Field */}
-      <div className="flex flex-col mb-4">
-        <label className="text-sm font-medium text-gray-600 mb-1">
-          Address
-        </label>
-        {isEditing ? (
-          <>
-            <p className="text-sm mb-1">{formData.address}</p>
-            <button
-              type="button"
-              onClick={() => setShowAddressModal(true)}
-              className="text-theme-blue hover:underline text-left text-sm"
-            >
-              Edit Address
-            </button>
-          </>
-        ) : (
-          <p className="text-lg font-medium">{formData.address}</p>
-        )}
-      </div>
+      {formData.role === "User" && (
+        <div className="flex flex-col mb-4">
+          <label className="text-sm font-medium text-gray-600 mb-1">
+            Address
+          </label>
+          {isEditing ? (
+            <>
+              <p className="text-sm mb-1">{formData.address}</p>
+              <button
+                type="button"
+                onClick={() => setShowAddressModal(true)}
+                className="text-theme-blue hover:underline text-left text-sm"
+              >
+                Edit Address
+              </button>
+            </>
+          ) : (
+            <p className="text-lg font-medium">{formData.address}</p>
+          )}
+        </div>
+      )}
 
       {/* Password Field */}
       <div className="flex flex-col mb-4">
