@@ -36,7 +36,6 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const handleCancel = () => {
     setShowConfirm(false);
   };
-
   return (
     <>
       {showConfirm && (

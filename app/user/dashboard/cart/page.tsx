@@ -1,6 +1,5 @@
 "use client";
 
-import { updateUserAddress } from "../../lib/actions";
 import { useTransition } from "react";
 import React, { useEffect, useState } from "react";
 import AddressModal from "../../ui/dashboard/address-modal";
@@ -55,38 +54,37 @@ const CartPage = () => {
   const total = subtotal + deliveryFee;
 
   const handlePlaceOrder = () => {
+    startTransition(async () => {
+      const storedCart = localStorage.getItem("cart");
+      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-  startTransition(async () => {
-    const storedCart = localStorage.getItem("cart");
-    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+      const result = await placeOrder(parsedCart, savedAddress, instructions);
 
-    const result = await placeOrder(parsedCart, savedAddress , instructions); 
+      if (result.success) {
+        localStorage.removeItem("cart");
+        setCartItems([]);
+        alert("✅ Order placed successfully!");
+      } else {
+        alert("❌ " + result.error || "Something went wrong");
+      }
+    });
+  };
 
-    if (result.success) {
-      localStorage.removeItem("cart");
-      setCartItems([]);
-      alert("✅ Order placed successfully!");
+  const handleRemove = (name: string) => {
+    const updatedCart = cartItems.filter((item) => item.name !== name);
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  const groupedItems = cartItems.reduce((acc, item) => {
+    const existing = acc.find((i) => i.name === item.name);
+    if (existing) {
+      existing.quantity += item.quantity;
     } else {
-      alert("❌ " + result.error || "Something went wrong");
+      acc.push({ ...item }); // clone item
     }
-  });
-};
-
-const handleRemove = (name: string) => {
-  const updatedCart = cartItems.filter((item) => item.name !== name);
-  setCartItems(updatedCart);
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-};
-
-const groupedItems = cartItems.reduce((acc, item) => {
-  const existing = acc.find((i) => i.name === item.name);
-  if (existing) {
-    existing.quantity += item.quantity;
-  } else {
-    acc.push({ ...item }); // clone item
-  }
-  return acc;
-}, [] as CartItem[]);
+    return acc;
+  }, [] as CartItem[]);
 
   return (
     <>
@@ -120,23 +118,23 @@ const groupedItems = cartItems.reduce((acc, item) => {
                   </p>
                 ) : (
                   <ul>
-  {groupedItems.map((item, index) => (
-    <li key={index} className="flex justify-between">
-      <span>
-        {item.name} x{item.quantity}
-      </span>
-      <span>
-        PKR {item.price * item.quantity}
-        <button
-          className="ml-5 text-sm text-blue-600 hover:underline font-medium"
-          onClick={() => handleRemove(item.name)}
-        >
-          Remove
-        </button>
-      </span>
-    </li>
-  ))}
-</ul>
+                    {groupedItems.map((item, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>
+                          {item.name} x{item.quantity}
+                        </span>
+                        <span>
+                          PKR {item.price * item.quantity}
+                          <button
+                            className="ml-5 text-sm text-blue-600 hover:underline font-medium"
+                            onClick={() => handleRemove(item.name)}
+                          >
+                            Remove
+                          </button>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </ul>
             </div>
@@ -152,7 +150,7 @@ const groupedItems = cartItems.reduce((acc, item) => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm" >{savedAddress} </p>
+              <p className="text-sm">{savedAddress} </p>
             </div>
 
             {/* Special Instructions */}
