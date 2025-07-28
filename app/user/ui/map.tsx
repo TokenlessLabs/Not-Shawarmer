@@ -5,8 +5,9 @@ import {
   MapContainer,
   TileLayer,
   Marker,
+  Polyline,
+  Popup,
   useMapEvents,
-  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
@@ -26,12 +27,16 @@ type Props = {
   location: LatLngExpression | null;
   onLocationChange: (loc: LatLngExpression) => void;
   editable?: boolean;
+  userLocation?: LatLngExpression | null;
+  showPath?: boolean;
 };
 
 export default function Map({
   location,
   onLocationChange,
   editable = true,
+  userLocation = null,
+  showPath = false,
 }: Props) {
   const [currentLocation, setCurrentLocation] =
     useState<LatLngExpression | null>(location);
@@ -106,7 +111,26 @@ export default function Map({
           />
         )}
 
-        <Marker position={currentLocation} />
+        {/* Delivery Marker */}
+        <Marker position={currentLocation}>
+          <Popup>Delivery Location</Popup>
+        </Marker>
+
+        {/* User Address Marker */}
+        {userLocation && (
+          <Marker position={userLocation}>
+            <Popup>Your Address</Popup>
+          </Marker>
+        )}
+
+        {/* Line between both locations if Dispatched */}
+        {userLocation && currentLocation && showPath && (
+          <Polyline
+            positions={[currentLocation, userLocation]}
+            color="blue"
+            dashArray="6"
+          />
+        )}
       </MapContainer>
     </div>
   ) : (
