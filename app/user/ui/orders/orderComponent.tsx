@@ -85,6 +85,16 @@ export default function OrderCompo({ order }: { order: Order }) {
             </div>
           </div>
 
+          {order.status === "Delivered" && order.deliveredat && (
+  <div className="flex items-start gap-2 text-sm text-gray-700">
+    <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+    <div>
+      <span className="font-semibold">Delivered At:</span>{" "}
+      {new Date(order.deliveredat).toLocaleString()}
+    </div>
+  </div>
+)}
+
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm mb-1">
               <span>Subtotal</span>

@@ -3,6 +3,12 @@
 import { useState, useTransition } from "react";
 import { Order } from "@/app/user/lib/definitions";
 import { updateOrderStatus, cancelOrder } from "@/app/user/lib/actions";
+import {
+  ClockIcon,
+  ShoppingBagIcon,
+  MapPinIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
 
 type Props = {
   order: Order;
@@ -44,14 +50,26 @@ export default function OrderComponent({ order }: Props) {
     0
   ) ?? 0;
 
+  const totalItems = order.items?.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  ) ?? 0;
+
+  const total = subtotal + deliveryCharges;
+
   return (
-    <div className="bg-white shadow-md rounded-2xl p-4 mb-4 border-l-4 border-blue-500 transition-all duration-300">
+    <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-blue-500 transition-all duration-300">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h2 className="text-lg font-semibold">Order #{order.id}</h2>
-          <p className="text-sm text-gray-500">
-            Order Time: {new Date(order.createdat).toLocaleTimeString()}
-          </p>
+          <h2 className="text-xl font-semibold">Order</h2>
+          <div className="flex items-center text-sm text-gray-500 gap-1">
+            <ClockIcon className="h-4 w-4" />
+            <span>{new Date(order.createdat).toLocaleTimeString()}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
+            <ShoppingBagIcon className="h-4 w-4" />
+            <span>{totalItems} items • Rs. {total}</span>
+          </div>
         </div>
 
         <div className="flex flex-col items-end space-y-2">
@@ -93,22 +111,48 @@ export default function OrderComponent({ order }: Props) {
       </div>
 
       {isExpanded && (
-        <div className="mt-4 text-sm text-gray-700">
-          <div className="mb-4">
-            <h3 className="font-semibold mb-1">Items:</h3>
+        <div className="mt-4 space-y-4 text-sm text-gray-700">
+          <div>
+            <h3 className="text-md font-semibold mb-2">Items:</h3>
             <ul className="list-disc pl-5 space-y-1">
-              {order.items?.map((item, index) => (
-                <li key={index}>
-                  {item.name} x{item.quantity} – Rs. {item.price}
-                </li>
-              ))}
+              {order.items?.length > 0 ? (
+                order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.name} x{item.quantity} – Rs.{" "}
+                    {item.price * item.quantity}
+                  </li>
+                ))
+              ) : (
+                <li>No items found.</li>
+              )}
             </ul>
           </div>
 
-          <div className="mb-4">
-            <h3 className="font-semibold mb-1">Delivery Address:</h3>
-            <p>{order.address ?? "No address provided"}</p>
+          {order.instructions && (
+            <div className="flex items-start gap-2">
+              <PencilIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <span className="font-semibold">Instructions:</span> {order.instructions}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2">
+            <MapPinIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <span className="font-semibold">Delivery Address:</span> {order.address}
+            </div>
           </div>
+
+          {order.status === "Delivered" && order.deliveredat && (
+            <div className="flex items-start gap-2">
+              <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <span className="font-semibold">Delivered At:</span>{" "}
+                {new Date(order.deliveredat).toLocaleString()}
+              </div>
+            </div>
+          )}
 
           <div className="border-t pt-4">
             <div className="flex justify-between mb-1">
@@ -121,7 +165,7 @@ export default function OrderComponent({ order }: Props) {
             </div>
             <div className="flex justify-between font-bold text-base mt-2">
               <span>Total</span>
-              <span>Rs. {subtotal + deliveryCharges}</span>
+              <span>Rs. {total}</span>
             </div>
           </div>
         </div>

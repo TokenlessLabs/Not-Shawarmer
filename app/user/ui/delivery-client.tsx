@@ -89,7 +89,7 @@ export default function DeliveryClient({ order }: { order: Order | null }) {
 
         <hr className="border-theme-dark-blue/30 my-4" />
 
-        <div>
+        <div className="overflow-y-auto">
           <h3 className="text-xl font-semibold mb-3">Order Summary</h3>
           <ul className="space-y-2 text-sm">
             {order.items.map((item) => (
