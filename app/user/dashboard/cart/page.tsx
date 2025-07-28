@@ -212,8 +212,13 @@ const CartPage = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
-                disabled={cartItems.length === 0 || isPending}
+                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  cartItems.length === 0 ||
+                  isPending ||
+                  !savedAddress ||
+                  savedAddress === "Loading..."
+                }
               >
                 {isPending ? "Placing Order..." : "Place Order"}
               </button>
