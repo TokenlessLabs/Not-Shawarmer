@@ -1,10 +1,11 @@
 "use client";
 
-import { useTransition } from "react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import AddressModal from "../../ui/dashboard/address-modal";
-import { placeOrder } from "../../lib/actions";
-import { updateUserAddress } from "../../lib/actions";
+import ConfirmModal from "@/app/admin/ui/confirmation-modal";
+import { placeOrder, updateUserAddress } from "../../lib/actions";
+import { useRouter } from "next/navigation";
+
 
 type CartItem = {
   name: string;
@@ -14,21 +15,19 @@ type CartItem = {
 
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedAddress, setSavedAddress] = useState("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
   const [instructions, setInstructions] = useState("");
-
-  // Load cart items from localStorage when component mounts
+  const router = useRouter();
   useEffect(() => {
-    // Load cart items from localStorage
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       setCartItems(JSON.parse(storedCart));
     }
 
-    // Fetch address from API
-    async function fetchAddress() {
+    const fetchAddress = async () => {
       try {
         const res = await fetch("/api/address");
         if (res.ok) {
@@ -40,7 +39,7 @@ const CartPage = () => {
       } catch (error) {
         console.error("Failed to fetch address", error);
       }
-    }
+    };
 
     fetchAddress();
   }, []);
@@ -49,11 +48,10 @@ const CartPage = () => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-
   const deliveryFee = 250;
   const total = subtotal + deliveryFee;
 
-  const handlePlaceOrder = () => {
+  const handleConfirmPlaceOrder = () => {
     startTransition(async () => {
       const storedCart = localStorage.getItem("cart");
       const parsedCart = storedCart ? JSON.parse(storedCart) : [];
@@ -63,12 +61,18 @@ const CartPage = () => {
       if (result.success) {
         localStorage.removeItem("cart");
         setCartItems([]);
-        alert("✅ Order placed successfully!");
+        // alert("✅ Order placed successfully!");
+
+        // redirect to delivery page (pass result.orderId or similar)
+        router.push(`/user/orders/${result.orderId}/delivery`);
       } else {
-        alert("❌ " + result.error || "Something went wrong");
+        alert("❌ " + (result.error || "Something went wrong"));
       }
+
+      setShowConfirmModal(false);
     });
   };
+
 
   const handleRemove = (name: string) => {
     const updatedCart = cartItems.filter((item) => item.name !== name);
@@ -89,20 +93,20 @@ const CartPage = () => {
       .map((item) =>
         item.name === name ? { ...item, quantity: item.quantity - 1 } : item
       )
-      .filter((item) => item.quantity > 0); // remove items with 0
+      .filter((item) => item.quantity > 0);
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   return (
     <>
+      {/* Address Modal */}
       {openModal && (
         <AddressModal
           savedAddress={savedAddress}
           onClose={() => setOpenModal(false)}
           onSave={(newAddress) => {
             setOpenModal(false);
-
             if (newAddress !== savedAddress) {
               setSavedAddress(newAddress);
               updateUserAddress(newAddress);
@@ -110,6 +114,20 @@ const CartPage = () => {
           }}
         />
       )}
+
+      {/* Confirm Modal */}
+      {showConfirmModal && (
+        <ConfirmModal
+          heading="Confirm Your Order"
+          message="Are you sure you want to place this order?"
+          onAccept={handleConfirmPlaceOrder}
+          onCancel={() => setShowConfirmModal(false)}
+          acceptLabel="Yes, Place Order"
+          cancelLabel="No, Go Back"
+          isProcessing={isPending}
+        />
+      )}
+
       <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
         <h1 className="text-3xl font-bold mb-10">My Cart</h1>
 
@@ -119,47 +137,43 @@ const CartPage = () => {
             {/* Order Summary */}
             <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-              <ul className="space-y-3">
-                {cartItems.length === 0 ? (
-                  <p className="text-sm text-theme-dark-blue/70">
-                    Your cart is empty.
-                  </p>
-                ) : (
-                  <ul>
-                    {cartItems.map((item, index) => (
-                      <li
-                        key={index}
-                        className="flex justify-between items-center py-2 border-b border-theme-dark-blue/10"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">{item.name}</span>
-                          <span className="text-sm text-theme-dark-blue/70">
-                            PKR {item.price * item.quantity}
-                          </span>
-                        </div>
+              {cartItems.length === 0 ? (
+                <p className="text-sm text-theme-dark-blue/70">
+                  Your cart is empty.
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {cartItems.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center py-2 border-b border-theme-dark-blue/10"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-sm text-theme-dark-blue/70">
+                          PKR {item.price * item.quantity}
+                        </span>
+                      </div>
 
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleDecrement(item.name)}
-                            className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
-                          >
-                            –
-                          </button>
-                          <span className="w-6 text-center">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => handleIncrement(item.name)}
-                            className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </ul>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDecrement(item.name)}
+                          className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
+                        >
+                          –
+                        </button>
+                        <span className="w-6 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => handleIncrement(item.name)}
+                          className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Delivery Address */}
@@ -173,7 +187,7 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm">{savedAddress} </p>
+              <p className="text-sm">{savedAddress}</p>
             </div>
 
             {/* Special Instructions */}
@@ -183,14 +197,15 @@ const CartPage = () => {
               </h2>
               <textarea
                 onChange={(e) => setInstructions(e.target.value)}
-                rows={3}
                 value={instructions}
+                rows={3}
                 placeholder="Add any extra notes..."
                 className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
               />
             </div>
           </div>
 
+          {/* Right Section */}
           <div className="w-full md:w-96 flex-shrink-0 bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 h-fit">
             <h2 className="text-xl font-semibold mb-4">Summary</h2>
 
@@ -217,9 +232,9 @@ const CartPage = () => {
               </div>
 
               <button
-                onClick={handlePlaceOrder}
-                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
+                onClick={() => setShowConfirmModal(true)}
                 disabled={cartItems.length === 0 || isPending}
+                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
               >
                 {isPending ? "Placing Order..." : "Place Order"}
               </button>
