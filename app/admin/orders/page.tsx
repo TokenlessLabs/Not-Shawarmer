@@ -1,7 +1,6 @@
-import Link from 'next/link';
-import { getAdminCurrentOrders } from '@/app/user/lib/data';
-import OrderComponent from '../ui/dashboard/ordercomponent';
-import { Order } from '@/app/user/lib/definitions';
+import Link from "next/link";
+import { getAdminCurrentOrders } from "@/app/user/lib/data";
+import OrderComponent from "../ui/orders/order-component";
 
 export default async function CurrentOrdersPage() {
   const orders = await getAdminCurrentOrders();

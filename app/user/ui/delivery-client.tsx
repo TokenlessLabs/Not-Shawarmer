@@ -21,12 +21,16 @@ export default function DeliveryClient({ order }: { order: Order | null }) {
 
   const steps = [
     { label: "Cooking", colorClass: "bg-yellow-400" },
-    { label: "Dispatched", colorClass: "bg-orange-400" },
-    { label: "Delivered", colorClass: "bg-green-500" },
+    { label: "Dispatched", colorClass: "bg-blue-400" },
+    { label: "Delivered", colorClass: "bg-green-400" },
   ];
 
   if (!order) {
-    return <div className="p-10 text-center text-red-500">No active delivery found.</div>;
+    return (
+      <div className="p-10 text-center text-red-500">
+        No active delivery found.
+      </div>
+    );
   }
 
   let currentFound = false;

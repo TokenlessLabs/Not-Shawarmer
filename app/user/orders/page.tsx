@@ -1,5 +1,5 @@
 import { getCurrentOrders } from "../lib/data";
-import OrderCompo from "@/app/user/ui/orders/orderComponent";
+import OrderCompo from "@/app/user/ui/orders/order-component";
 import Link from "next/link";
 
 export default async function Currentorder() {
