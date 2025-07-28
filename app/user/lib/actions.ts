@@ -226,36 +226,51 @@ export async function cancelOrder(orderId: number): Promise<ErrorState> {
   }
 }
 
+const restaurantUpdateSchema = z.object({
+  address: z.string().min(1, "Address is required"),
+  about: z.string().min(1, "About Us is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  contact: z
+    .string()
+    .min(6, "Contact must be at least 6 digits")
+    .max(20, "Contact must be at most 20 digits")
+    .regex(/^\d+$/, "Contact must only contain digits"),
+});
+
 export async function updateRestaurant(
   prevState: { success: boolean; message: string | null; errors: string[] },
   formData: FormData
 ): Promise<{ success: boolean; message: string | null; errors: string[] }> {
   try {
-    const name = formData.get("name")?.toString().trim() ?? "";
-    const address = formData.get("address")?.toString().trim() ?? "";
-    const about = formData.get("about")?.toString().trim() ?? "";
-    const startTime = formData.get("startTime")?.toString().trim() ?? "";
-    const endTime = formData.get("endTime")?.toString().trim() ?? "";
-    const contact = formData.get("contact")?.toString().trim() ?? "";
+    const rawData = {
+      address: formData.get("address")?.toString().trim() ?? "",
+      about: formData.get("about")?.toString().trim() ?? "",
+      startTime: formData.get("startTime")?.toString().trim() ?? "",
+      endTime: formData.get("endTime")?.toString().trim() ?? "",
+      contact: formData.get("contact")?.toString().trim() ?? "",
+    };
 
-    if (!name || !address || !startTime || !endTime || !contact) {
-      return {
-        success: false,
-        message: null,
-        errors: ["All fields except 'about' are required."],
-      };
+    const parsed = restaurantUpdateSchema.safeParse(rawData);
+
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map((e) => e.message);
+      return { success: false, message: null, errors };
     }
+
+    const { address, about, startTime, endTime, contact } = parsed.data;
 
     await sql`
       UPDATE RestDetails
-      SET name = ${name},
-          address = ${address},
+      SET address = ${address},
           about = ${about},
           operatingHoursStart = ${startTime},
           operatingHoursEnd = ${endTime},
           contact = ${contact}
       WHERE id = 1
     `;
+
+    revalidatePath("/admin/editrestaurant");
 
     return { success: true, message: "Restaurant updated!", errors: [] };
   } catch (error) {
@@ -265,8 +280,8 @@ export async function updateRestaurant(
       message: "Update failed due to a server error. Please try again later.",
       errors: [],
     };
-  }};
-
+  }
+}
 type CartItem = {
   name: string;
   quantity: number;
