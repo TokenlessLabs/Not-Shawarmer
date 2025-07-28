@@ -68,7 +68,7 @@ async function createTables() {
   CREATE TABLE Orders (
     id SERIAL PRIMARY KEY,
     userId INTEGER NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    createdAt TIMESTAMP DEFAULT NOW(),
     deliveredAt TIMESTAMP,
     status VARCHAR(20) NOT NULL DEFAULT 'Cooking' CHECK (status IN ('Cooking', 'Dispatched', 'Delivered', 'Cancelled')),
     instructions TEXT,

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 export default function Cart() {
   const [animate, setAnimate] = useState(false);
   const [itemCount, setItemCount] = useState(0);
+  const [shiftUp, setShiftUp] = useState(false);
 
   // Function to calculate total items in the cart
   const updateCartCount = () => {
@@ -31,8 +32,33 @@ export default function Cart() {
     return () => window.removeEventListener("cart-add", handleCartAdd);
   }, []);
 
+  // Observe footer intersection
+  useEffect(() => {
+    const footer = document.getElementById("page-footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setShiftUp(entry.isIntersecting);
+        });
+      },
+      {
+        root: null,
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div
+      className={`fixed right-4 z-50 transition-all duration-300 ${
+        shiftUp ? "bottom-24" : "bottom-4"
+      }`}
+    >
       <Link
         href="/user/dashboard/cart"
         className={`relative w-16 h-16 rounded-full shadow-lg bg-theme-blue flex items-center justify-center transition-transform duration-300 ${
