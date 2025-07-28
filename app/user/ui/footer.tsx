@@ -7,15 +7,20 @@ export default async function Footer() {
   if (!restDetails) return null;
 
   return (
-    <footer className="w-full h-[90px] bg-theme-light-blue border-t-3 border-theme-dark-blue px-6 flex items-center justify-between text-theme-dark-blue text-sm">
+    <footer
+      id="page-footer"
+      className="w-full h-[90px] bg-theme-light-blue border-t-3 border-theme-dark-blue px-6 flex items-center justify-between text-theme-dark-blue text-sm"
+    >
       {/* Left: Logo Only */}
       <div className="flex items-center">
         <img src="/Logo.svg" alt="Logo" className="h-[60px] w-auto" />
       </div>
 
       {/* Center: About Us */}
-      <div className="text-center hidden sm:block">
-        <p className="text-lg font-medium">{restDetails.about}</p>
+      <div className="text-center hidden sm:block max-w-[500px] overflow-hidden whitespace-nowrap text-ellipsis">
+        <p className="text-lg font-medium overflow-hidden whitespace-nowrap text-ellipsis">
+          {restDetails.about}
+        </p>
       </div>
 
       {/* Right: Contact Info */}
@@ -24,9 +29,11 @@ export default async function Footer() {
           <PhoneIcon className="w-4 h-4" />
           {restDetails.contact}
         </p>
-        <p className="flex items-center justify-end gap-1">
-          <MapPinIcon className="w-4 h-4" />
-          {restDetails.address}
+        <p className="flex items-center justify-end gap-1 max-w-[200px] overflow-hidden whitespace-nowrap text-ellipsis text-left">
+          <MapPinIcon className="w-4 h-4 shrink-0" />
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+            {restDetails.address}
+          </span>
         </p>
         <p className="flex items-center justify-end gap-1">
           <ClockIcon className="w-4 h-4" />
