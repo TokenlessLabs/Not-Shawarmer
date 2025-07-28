@@ -70,12 +70,6 @@ const CartPage = () => {
     });
   };
 
-  const handleRemove = (name: string) => {
-    const updatedCart = cartItems.filter((item) => item.name !== name);
-    setCartItems(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-  };
-
   const handleIncrement = (name: string) => {
     const updatedCart = cartItems.map((item) =>
       item.name === name ? { ...item, quantity: item.quantity + 1 } : item

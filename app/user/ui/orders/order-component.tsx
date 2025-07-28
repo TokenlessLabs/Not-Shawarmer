@@ -29,14 +29,18 @@ export default function OrderCompo({ order }: { order: Order }) {
             <ClockIcon className="h-4 w-4" />
             <span>
               {" "}
-              {new Date(order.createdat).toLocaleString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
+              {(() => {
+                const d = new Date(order.createdat);
+                d.setHours(d.getHours() + 5);
+                return d.toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+              })()}
             </span>
           </div>
           <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
@@ -110,14 +114,18 @@ export default function OrderCompo({ order }: { order: Order }) {
               <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <span className="font-semibold">Delivered At:</span>{" "}
-                {new Date(order.deliveredat).toLocaleString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
+                {(() => {
+                  const d = new Date(order.deliveredat);
+                  d.setHours(d.getHours() + 5);
+                  return d.toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  });
+                })()}
               </div>
             </div>
           )}

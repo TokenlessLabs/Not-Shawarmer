@@ -196,13 +196,23 @@ export async function updateOrderStatus(
   newStatus: string
 ): Promise<ErrorState> {
   try {
-    await sql`
-      UPDATE Orders
-      SET status = ${newStatus}
-      WHERE id = ${orderId}
-    `;
+    if (newStatus.toLowerCase() === "delivered") {
+      await sql`
+        UPDATE Orders
+        SET status = ${newStatus},
+            deliveredAt = NOW()
+        WHERE id = ${orderId}
+      `;
+    } else {
+      await sql`
+        UPDATE Orders
+        SET status = ${newStatus}
+        WHERE id = ${orderId}
+      `;
+    }
 
-    revalidatePath("/admin/orders/currentorders"); // Adjust path if needed
+    revalidatePath("/admin/orders");
+
     return { success: true, message: "Status updated" };
   } catch (error) {
     console.error("Failed to update order status:", error);
@@ -298,9 +308,18 @@ export async function placeOrder(
       throw new Error("Cart is empty");
     }
 
+      const session = await auth();
+
+    const userId = session?.user?.id;
+
+    if (!userId)
+      return {
+        success: false
+      };
+
     const orderResult = await sql`
-      INSERT INTO Orders (userid,createdat, status ,  instructions, address)
-      VALUES (${1},${"2025-07-24"},${"Cooking"},${
+      INSERT INTO Orders (userid, instructions, address)
+      VALUES (${userId},${
       instructions || null
     },${address})
       RETURNING id;

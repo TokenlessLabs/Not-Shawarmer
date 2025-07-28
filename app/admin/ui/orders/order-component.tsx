@@ -94,7 +94,21 @@ export default function OrderComponent({ order }: Props) {
             <h2 className="text-xl font-semibold">Order</h2>
             <div className="flex items-center text-sm text-gray-500 gap-1">
               <ClockIcon className="h-4 w-4" />
-              <span>{new Date(order.createdat).toLocaleTimeString()}</span>
+              <span>
+                {" "}
+                {(() => {
+                  const d = new Date(order.createdat);
+                  d.setHours(d.getHours() + 5);
+                  return d.toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  });
+                })()}
+              </span>
             </div>
             <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
               <ShoppingBagIcon className="h-4 w-4" />
