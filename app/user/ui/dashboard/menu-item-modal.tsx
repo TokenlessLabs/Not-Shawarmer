@@ -17,15 +17,38 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
 
   const handleAddToCart = () => {
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
     const newItem = {
       name: item.name,
       price: item.price,
       quantity: quantity,
     };
-    const updatedCart = [...existingCart, newItem];
+
+    // Check if item already exists in the cart
+    const existingIndex = existingCart.findIndex(
+      (cartItem: { name: string }) => cartItem.name === newItem.name
+    );
+
+    let updatedCart;
+
+    if (existingIndex !== -1) {
+      // Update quantity if item exists
+      const updatedItem = {
+        ...existingCart[existingIndex],
+        quantity: existingCart[existingIndex].quantity + newItem.quantity,
+      };
+      updatedCart = [...existingCart];
+      updatedCart[existingIndex] = updatedItem;
+    } else {
+      // Add as new item
+      updatedCart = [...existingCart, newItem];
+    }
+
+    // Save and dispatch
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     const event = new CustomEvent("cart-add", { detail: newItem });
     window.dispatchEvent(event);
+    onClose();
   };
 
   return (

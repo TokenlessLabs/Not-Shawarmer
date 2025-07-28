@@ -76,15 +76,23 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const groupedItems = cartItems.reduce((acc, item) => {
-    const existing = acc.find((i) => i.name === item.name);
-    if (existing) {
-      existing.quantity += item.quantity;
-    } else {
-      acc.push({ ...item }); // clone item
-    }
-    return acc;
-  }, [] as CartItem[]);
+  const handleIncrement = (name: string) => {
+    const updatedCart = cartItems.map((item) =>
+      item.name === name ? { ...item, quantity: item.quantity + 1 } : item
+    );
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  const handleDecrement = (name: string) => {
+    const updatedCart = cartItems
+      .map((item) =>
+        item.name === name ? { ...item, quantity: item.quantity - 1 } : item
+      )
+      .filter((item) => item.quantity > 0); // remove items with 0
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
   return (
     <>
@@ -118,20 +126,35 @@ const CartPage = () => {
                   </p>
                 ) : (
                   <ul>
-                    {groupedItems.map((item, index) => (
-                      <li key={index} className="flex justify-between">
-                        <span>
-                          {item.name} x{item.quantity}
-                        </span>
-                        <span>
-                          PKR {item.price * item.quantity}
+                    {cartItems.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center py-2 border-b border-theme-dark-blue/10"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">{item.name}</span>
+                          <span className="text-sm text-theme-dark-blue/70">
+                            PKR {item.price * item.quantity}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
                           <button
-                            className="ml-5 text-sm text-blue-600 hover:underline font-medium"
-                            onClick={() => handleRemove(item.name)}
+                            onClick={() => handleDecrement(item.name)}
+                            className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
                           >
-                            Remove
+                            –
                           </button>
-                        </span>
+                          <span className="w-6 text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => handleIncrement(item.name)}
+                            className="w-6 h-6 flex items-center justify-center bg-theme-blue text-white rounded-full text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
