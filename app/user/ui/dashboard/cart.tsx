@@ -26,7 +26,7 @@ export default function Cart() {
           animate ? "scale-10" : ""
         }`}
       >
-        <ShoppingCartIcon className="w-6 h-6 text-white" />
+        <ShoppingCartIcon className="w-6 h-6 text-white" /> 
       </Link>
     </div>
   );

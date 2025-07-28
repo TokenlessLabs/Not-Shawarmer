@@ -2,28 +2,41 @@
 
 import { useState } from "react";
 import { Order } from "../../lib/definitions";
-import { OrderItem } from "../../lib/definitions";
+import {
+  ClockIcon,
+  ShoppingBagIcon,
+  MapPinIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
 
 export default function OrderCompo({ order }: { order: Order }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const deliveryCharges = order.delivery_fee ?? 0;
 
-  const subtotal = order.items?.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  ) ?? 0;
+  const subtotal =
+    order.items?.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    ) ?? 0;
 
   const total = subtotal + deliveryCharges;
+  const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-blue-500 transition-all duration-300">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-start mb-2">
         <div>
-          <h2 className="text-xl font-semibold">Order #{order.id}</h2>
-          <p className="text-sm text-gray-500">
-            Order Time: {new Date(order.createdat).toLocaleTimeString()}
-          </p>
+          <h2 className="text-xl font-semibold">Order</h2>
+          <div className="flex items-center text-sm text-gray-500 gap-1">
+            <ClockIcon className="h-4 w-4" />
+            <span>{new Date(order.createdat).toLocaleTimeString()}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
+            <ShoppingBagIcon className="h-4 w-4" />
+            <span>{totalItems} items • Rs. {total}</span>
+          </div>
         </div>
+
         <span className="bg-green-100 text-green-800 text-sm font-medium px-4 py-1 rounded-full">
           {order.status}
         </span>
@@ -39,8 +52,8 @@ export default function OrderCompo({ order }: { order: Order }) {
       </div>
 
       {isExpanded && (
-        <div className="mt-4">
-          <div className="mb-4">
+        <div className="mt-4 space-y-4">
+          <div>
             <h3 className="text-md font-semibold mb-2">Items:</h3>
             <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
               {order.items?.length > 0 ? (
@@ -56,11 +69,20 @@ export default function OrderCompo({ order }: { order: Order }) {
             </ul>
           </div>
 
-          <div className="mb-4">
-            <h3 className="text-md font-semibold mb-1">Delivery Address:</h3>
-            <p className="text-sm text-gray-700">
-              {order.address}
-            </p>
+          {order.instructions && (
+            <div className="flex items-start gap-2 text-sm text-gray-700">
+              <PencilIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <span className="font-semibold">Instructions:</span> {order.instructions}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <MapPinIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <span className="font-semibold">Delivery Address:</span> {order.address}
+            </div>
           </div>
 
           <div className="border-t pt-4">
