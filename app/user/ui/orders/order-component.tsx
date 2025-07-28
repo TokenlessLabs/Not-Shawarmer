@@ -8,6 +8,7 @@ import {
   MapPinIcon,
   PencilIcon,
 } from "@heroicons/react/24/outline";
+import { formatDateWithOffset } from "../../lib/utils";
 
 export default function OrderCompo({ order }: { order: Order }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -27,21 +28,7 @@ export default function OrderCompo({ order }: { order: Order }) {
           <h2 className="text-xl font-semibold">Order</h2>
           <div className="flex items-center text-sm text-gray-500 gap-1">
             <ClockIcon className="h-4 w-4" />
-            <span>
-              {" "}
-              {(() => {
-                const d = new Date(order.createdat);
-                d.setHours(d.getHours() + 5);
-                return d.toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                });
-              })()}
-            </span>
+            <span> {formatDateWithOffset(order.createdat)}</span>
           </div>
           <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
             <ShoppingBagIcon className="h-4 w-4" />
@@ -114,18 +101,7 @@ export default function OrderCompo({ order }: { order: Order }) {
               <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <span className="font-semibold">Delivered At:</span>{" "}
-                {(() => {
-                  const d = new Date(order.deliveredat);
-                  d.setHours(d.getHours() + 5);
-                  return d.toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  });
-                })()}
+                {formatDateWithOffset(order.deliveredat)}
               </div>
             </div>
           )}

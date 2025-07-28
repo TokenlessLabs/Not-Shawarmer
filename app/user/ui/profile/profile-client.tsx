@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { useActionState } from "react";
-import { updateUser } from "../../lib/actions";
-import { User } from "../../lib/definitions";
+import React, { useState, useTransition, useActionState } from "react";
+import { updateUser, deleteUserAccount } from "../../lib/actions";
+import { User, ErrorState } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
-import { ErrorState } from "../../lib/definitions";
+import ConfirmModal from "@/app/admin/ui/confirmation-modal";
 
 export default function ProfileClient({ user }: { user: User }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,6 +18,18 @@ export default function ProfileClient({ user }: { user: User }) {
     updateUser,
     initialState
   );
+  const [showModal, setShowModal] = useState(false);
+  const [isPendingDelete, startTransition] = useTransition();
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      try {
+        await deleteUserAccount();
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  };
 
   const handleChange = (field: keyof User, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -87,10 +98,22 @@ export default function ProfileClient({ user }: { user: User }) {
             {user.role === "User" && (
               <button
                 type="button"
+                onClick={() => setShowModal(true)}
                 className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600"
               >
                 Delete Account
               </button>
+            )}
+            {showModal && (
+              <ConfirmModal
+                heading="Delete Your Account?"
+                message="This action is irreversible. Are you sure you want to delete your account?"
+                onAccept={handleDelete}
+                onCancel={() => setShowModal(false)}
+                isProcessing={isPendingDelete}
+                acceptLabel="Yes, Delete"
+                cancelLabel="Cancel"
+              />
             )}
           </div>
         )}

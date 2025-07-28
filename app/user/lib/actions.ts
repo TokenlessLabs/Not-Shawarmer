@@ -6,6 +6,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { ErrorState } from "./definitions";
+import { redirect } from "next/navigation";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -356,3 +357,25 @@ export async function placeOrder(
     return { success: false, error: error.message || "Unknown error" };
   }
 };
+
+export async function deleteUserAccount() {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    await sql`
+      DELETE FROM users
+      WHERE id = ${userId}
+    `;
+
+    revalidatePath("/");
+    redirect("/");
+  } catch (error) {
+    console.error("Failed to delete account:", error);
+    throw new Error("Account deletion failed");
+  }
+}
