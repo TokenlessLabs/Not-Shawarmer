@@ -27,7 +27,17 @@ export default function OrderCompo({ order }: { order: Order }) {
           <h2 className="text-xl font-semibold">Order</h2>
           <div className="flex items-center text-sm text-gray-500 gap-1">
             <ClockIcon className="h-4 w-4" />
-            <span>{new Date(order.createdat).toLocaleTimeString()}</span>
+            <span>
+              {" "}
+              {new Date(order.createdat).toLocaleString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
           </div>
           <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
             <ShoppingBagIcon className="h-4 w-4" />
@@ -100,7 +110,14 @@ export default function OrderCompo({ order }: { order: Order }) {
               <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <span className="font-semibold">Delivered At:</span>{" "}
-                {new Date(order.deliveredat).toLocaleString()}
+                {new Date(order.deliveredat).toLocaleString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
               </div>
             </div>
           )}
