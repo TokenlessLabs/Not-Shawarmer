@@ -236,6 +236,10 @@ const restaurantUpdateSchema = z.object({
     .min(6, "Contact must be at least 6 digits")
     .max(20, "Contact must be at most 20 digits")
     .regex(/^\d+$/, "Contact must only contain digits"),
+  delivery_fee: z
+    .string()
+    .min(1, "Delivery fee is required")
+    .regex(/^\d+$/, "Delivery fee must be a valid positive number"),
 });
 
 export async function updateRestaurant(
@@ -244,12 +248,14 @@ export async function updateRestaurant(
 ): Promise<{ success: boolean; message: string | null; errors: string[] }> {
   try {
     const rawData = {
-      address: formData.get("address")?.toString().trim() ?? "",
-      about: formData.get("about")?.toString().trim() ?? "",
-      startTime: formData.get("startTime")?.toString().trim() ?? "",
-      endTime: formData.get("endTime")?.toString().trim() ?? "",
-      contact: formData.get("contact")?.toString().trim() ?? "",
-    };
+  address: formData.get("address")?.toString().trim() ?? "",
+  about: formData.get("about")?.toString().trim() ?? "",
+  startTime: formData.get("startTime")?.toString().trim() ?? "",
+  endTime: formData.get("endTime")?.toString().trim() ?? "",
+  contact: formData.get("contact")?.toString().trim() ?? "",
+  delivery_fee: formData.get("delivery_fee")?.toString().trim() ?? "",
+};
+
 
     const parsed = restaurantUpdateSchema.safeParse(rawData);
 
@@ -258,17 +264,18 @@ export async function updateRestaurant(
       return { success: false, message: null, errors };
     }
 
-    const { address, about, startTime, endTime, contact } = parsed.data;
+    const { address, about, startTime, endTime, contact, delivery_fee } = parsed.data;
 
-    await sql`
-      UPDATE RestDetails
-      SET address = ${address},
-          about = ${about},
-          operatingHoursStart = ${startTime},
-          operatingHoursEnd = ${endTime},
-          contact = ${contact}
-      WHERE id = 1
-    `;
+   await sql`
+  UPDATE RestDetails
+  SET address = ${address},
+      about = ${about},
+      operatingHoursStart = ${startTime},
+      operatingHoursEnd = ${endTime},
+      contact = ${contact},
+      delivery_fee = ${delivery_fee}
+  WHERE id = 1
+`;
 
     revalidatePath("/admin/editrestaurant");
 

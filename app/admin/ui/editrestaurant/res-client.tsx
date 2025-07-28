@@ -12,7 +12,9 @@ export type Restaurant = {
   startTime: string;
   endTime: string;
   contact: string;
+  delivery_fee: number;
 };
+
 
 export default function RestaurantClient({
   restaurant,
@@ -59,6 +61,7 @@ export default function RestaurantClient({
         <input type="hidden" name="startTime" value={formData.startTime} />
         <input type="hidden" name="endTime" value={formData.endTime} />
         <input type="hidden" name="contact" value={formData.contact} />
+        <input type="hidden" name="delivery_fee" value={formData.delivery_fee} />
 
         {/* Messages */}
         <div>

@@ -10,8 +10,8 @@ export default async function RestaurantPage() {
     about: rawData.about,
     startTime: rawData.operatinghoursstart,
     endTime: rawData.operatinghoursend,
-
     contact: rawData.contact,
+    delivery_fee: rawData.delivery_fee
   };
 
   return <RestaurantClient restaurant={restaurant} />;
