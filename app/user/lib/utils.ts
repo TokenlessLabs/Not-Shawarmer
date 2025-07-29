@@ -17,3 +17,21 @@ export async function geocodeAddress(address: string): Promise<[number, number] 
   }
   return null;
 }
+
+export function formatDateWithOffset(
+  date: string | Date,
+  hourOffset = 5,
+  locale = "en-US"
+): string {
+  const d = new Date(date);
+  d.setHours(d.getHours() + hourOffset);
+
+  return d.toLocaleString(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}

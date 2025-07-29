@@ -15,7 +15,7 @@ export default function Card({ item, onClick }: CardProps) {
       className="max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
       onClick={onClick}
     >
-      <Image
+      <img 
         src={imageUrl}
         alt={item.name}
         width={400}
