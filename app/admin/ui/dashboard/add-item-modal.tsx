@@ -46,6 +46,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ categories, onClose }) => {
     }
   }, [state.success, onClose]);
 
+  void imageFile;
+
   return (
     <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md flex justify-center items-center">
       <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md relative overflow-hidden max-h-[98vh] overflow-y-auto">

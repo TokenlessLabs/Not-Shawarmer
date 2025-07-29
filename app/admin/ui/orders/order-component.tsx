@@ -54,12 +54,6 @@ export default function OrderComponent({ order }: Props) {
     });
   };
 
-  const handleCancelOrder = () => {
-    startCancelTransition(() => {
-      cancelOrder(order.id);
-    });
-  };
-
   const deliveryCharges = order.delivery_fee ?? 0;
   const subtotal =
     order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ??
@@ -107,10 +101,16 @@ export default function OrderComponent({ order }: Props) {
 
           <div className="flex flex-col items-end space-y-2">
             <div
-              className={`${currentStatus.color} text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2`}
+              className={`${
+                currentStatus.color
+              } text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2 ${
+                isUpdatingStatus ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               onClick={handleStatusClick}
             >
-              <span>{currentStatus.label}</span>
+              <span>
+                {isUpdatingStatus ? "Updating..." : currentStatus.label}
+              </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -138,7 +138,6 @@ export default function OrderComponent({ order }: Props) {
             )}
           </div>
         </div>
-
 
         <div className="flex justify-between items-center mt-2">
           <button
@@ -213,7 +212,5 @@ export default function OrderComponent({ order }: Props) {
         )}
       </div>
     </>
-
-
   );
 }

@@ -2,7 +2,7 @@ import { getRestaurantDetails } from "@/app/user/lib/data";
 import RestaurantClient from "../ui/editrestaurant/res-client";
 import { Restaurant } from "@/app/user/lib/definitions";
 import RestaurantSkeleton from "./loading";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 
 export default function RestaurantPageWrapper() {
   return (

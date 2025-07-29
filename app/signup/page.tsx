@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useActionState } from "react";
 import { signupUser } from "./actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
@@ -10,11 +10,17 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const [state, formAction] = useActionState(signupUser,  {
+  const [state, formAction, isPending] = useActionState(signupUser, {
     message: null,
     success: false,
     errors: [],
   });
+
+  useEffect(() => {
+    if (state.success) {
+      window.location.reload();
+    }
+  }, [state.success]);
 
   return (
     <div className="h-screen w-full flex text-theme-dark-blue">
@@ -79,7 +85,11 @@ const [state, formAction] = useActionState(signupUser,  {
               className="absolute right-3 top-[33px] text-gray-500 hover:text-gray-700"
               aria-label="Toggle password visibility"
             >
-              {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+              {showPassword ? (
+                <EyeSlashIcon className="h-5 w-5" />
+              ) : (
+                <EyeIcon className="h-5 w-5" />
+              )}
             </button>
           </div>
 
@@ -106,29 +116,41 @@ const [state, formAction] = useActionState(signupUser,  {
             </button>
           </div>
 
+          {/* Error Display */}
+          {state?.errors && state.errors.length > 0 && (
+            <ul className="text-red-600 text-sm">
+              {state.errors.map((err, idx) => (
+                <li key={idx}>• {err}</li>
+              ))}
+            </ul>
+          )}
+          {/* Meesage Display */}
+          {state?.message && (
+            <p className="text-red-600 text-sm">{state.message}</p>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
-            className="bg-theme-blue hover:bg-theme-bluehighlighted text-white py-2 rounded-md mt-2 font-medium"
+            disabled={isPending}
+            className={`py-2 rounded-md mt-2 font-medium text-white ${
+              isPending
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-theme-blue hover:bg-theme-bluehighlighted"
+            }`}
           >
-            Sign Up
+            {isPending ? "Signing Up..." : "Sign Up"}
           </button>
 
           <p className="text-sm text-center">
             Already have an account?{" "}
-            <Link href="/" className="text-theme-dark-blue underline font-semibold">
+            <Link
+              href="/"
+              className="text-theme-dark-blue underline font-semibold"
+            >
               Log in!
             </Link>
           </p>
-
-            {/* Error Display */}
-                {state?.errors && state.errors.length > 0 && (
-          <ul className="text-red-600 text-sm">
-            {state.errors.map((err, idx) => (
-              <li key={idx}>• {err}</li>
-            ))}
-          </ul>
-        )}
         </form>
       </div>
     </div>

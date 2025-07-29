@@ -20,7 +20,6 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>(menuItems);
-  const [searchValue, setSearchValue] = useState("");
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
   const [activeCategory, setActiveCategory] = useState(categories[0]);
@@ -32,10 +31,7 @@ export default function DashboardClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
-
-  useEffect(() => {
-    setSearchValue(searchQuery);
-  }, []);
+  const [searchValue, setSearchValue] = useState(searchQuery);
 
   useEffect(() => {
     const value = searchValue.toLowerCase();
@@ -53,7 +49,11 @@ export default function DashboardClient({
   useEffect(() => {
     const debounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
-      searchValue ? params.set("query", searchValue) : params.delete("query");
+      if (searchValue) {
+        params.set("query", searchValue);
+      } else {
+        params.delete("query");
+      }
       router.replace(`?${params.toString()}`);
     }, 300);
     return () => clearTimeout(debounce);
@@ -120,10 +120,6 @@ export default function DashboardClient({
         behavior: "smooth",
       });
     }
-  };
-
-  const handleDeleteCategory = (categoryName: string) => {
-    setCategoryToDelete(categoryName);
   };
 
   return (

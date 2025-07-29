@@ -67,7 +67,7 @@ async function createTables() {
   await sql`
   CREATE TABLE Orders (
     id SERIAL PRIMARY KEY,
-    userId INTEGER NOT NULL,
+    userId INTEGER,
     createdAt TIMESTAMP DEFAULT NOW(),
     deliveredAt TIMESTAMP,
     status VARCHAR(20) NOT NULL DEFAULT 'Cooking' CHECK (status IN ('Cooking', 'Dispatched', 'Delivered', 'Cancelled')),
@@ -177,7 +177,7 @@ async function seedOrderDetails() {
 
 export async function GET() {
   try {
-    await sql.begin(async (sql) => {
+    await sql.begin(async () => {
       await dropTables();
       await createTables();
       await seedUsers();

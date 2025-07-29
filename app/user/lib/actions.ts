@@ -4,9 +4,8 @@ import bcrypt from "bcryptjs";
 import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import { ErrorState } from "./definitions";
-import { redirect } from "next/navigation";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -55,7 +54,7 @@ export async function updateUserAddress(
       success: true,
       message: "Address updated successfully.",
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update address:", error);
     return {
       success: false,
@@ -127,7 +126,7 @@ export async function updateUser(
       message: "",
       errors: [],
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
     return {
       success: false,
@@ -247,10 +246,13 @@ const restaurantUpdateSchema = z.object({
     .min(6, "Contact must be at least 6 digits")
     .max(20, "Contact must be at most 20 digits")
     .regex(/^\d+$/, "Contact must only contain digits"),
-  delivery_fee: z
+ delivery_fee: z
     .string()
     .min(1, "Delivery fee is required")
-    .regex(/^\d+$/, "Delivery fee must be a valid positive number"),
+    .regex(/^\d+$/, "Delivery fee must be a valid positive number")
+    .refine((val) => parseInt(val) <= 9999, {
+      message: "Delivery fee must be less than 10000",
+    }),
 });
 
 export async function updateRestaurant(
@@ -359,14 +361,16 @@ export async function placeOrder(
 
     console.log("✅ Order placed successfully with ID:", orderId);
     return { success: true, orderId };
-  } catch (error: any) {
-    console.error("❌ Error placing order:", error.message);
-    return { success: false, error: error.message || "Unknown error" };
-  }
+  }catch (error: unknown) {
+  console.error("❌ Error placing order:", error instanceof Error ? error.message : error);
+  return {
+    success: false,
+    error: error instanceof Error ? error.message : "Unknown error",
+  };
+}
 };
 
-export async function deleteUserAccount() {
-  try {
+export async function deleteUserAccountAndLogout() {
     const session = await auth();
     const userId = session?.user?.id;
 
@@ -379,10 +383,5 @@ export async function deleteUserAccount() {
       WHERE id = ${userId}
     `;
 
-    revalidatePath("/");
-    redirect("/");
-  } catch (error) {
-    console.error("Failed to delete account:", error);
-    throw new Error("Account deletion failed");
-  }
+    await signOut({ redirectTo: "/" });
 }

@@ -1,6 +1,5 @@
 // menu-item-card.tsx
 "use client";
-import Image from "next/image";
 import { MenuItem } from "../../lib/definitions";
 
 type CardProps = {
@@ -15,7 +14,7 @@ export default function Card({ item, onClick }: CardProps) {
       className="max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
       onClick={onClick}
     >
-      <img 
+      <img
         src={imageUrl}
         alt={item.name}
         width={400}

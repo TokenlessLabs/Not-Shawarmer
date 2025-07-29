@@ -58,7 +58,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
     ORDER BY o.createdAt DESC;
   `;
 
-  const orders: Order[] = result.map((row: any) => ({
+  const orders: Order[] = result.map((row):Order => ({
     id: row.id,
     userId: row.userId,
     createdat: row.createdat,
@@ -110,7 +110,7 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
     ORDER BY o.createdAt DESC;
   `;
 
-  const orders: Order[] = result.map((row: any) => ({
+  const orders: Order[] = result.map((row):Order => ({
     id: row.id,
     userId: row.userId,
     createdat: row.createdat,
@@ -156,7 +156,7 @@ export async function getAdminPastOrders(): Promise<Order[]> {
     ORDER BY o.createdAt DESC;
   `;
 
-  const orders: Order[] = result.map((row: any) => ({
+  const orders: Order[] = result.map((row):Order => ({
     id: row.id,
     userId: row.userId,
     createdat: row.createdat,
@@ -202,7 +202,7 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
     ORDER BY o.createdAt DESC;
   `;
 
-  const orders: Order[] = result.map((row: any) => ({
+  const orders: Order[] = result.map((row):Order => ({
     id: row.id,
     userId: row.userId,
     createdat: row.createdat,
