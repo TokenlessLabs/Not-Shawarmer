@@ -245,7 +245,6 @@ const CartPage = () => {
 
               <div className="w-full">
                 <button
-                  disabled={cartItems.length === 0 || isAddressInvalid}
                   onClick={() => {
                     if (cartItems.length === 0 || isAddressInvalid) {
                       setNoItemsWarning(true);
@@ -254,22 +253,22 @@ const CartPage = () => {
                       setShowConfirmModal(true);
                     }
                   }}
-                  className={`w-full text-center py-3 rounded-lg font-semibold transition ${noItemsWarning ? "animate-shake" : ""
-                    } ${cartItems.length === 0 || isAddressInvalid
-                      ? "bg-gray-400 cursor-not-allowed text-white"
-                      : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
-                    }`}
+                  className={`w-full text-center py-3 rounded-lg font-semibold transition
+    ${noItemsWarning ? "animate-shake bg-red-600/80 text-white" : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"}
+  `}
                 >
                   {isPending ? "Placing Order..." : "Place Order"}
                 </button>
+
 
                 {noItemsWarning && (
                   <p className="text-red-600 text-sm font-medium mt-2 text-center">
                     {cartItems.length === 0
                       ? "No items in the cart!"
-                      : "Please add a delivery address before placing your order."}
+                      : "Please enter a delivery address before placing your order."}
                   </p>
                 )}
+
               </div>
             </div>
           </div>
