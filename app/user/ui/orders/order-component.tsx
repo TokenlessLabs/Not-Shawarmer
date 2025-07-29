@@ -22,7 +22,7 @@ export default function OrderCompo({ order }: { order: Order }) {
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-blue-500 transition-all duration-300">
+    <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-theme-blue transition-all duration-300">
       <div className="flex justify-between items-start mb-2">
         <div>
           <h2 className="text-xl font-semibold">Order</h2>
@@ -51,14 +51,24 @@ export default function OrderCompo({ order }: { order: Order }) {
         </span>
       </div>
 
-      <div className="text-right">
+      <div className="flex justify-between items-center mt-2">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-sm text-blue-600 underline focus:outline-none"
+          className="text-sm text-theme-blue underline focus:outline-none"
         >
           {isExpanded ? "Hide Details" : "View Details"}
         </button>
+
+        {["Cooking", "Dispatched"].includes(order.status) && (
+          <a
+            href={`/user/orders/${order.id}/delivery/`}
+            className="text-sm text-theme-blue underline ml-4"
+          >
+            View Delivery Status
+          </a>
+        )}
       </div>
+
 
       {isExpanded && (
         <div className="mt-4 space-y-4">

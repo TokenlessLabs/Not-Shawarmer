@@ -219,7 +219,7 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
 
 export async function getRestaurantDetails() {
   const result = await sql`
-    SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd
+    SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd, delivery_fee
     FROM RestDetails
     WHERE id = 1
     LIMIT 1;
