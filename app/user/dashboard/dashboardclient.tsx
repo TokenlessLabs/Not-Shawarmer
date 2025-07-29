@@ -36,7 +36,11 @@ export default function DashboardClient({
   useEffect(() => {
     const debounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams);
-      searchValue ? params.set("query", searchValue) : params.delete("query");
+      if (searchValue) {
+        params.set("query", searchValue);
+      } else {
+        params.delete("query");
+      }
       router.replace(`?${params.toString()}`);
     }, 300);
 

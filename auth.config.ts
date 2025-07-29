@@ -16,16 +16,17 @@ authorized({ auth, request: { nextUrl } }) {
   // Protected routes
   if (!isLoggedIn && path.startsWith('/user')) return false;
   if (!isLoggedIn && path.startsWith('/admin')) return false;
+  if (!isLoggedIn && path.startsWith('/profile')) return false;
 
   // Redirect users trying to access each other's dashboards
   if (isLoggedIn) {
     const role = user.role?.toLowerCase();
 
-    if (role === 'admin' && !path.startsWith('/admin')) {
+    if (role === 'admin' && !path.startsWith('/admin') && !path.startsWith('/profile')) {
       return Response.redirect(new URL('/admin/dashboard', nextUrl));
     }
 
-    if (role === 'user' && !path.startsWith('/user')) {
+    if (role === 'user' && !path.startsWith('/user') && !path.startsWith('/profile')) {
       return Response.redirect(new URL('/user/dashboard', nextUrl));
     }
   }

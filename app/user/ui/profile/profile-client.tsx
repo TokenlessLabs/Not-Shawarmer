@@ -6,7 +6,7 @@ import React, {
   useActionState,
   useEffect,
 } from "react";
-import { updateUser, deleteUserAccount } from "../../lib/actions";
+import { updateUser, deleteUserAccountAndLogout } from "../../lib/actions";
 import { User, ErrorState } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 import ConfirmModal from "@/app/admin/ui/confirmation-modal";
@@ -34,11 +34,7 @@ export default function ProfileClient({ user }: { user: User }) {
 
   const handleDelete = () => {
     startTransition(async () => {
-      try {
-        await deleteUserAccount();
-      } catch (error) {
-        console.error(error);
-      }
+      deleteUserAccountAndLogout();
     });
   };
 

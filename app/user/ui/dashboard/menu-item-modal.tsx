@@ -11,7 +11,6 @@ type MenuItemModalProps = {
 
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
 

@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import postgres from "postgres";
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import { ErrorState } from "@/app/user/lib/definitions";
 import { z } from "zod";
-import { redirect } from "next/navigation";
 
 const menuItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -64,21 +63,21 @@ export async function updateMenuItem(
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadResult = await new Promise((resolve, reject) => {
+      const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream({ folder: "items" }, (error, result) => {
             if (error) reject(error);
-            else resolve(result);
+            else resolve(result as UploadApiResponse);
           })
           .end(buffer);
       });
 
-      imageUrl = (uploadResult as any).secure_url;
+      imageUrl = uploadResult.secure_url;
     }
 
     // Build dynamic update query
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | null)[] = [];
 
     fields.push(`name = $${values.push(name)}`);
     fields.push(`price = $${values.push(parseFloat(price))}`);
@@ -116,12 +115,12 @@ export async function updateMenuItem(
       success: true,
       message: "Menu item updated successfully.",
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Update error:", err);
     return {
       success: false,
       message: "Failed to update menu item.",
-      errors: [err.message || "Unexpected error occurred."],
+      errors: ["Unexpected error occurred."],
     };
   }
 }
@@ -157,16 +156,16 @@ export async function addMenuItem(
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const uploadResult = await new Promise((resolve, reject) => {
+      const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream({ folder: "items" }, (error, result) => {
             if (error) reject(error);
-            else resolve(result);
+            else resolve(result as UploadApiResponse);
           })
           .end(buffer);
       });
 
-      imageUrl = (uploadResult as any).secure_url;
+      imageUrl = uploadResult.secure_url;
     }
 
     // Get category ID
@@ -205,13 +204,13 @@ export async function addMenuItem(
       message: "Item added successfully.",
       errors: [],
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Add item error:", err);
 
     return {
       success: false,
       message: "Something went wrong while adding the item.",
-      errors: [err.message || "Unknown error"],
+      errors: ["Unknown error"],
     };
   }
 }
@@ -245,7 +244,7 @@ export async function addCategory(name: string): Promise<{ success: boolean; mes
 
     revalidatePath("/admin/dashboard");
     return { success: true, message: 'Category added successfully.' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Add Category Error:', error);
     return { success: false, message: 'Server error. Please try again.' };
   }

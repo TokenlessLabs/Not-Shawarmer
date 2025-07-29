@@ -10,7 +10,7 @@ export const signupSchema = z
       .max(20, "Phone number must be no more than 20 characters"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
+      .min(6, "Password must be at least 6 characters")
       .regex(/\d/, "Password must contain at least one digit"),
     confirmPassword: z.string(),
   })

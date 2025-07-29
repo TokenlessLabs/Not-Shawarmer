@@ -1,10 +1,18 @@
-import { getOrderById, getUserAddress, getRestaurantDetails } from "@/app/user/lib/data";
+import {
+  getOrderById,
+  getUserAddress,
+  getRestaurantDetails,
+} from "@/app/user/lib/data";
 import DeliveryClient from "@/app/user/ui/delivery-client";
 import { notFound } from "next/navigation";
 
-async function geocodeAddress(address: string): Promise<[number, number] | null> {
+async function geocodeAddress(
+  address: string
+): Promise<[number, number] | null> {
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      address
+    )}`
   );
   const data = await response.json();
 
@@ -15,7 +23,10 @@ async function geocodeAddress(address: string): Promise<[number, number] | null>
   return null;
 }
 
-export default async function DeliveryPage({ params }: { params: { orderid: string } }) {
+export default async function DeliveryPage(props: {
+  params: Promise<{ orderid: string }>;
+}) {
+  const params = await props.params;
   const orderId = parseInt(params.orderid, 10);
   if (isNaN(orderId)) return notFound();
 

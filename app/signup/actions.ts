@@ -31,13 +31,24 @@ export async function signupUser(
   const { name, email, phone, password } = result.data;
 
   try {
-    const existingUser = await sql`
+    // Check for duplicate email
+    const existingUserByEmail = await sql`
       SELECT * FROM users WHERE email = ${email}
     `;
-
-    if (existingUser.length > 0) {
+    if (existingUserByEmail.length > 0) {
       return {
         message: "An account with this email already exists.",
+        success: false,
+      };
+    }
+
+    // Check for duplicate username
+    const existingUserByUsername = await sql`
+      SELECT * FROM users WHERE username = ${name}
+    `;
+    if (existingUserByUsername.length > 0) {
+      return {
+        message: "This username is already taken.",
         success: false,
       };
     }
@@ -49,6 +60,13 @@ export async function signupUser(
       VALUES (${name}, ${email}, ${phone}, ${hashedPassword})
     `;
 
+    await signIn('credentials', {
+      username: name,
+      password,
+      redirect: true,
+      callbackUrl: '/',
+    });
+
     return {
       message: null,
       success: true,
@@ -59,5 +77,24 @@ export async function signupUser(
       message: "Something went wrong. Please try again later.",
       success: false,
     };
+  }
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }

@@ -50,4 +50,10 @@ export type Restaurant = {
   startTime: string;
   endTime: string;
   contact: string;
+  delivery_fee: number;
+};
+
+export type Credentials = {
+  username: string;
+  password: string;
 };

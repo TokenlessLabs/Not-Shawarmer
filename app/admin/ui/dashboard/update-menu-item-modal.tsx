@@ -59,6 +59,27 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const loadInitialImage = async () => {
+      if (item.image && !imageFile) {
+        try {
+          const response = await fetch(item.image);
+          const blob = await response.blob();
+
+          // Extract filename from URL or use a default
+          const filename = item.image.split("/").pop() || "image.jpg";
+          const file = new File([blob], filename, { type: blob.type });
+
+          setImageFile(file);
+        } catch (error) {
+          console.error("Error converting Cloudinary URL to file:", error);
+        }
+      }
+    };
+
+    loadInitialImage();
+  }, [item.image, imageFile]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
