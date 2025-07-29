@@ -6,7 +6,6 @@ import ConfirmModal from "@/app/admin/ui/confirmation-modal";
 import { placeOrder, updateUserAddress } from "../../lib/actions";
 import { useRouter } from "next/navigation";
 
-
 type CartItem = {
   name: string;
   price: number;
@@ -16,11 +15,15 @@ type CartItem = {
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState("Loading...");
+  const [savedAddress, setSavedAddress] = useState<string | null | "Loading...">("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
   const [instructions, setInstructions] = useState("");
+  const [noItemsWarning, setNoItemsWarning] = useState(false);
   const router = useRouter();
+  const [deliveryFee, setDeliveryFee] = useState<number>(0);
+
+  // Fetch cart and address
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -30,40 +33,50 @@ const CartPage = () => {
     const fetchAddress = async () => {
       try {
         const res = await fetch("/api/address");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.address) {
-            setSavedAddress(data.address);
-          }
-        }
+        const data = await res.ok ? await res.json() : {};
+        setSavedAddress(data.address ?? null);
       } catch (error) {
         console.error("Failed to fetch address", error);
+        setSavedAddress(null);
+      }
+    };
+
+    const fetchDeliveryFee = async () => {
+      try {
+        const res = await fetch("/api/deliveryfee");
+        const data = await res.json();
+        if (res.ok) {
+          setDeliveryFee(data.deliveryFee);
+        } else {
+          console.error("Failed to fetch delivery fee:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching delivery fee:", error);
       }
     };
 
     fetchAddress();
+    fetchDeliveryFee();
   }, []);
+
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const deliveryFee = 250;
-  const total = subtotal + deliveryFee;
+  const total = Number(subtotal) + Number(deliveryFee);
 
   const handleConfirmPlaceOrder = () => {
     startTransition(async () => {
       const storedCart = localStorage.getItem("cart");
       const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-      const result = await placeOrder(parsedCart, savedAddress, instructions);
+      const result = await placeOrder(parsedCart, savedAddress as string, instructions);
+
 
       if (result.success) {
         localStorage.removeItem("cart");
         setCartItems([]);
-        // alert("✅ Order placed successfully!");
-
-        // redirect to delivery page (pass result.orderId or similar)
         router.push(`/user/orders/${result.orderId}/delivery`);
       } else {
         alert("❌ " + (result.error || "Something went wrong"));
@@ -72,7 +85,6 @@ const CartPage = () => {
       setShowConfirmModal(false);
     });
   };
-
 
   const handleRemove = (name: string) => {
     const updatedCart = cartItems.filter((item) => item.name !== name);
@@ -98,12 +110,15 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
+  const isAddressInvalid =
+    !savedAddress || savedAddress === "Loading...";
+
   return (
     <>
       {/* Address Modal */}
       {openModal && (
         <AddressModal
-          savedAddress={savedAddress}
+          savedAddress={savedAddress ?? undefined} // convert null to undefined
           onClose={() => setOpenModal(false)}
           onSave={(newAddress) => {
             setOpenModal(false);
@@ -113,6 +128,7 @@ const CartPage = () => {
             }
           }}
         />
+
       )}
 
       {/* Confirm Modal */}
@@ -138,9 +154,7 @@ const CartPage = () => {
             <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               {cartItems.length === 0 ? (
-                <p className="text-sm text-theme-dark-blue/70">
-                  Your cart is empty.
-                </p>
+                <p className="text-sm text-theme-dark-blue/70">Your cart is empty.</p>
               ) : (
                 <ul className="space-y-3">
                   {cartItems.map((item, index) => (
@@ -187,14 +201,12 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm">{savedAddress}</p>
+              <p className="text-sm text-theme-dark-blue/70">{savedAddress ?? "Please enter an address..."}</p>
             </div>
 
             {/* Special Instructions */}
             <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-2">
-                Special Instructions
-              </h2>
+              <h2 className="text-xl font-semibold mb-2">Special Instructions</h2>
               <textarea
                 onChange={(e) => setInstructions(e.target.value)}
                 value={instructions}
@@ -223,7 +235,7 @@ const CartPage = () => {
 
             <div className="flex justify-between text-lg font-bold mb-6">
               <span>Total</span>
-              <span>PKR {total}</span>
+              <span>PKR {(total ?? 0).toFixed(2)}</span>
             </div>
 
             <div className="flex flex-col w-full gap-1">
@@ -231,13 +243,34 @@ const CartPage = () => {
                 <strong>Payment:</strong> Cash on Delivery
               </div>
 
-              <button
-                onClick={() => setShowConfirmModal(true)}
-                disabled={cartItems.length === 0 || isPending}
-                className="w-full text-center bg-theme-blue hover:bg-theme-bluehighlighted text-white py-3 rounded-lg font-semibold transition"
-              >
-                {isPending ? "Placing Order..." : "Place Order"}
-              </button>
+              <div className="w-full">
+                <button
+                  disabled={cartItems.length === 0 || isAddressInvalid}
+                  onClick={() => {
+                    if (cartItems.length === 0 || isAddressInvalid) {
+                      setNoItemsWarning(true);
+                      setTimeout(() => setNoItemsWarning(false), 2000);
+                    } else {
+                      setShowConfirmModal(true);
+                    }
+                  }}
+                  className={`w-full text-center py-3 rounded-lg font-semibold transition ${noItemsWarning ? "animate-shake" : ""
+                    } ${cartItems.length === 0 || isAddressInvalid
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
+                    }`}
+                >
+                  {isPending ? "Placing Order..." : "Place Order"}
+                </button>
+
+                {noItemsWarning && (
+                  <p className="text-red-600 text-sm font-medium mt-2 text-center">
+                    {cartItems.length === 0
+                      ? "No items in the cart!"
+                      : "Please add a delivery address before placing your order."}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
