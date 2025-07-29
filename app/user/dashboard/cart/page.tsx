@@ -15,7 +15,9 @@ type CartItem = {
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState<string | null | "Loading...">("Loading...");
+  const [savedAddress, setSavedAddress] = useState<
+    string | null | "Loading..."
+  >("Loading...");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
   const [instructions, setInstructions] = useState("");
@@ -33,7 +35,7 @@ const CartPage = () => {
     const fetchAddress = async () => {
       try {
         const res = await fetch("/api/address");
-        const data = await res.ok ? await res.json() : {};
+        const data = (await res.ok) ? await res.json() : {};
         setSavedAddress(data.address ?? null);
       } catch (error) {
         console.error("Failed to fetch address", error);
@@ -59,7 +61,6 @@ const CartPage = () => {
     fetchDeliveryFee();
   }, []);
 
-
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -71,8 +72,11 @@ const CartPage = () => {
       const storedCart = localStorage.getItem("cart");
       const parsedCart = storedCart ? JSON.parse(storedCart) : [];
 
-      const result = await placeOrder(parsedCart, savedAddress as string, instructions);
-
+      const result = await placeOrder(
+        parsedCart,
+        savedAddress as string,
+        instructions
+      );
 
       if (result.success) {
         localStorage.removeItem("cart");
@@ -104,8 +108,7 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const isAddressInvalid =
-    !savedAddress || savedAddress === "Loading...";
+  const isAddressInvalid = !savedAddress || savedAddress === "Loading...";
 
   return (
     <>
@@ -122,7 +125,6 @@ const CartPage = () => {
             }
           }}
         />
-
       )}
 
       {/* Confirm Modal */}
@@ -138,17 +140,19 @@ const CartPage = () => {
         />
       )}
 
-      <div className="max-h-screen overflow-y-hidden p-6 text-theme-dark-blue flex flex-col">
+      <div className="max-h-screen p-6 text-theme-dark-blue flex flex-col overflow-y-auto">
         <h1 className="text-3xl font-bold mb-10">My Cart</h1>
 
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-7xl mx-auto flex-grow">
           {/* Left Section */}
           <div className="flex-1 space-y-6">
             {/* Order Summary */}
-            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 overflow-y-scroll max-h-[40vh]">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               {cartItems.length === 0 ? (
-                <p className="text-sm text-theme-dark-blue/70">Your cart is empty.</p>
+                <p className="text-sm text-theme-dark-blue/70">
+                  Your cart is empty.
+                </p>
               ) : (
                 <ul className="space-y-3">
                   {cartItems.map((item, index) => (
@@ -195,18 +199,22 @@ const CartPage = () => {
                   ✏️ Edit
                 </button>
               </div>
-              <p className="text-sm text-theme-dark-blue/70">{savedAddress ?? "Please enter an address..."}</p>
+              <p className="text-sm text-theme-dark-blue/70">
+                {savedAddress ?? "Please enter an address..."}
+              </p>
             </div>
 
             {/* Special Instructions */}
-            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-2">Special Instructions</h2>
+            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-4">
+              <h2 className="text-xl font-semibold mb-2">
+                Special Instructions
+              </h2>
               <textarea
                 onChange={(e) => setInstructions(e.target.value)}
                 value={instructions}
                 rows={3}
                 placeholder="Add any extra notes..."
-                className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none"
+                className="w-full p-3 rounded-lg text-sm bg-white/5 border border-theme-dark-blue/40 placeholder-theme-dark-blue/60 outline-none h-[8vh]"
               />
             </div>
           </div>
@@ -248,12 +256,15 @@ const CartPage = () => {
                     }
                   }}
                   className={`w-full text-center py-3 rounded-lg font-semibold transition
-    ${noItemsWarning ? "animate-shake bg-red-600/80 text-white" : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"}
+    ${
+      noItemsWarning
+        ? "animate-shake bg-red-600/80 text-white"
+        : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
+    }
   `}
                 >
                   {isPending ? "Placing Order..." : "Place Order"}
                 </button>
-
 
                 {noItemsWarning && (
                   <p className="text-red-600 text-sm font-medium mt-2 text-center">
@@ -262,7 +273,6 @@ const CartPage = () => {
                       : "Please enter a delivery address before placing your order."}
                   </p>
                 )}
-
               </div>
             </div>
           </div>
