@@ -7,12 +7,12 @@ import {
   Marker,
   Polyline,
   Popup,
-  useMapEvents,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
+import L, { LatLngBounds, LatLngExpression } from "leaflet";
 import { toTuple } from "../lib/utils";
 import polyline from "@mapbox/polyline";
+import { useMap } from "react-leaflet";
 
 // Fix default Leaflet icon paths for Next.js
 delete (
@@ -35,7 +35,6 @@ type Props = {
 export default function Map({
   location,
   onLocationChange,
-  editable = true,
   userLocation = null,
   showPath = false,
 }: Props) {
@@ -77,33 +76,9 @@ export default function Map({
 
   return currentLocation ? (
     <div className="relative w-full h-full">
-      {editable && location && (
-        <button
-          onClick={() => {
-            navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                const userLoc: LatLngExpression = [
-                  pos.coords.latitude,
-                  pos.coords.longitude,
-                ];
-                setCurrentLocation(userLoc);
-                onLocationChange(userLoc);
-              },
-              () => {
-                alert("Unable to get your current location.");
-              }
-            );
-          }}
-          className="absolute top-2 right-2 z-[1000] bg-white p-2 rounded shadow hover:bg-gray-100 transition"
-          title="Use my current location"
-        >
-          📍
-        </button>
-      )}
-
       <MapContainer
         key={toTuple(currentLocation).join("-")}
-        center={currentLocation}
+        center={currentLocation || [0, 0]}
         zoom={13}
         scrollWheelZoom
         className="h-full w-full"
@@ -113,13 +88,8 @@ export default function Map({
           attribution="&copy; OpenStreetMap contributors"
         />
 
-        {editable && (
-          <ClickToSetMarker
-            setLocation={(loc) => {
-              setCurrentLocation(loc);
-              onLocationChange(loc);
-            }}
-          />
+        {userLocation && currentLocation && (
+          <FitBoundsHandler points={[userLocation, currentLocation]} />
         )}
 
         {/* Delivery Marker */}
@@ -155,16 +125,17 @@ export default function Map({
   );
 }
 
-function ClickToSetMarker({
-  setLocation,
-}: {
-  setLocation: (loc: LatLngExpression) => void;
-}) {
-  useMapEvents({
-    click: (e: LeafletMouseEvent) => {
-      const newLoc: LatLngExpression = [e.latlng.lat, e.latlng.lng];
-      setLocation(newLoc);
-    },
-  });
+function FitBoundsHandler({ points }: { points: LatLngExpression[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (points.length >= 2) {
+      const bounds = new LatLngBounds(points);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else if (points.length === 1) {
+      map.setView(points[0], 13);
+    }
+  }, [points, map]);
+
   return null;
 }
