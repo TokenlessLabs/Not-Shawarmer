@@ -25,8 +25,9 @@ const OrderHandle = () => {
     <>
       {/* Sliding Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full bg-white shadow-lg border-l border-gray-300 z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0 w-80" : "translate-x-full w-80"
-          }`}
+        className={`fixed top-0 right-0 h-full bg-white shadow-lg border-l border-gray-300 z-50 transform transition-transform duration-300 ${
+          isOpen ? "translate-x-0 w-80" : "translate-x-full w-80"
+        }`}
       >
         <div className="p-6 overflow-y-auto h-full space-y-8">
           {!orders || orders.length === 0 ? (
@@ -63,7 +64,7 @@ const OrderHandle = () => {
                   {/* Total */}
                   <div className="flex justify-between text-base font-semibold text-theme-dark-blue">
                     <span>Total:</span>
-                    <span>Rs {total}</span>
+                    <span>Rs {total.toFixed(2)}</span>
                   </div>
 
                   {/* Address */}
@@ -83,21 +84,25 @@ const OrderHandle = () => {
                       <span
                         className={`
                           inline-block mt-1 px-3 py-1 text-xs font-semibold rounded-full
-                          ${order.status === "Cooking"
-                            ? "bg-yellow-200 text-yellow-800"
-                            : ""
+                          ${
+                            order.status === "Cooking"
+                              ? "bg-yellow-200 text-yellow-800"
+                              : ""
                           }
-                          ${order.status === "Dispatched"
-                            ? "bg-blue-200 text-blue-800"
-                            : ""
+                          ${
+                            order.status === "Dispatched"
+                              ? "bg-blue-200 text-blue-800"
+                              : ""
                           }
-                          ${order.status === "Delivered"
-                            ? "bg-green-200 text-green-800"
-                            : ""
+                          ${
+                            order.status === "Delivered"
+                              ? "bg-green-200 text-green-800"
+                              : ""
                           }
-                          ${order.status === "Cancelled"
-                            ? "bg-red-200 text-red-800"
-                            : ""
+                          ${
+                            order.status === "Cancelled"
+                              ? "bg-red-200 text-red-800"
+                              : ""
                           }
                         `}
                       >
@@ -130,8 +135,9 @@ const OrderHandle = () => {
         className={`fixed top-1/2 right-0 transform -translate-y-1/2 z-50 bg-gray-300 hover:bg-gray-400 w-6 h-20 rounded-l-md flex items-center justify-center cursor-pointer transition-all duration-200`}
       >
         <svg
-          className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

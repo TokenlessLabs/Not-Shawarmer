@@ -136,10 +136,12 @@ export default function DeliveryClient({
             <span>Total</span>
             <span>
               PKR{" "}
-              {order.items.reduce(
-                (sum, item) => sum + item.price * item.quantity,
-                order.delivery_fee
-              )}
+              {order.items
+                .reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  order.delivery_fee
+                )
+                .toFixed(2)}
             </span>
           </div>
         </div>

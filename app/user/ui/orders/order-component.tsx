@@ -33,7 +33,7 @@ export default function OrderCompo({ order }: { order: Order }) {
           <div className="flex items-center text-sm text-gray-600 gap-1 mt-1">
             <ShoppingBagIcon className="h-4 w-4" />
             <span>
-              {totalItems} items • Rs. {total}
+              {totalItems} items • Rs. {total.toFixed(2)}
             </span>
           </div>
         </div>
@@ -68,7 +68,6 @@ export default function OrderCompo({ order }: { order: Order }) {
           </a>
         )}
       </div>
-
 
       {isExpanded && (
         <div className="mt-4 space-y-4">
@@ -119,15 +118,15 @@ export default function OrderCompo({ order }: { order: Order }) {
           <div className="border-t pt-4">
             <div className="flex justify-between text-sm mb-1">
               <span>Subtotal</span>
-              <span>Rs. {subtotal}</span>
+              <span>Rs. {subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm mb-1">
               <span>Delivery Charges</span>
-              <span>Rs. {deliveryCharges}</span>
+              <span>Rs. {deliveryCharges.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold text-base mt-2">
               <span>Total</span>
-              <span>Rs. {total}</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
           </div>
         </div>
