@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useState, useTransition, useActionState } from "react";
+import React, {
+  useState,
+  useTransition,
+  useActionState,
+  useEffect,
+} from "react";
 import { updateUser, deleteUserAccount } from "../../lib/actions";
 import { User, ErrorState } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
@@ -18,6 +23,12 @@ export default function ProfileClient({ user }: { user: User }) {
     updateUser,
     initialState
   );
+  const [actionState, setActionState] = useState<ErrorState>({
+    success: false,
+    message: null,
+    errors: [],
+  });
+
   const [showModal, setShowModal] = useState(false);
   const [isPendingDelete, startTransition] = useTransition();
 
@@ -35,6 +46,20 @@ export default function ProfileClient({ user }: { user: User }) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  useEffect(() => {
+    setActionState(state);
+  }, [state]);
+
+  const resetForm = () => {
+    setFormData(user);
+    setIsEditing(false);
+    setActionState({
+      message: null,
+      success: false,
+      errors: [],
+    });
+  };
+
   return (
     <form
       action={formAction}
@@ -48,17 +73,17 @@ export default function ProfileClient({ user }: { user: User }) {
 
       <div>
         {isEditing &&
-          state.errors?.map((err, i) => (
+          actionState.errors?.map((err, i) => (
             <p key={i} className="text-red-500 text-sm">
               {err}
             </p>
           ))}
 
-        {isEditing && state.message && (
-          <p className="text-red-500 text-sm">{state.message}</p>
+        {isEditing && actionState.message && (
+          <p className="text-red-500 text-sm">{actionState.message}</p>
         )}
 
-        {isEditing && state.success && (
+        {isEditing && actionState.success && (
           <p className="text-green-600 text-sm">
             Information updated successfully!
           </p>
@@ -77,10 +102,7 @@ export default function ProfileClient({ user }: { user: User }) {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setFormData(user);
-                setIsEditing(false);
-              }}
+              onClick={() => resetForm()}
               className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
             >
               Close

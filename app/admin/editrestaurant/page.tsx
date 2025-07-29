@@ -1,5 +1,6 @@
 import { getRestaurantDetails } from "@/app/user/lib/data";
-import RestaurantClient, { Restaurant } from "../ui/editrestaurant/res-client";
+import RestaurantClient from "../ui/editrestaurant/res-client";
+import { Restaurant } from "@/app/user/lib/definitions";
 import RestaurantSkeleton from "./loading";
 import { Suspense, useEffect, useState } from "react";
 
@@ -12,9 +13,6 @@ export default function RestaurantPageWrapper() {
 }
 
 async function RestaurantPage() {
-  // Optional: add artificial delay to see skeleton
-  await new Promise((resolve) => setTimeout(resolve, 3000)); // 1.5 second delay
-
   const rawData = await getRestaurantDetails();
 
   const restaurant: Restaurant = {

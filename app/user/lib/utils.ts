@@ -26,7 +26,7 @@ export function formatDateWithOffset(
   const d = new Date(date);
   d.setHours(d.getHours() + hourOffset);
 
-  return d.toLocaleString(locale, {
+  const formatted = d.toLocaleString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -34,4 +34,6 @@ export function formatDateWithOffset(
     minute: "2-digit",
     hour12: true,
   });
+
+  return formatted.replace(/\bAM\b/, "am").replace(/\bPM\b/, "pm");
 }

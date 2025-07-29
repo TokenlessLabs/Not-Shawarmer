@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Restaurant } from "./res-client";
+import { Restaurant } from "@/app/user/lib/definitions";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import AddressModal from "@/app/user/ui/dashboard/address-modal";
 

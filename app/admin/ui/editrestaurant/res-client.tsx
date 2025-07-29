@@ -4,17 +4,8 @@ import React, { useState, useEffect } from "react";
 import RestaurantForm from "./res-form";
 import { updateRestaurant } from "@/app/user/lib/actions";
 import { useActionState } from "react";
+import { Restaurant, ErrorState } from "@/app/user/lib/definitions";
 import RestaurantSkeleton from "../../editrestaurant/loading";
-
-export type Restaurant = {
-  name: string;
-  address: string;
-  about: string;
-  startTime: string;
-  endTime: string;
-  contact: string;
-  delivery_fee: number;
-};
 
 export default function RestaurantClient({
   restaurant: initialData,
@@ -25,6 +16,11 @@ export default function RestaurantClient({
   const [formData, setFormData] = useState<Restaurant | null>(null);
 
   const [state, formAction, isPending] = useActionState(updateRestaurant, {
+    success: false,
+    message: null,
+    errors: [],
+  });
+  const [actionState, setActionState] = useState<ErrorState>({
     success: false,
     message: null,
     errors: [],
@@ -49,7 +45,16 @@ export default function RestaurantClient({
   const handleCancel = () => {
     setFormData(initialData);
     setIsEditing(false);
+    setActionState({
+      message: null,
+      success: false,
+      errors: [],
+    });
   };
+
+  useEffect(() => {
+    setActionState(state);
+  }, [state]);
 
   if (!formData) return <RestaurantSkeleton />;
 
@@ -77,19 +82,19 @@ export default function RestaurantClient({
         {/* Messages */}
         <div>
           {isEditing &&
-            Array.isArray(state.errors) &&
-            state.errors.map((err, i) => (
+            Array.isArray(actionState.errors) &&
+            actionState.errors.map((err, i) => (
               <p key={i} className="text-red-500 text-sm">
                 {err}
               </p>
             ))}
 
-          {isEditing && !state.success && state.message && (
-            <p className="text-red-500 text-sm">{state.message}</p>
+          {isEditing && !actionState.success && actionState.message && (
+            <p className="text-red-500 text-sm">{actionState.message}</p>
           )}
 
-          {isEditing && state.success && state.message && (
-            <p className="text-green-500 text-sm">{state.message}</p>
+          {isEditing && actionState.success && actionState.message && (
+            <p className="text-green-500 text-sm">{actionState.message}</p>
           )}
         </div>
 
