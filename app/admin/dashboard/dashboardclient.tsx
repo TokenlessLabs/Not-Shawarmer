@@ -35,7 +35,7 @@ export default function DashboardClient({
 
   useEffect(() => {
     setSearchValue(searchQuery);
-  }, [searchQuery]);
+  }, []);
 
   useEffect(() => {
     const value = searchValue.toLowerCase();
@@ -253,5 +253,3 @@ export default function DashboardClient({
     </>
   );
 }
-
-
