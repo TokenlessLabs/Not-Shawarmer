@@ -42,3 +42,12 @@ export type ErrorState = {
   message?: string | null;
   errors?: string[];
 };
+
+export type Restaurant = {
+  name: string;
+  address: string;
+  about: string;
+  startTime: string;
+  endTime: string;
+  contact: string;
+};

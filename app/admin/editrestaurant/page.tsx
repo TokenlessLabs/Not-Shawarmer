@@ -1,5 +1,6 @@
 import { getRestaurantDetails } from "@/app/user/lib/data";
-import RestaurantClient, { Restaurant } from "../ui/editrestaurant/res-client";
+import RestaurantClient from "../ui/editrestaurant/res-client";
+import { Restaurant } from "@/app/user/lib/definitions";
 
 export default async function RestaurantPage() {
   const rawData = await getRestaurantDetails();
