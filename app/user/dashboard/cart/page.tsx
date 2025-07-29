@@ -147,7 +147,7 @@ const CartPage = () => {
           {/* Left Section */}
           <div className="flex-1 space-y-6">
             {/* Order Summary */}
-            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 overflow-y-scroll max-h-[40vh]">
+            <div className="bg-white/10 backdrop-blur-md border border-theme-dark-blue/40 rounded-xl p-6 overflow-y-auto max-h-[40vh]">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               {cartItems.length === 0 ? (
                 <p className="text-sm text-theme-dark-blue/70">
