@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import AddItemModal from "./add-item-modal";
 import AddCategoryModal from "./add-category-modal";
@@ -13,11 +13,37 @@ export default function FloatingButton({ categories }: FloatingButtonProps) {
   const [showOptions, setShowOptions] = useState(false);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [shiftUp, setShiftUp] = useState(false);
+
+  // Observe footer intersection
+  useEffect(() => {
+    const footer = document.getElementById("page-footer");
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setShiftUp(entry.isIntersecting);
+        });
+      },
+      {
+        root: null,
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
       {/* Floating Action Button */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div
+        className={`fixed right-4 z-50 transition-all duration-300 ${
+          shiftUp ? "bottom-24" : "bottom-4"
+        }`}
+      >
         <div className="relative">
           {showOptions && (
             <ul className="absolute bottom-20 right-0 bg-white shadow-lg rounded-xl p-2 space-y-1 border border-gray-200 animate-slide-up w-44">
