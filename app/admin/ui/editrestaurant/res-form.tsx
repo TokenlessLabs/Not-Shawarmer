@@ -19,9 +19,9 @@ export default function RestaurantForm({
     key: keyof Restaurant;
     type?: string;
   }[] = [
-    { label: "About Us", key: "about" },
-    { label: "Contact Number", key: "contact", type: "tel" },
-  ];
+      { label: "About Us", key: "about" },
+      { label: "Contact Number", key: "contact", type: "tel" },
+    ];
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -83,6 +83,25 @@ export default function RestaurantForm({
           )}
         </div>
       ))}
+
+      <div className="flex flex-col gap-1">
+        <label className="text-xl font-semibold text-theme-dark-blue">
+          Delivery Fee (Rs)
+        </label>
+        {isEditing ? (
+          <input
+            type="number"
+            value={formData.delivery_fee}
+            onChange={(e) => onChange("delivery_fee", e.target.value)}
+            className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
+          />
+        ) : (
+          <p className="text-base font-medium text-gray-600">
+            Rs. {formData.delivery_fee}
+          </p>
+        )}
+      </div>
+
 
       {/* Time Pickers */}
       <div className="flex flex-col gap-1">
