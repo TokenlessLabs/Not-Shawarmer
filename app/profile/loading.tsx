@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
+import { Roles } from "../user/lib/definitions";
 
 export default async function Loading() {
   const session = await auth();
-  const isUser = session?.user?.role === "user";
+  const isUser = session?.user?.role === Roles.User;
 
   const skeletonCount = isUser ? 5 : 4;
 
