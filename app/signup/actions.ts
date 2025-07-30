@@ -75,7 +75,7 @@ export async function signupUser(
     console.error("Signup Error:", error);
     return {
       message: "Something went wrong. Please try again later.",
-      success: false,
+      success: true,
     };
   }
 }

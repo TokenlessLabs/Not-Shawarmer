@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ConfirmModal from "../confirmation-modal";
 import { formatDateWithOffset } from "@/app/user/lib/utils";
+import toast from "react-hot-toast";
 
 type Props = {
   order: Order;
@@ -49,8 +50,13 @@ export default function OrderComponent({ order }: Props) {
     const nextIndex = (currentStatusIndex + 1) % statuses.length;
     const nextStatus = statuses[nextIndex].value;
 
-    startStatusTransition(() => {
-      updateOrderStatus(order.id, nextStatus);
+    startStatusTransition(async () => {
+      try {
+        await updateOrderStatus(order.id, nextStatus);
+        toast.success(`Order marked as ${nextStatus}`);
+      } catch (error) {
+        toast.error("Failed to update order status");
+      }
     });
   };
 
