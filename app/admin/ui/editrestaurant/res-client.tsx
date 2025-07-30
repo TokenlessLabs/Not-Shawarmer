@@ -34,13 +34,14 @@ export default function RestaurantClient({
     return () => clearTimeout(timeout);
   }, [initialData]);
 
-  const handleChange = (field: keyof Restaurant, value: string) => {
+  const handleChange = (field: keyof Restaurant, value: string | number) => {
     if (!formData) return;
     setFormData((prev) => ({
       ...prev!,
-      [field]: field === "delivery_fee" ? parseFloat(value) : value,
+      [field]: field === "delivery_fee" ? parseFloat(value as string) : value,
     }));
   };
+
 
   const handleCancel = () => {
     setFormData(initialData);

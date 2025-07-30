@@ -17,7 +17,8 @@ async function RestaurantPage() {
 
   const restaurant: Restaurant = {
     name: rawData.name,
-    address: rawData.address,
+    latitude: rawData.latitude,         // ✅ use directly
+    longitude: rawData.longitude,       // ✅ use directly
     about: rawData.about,
     startTime: rawData.operatinghoursstart,
     endTime: rawData.operatinghoursend,

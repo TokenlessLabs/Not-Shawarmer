@@ -1,32 +1,25 @@
-"use client";
-
 import React, { useState } from "react";
-import { Restaurant } from "@/app/user/lib/definitions";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import AddressModal from "@/app/user/ui/dashboard/address-modal";
+import { Restaurant } from "@/app/user/lib/definitions";
 
-export default function RestaurantForm({
-  formData,
-  onChange,
-  isEditing,
-}: {
+type Props = {
   formData: Restaurant;
-  onChange: (field: keyof Restaurant, value: string) => void;
+  onChange: (field: keyof Restaurant, value: string | number) => void;
   isEditing: boolean;
-}) {
-  const editableFields: {
-    label: string;
-    key: keyof Restaurant;
-    type?: string;
-  }[] = [
-      { label: "About Us", key: "about" },
-      { label: "Contact Number", key: "contact", type: "tel" },
-    ];
+};
+
+export default function RestaurantForm({ formData, onChange, isEditing }: Props) {
+  const editableFields = [
+    { label: "About Us", key: "about" },
+    { label: "Contact Number", key: "contact", type: "tel" },
+  ];
+
   const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="flex flex-col gap-7">
-      {/* Restaurant Name (Always Visible, Never Editable) */}
+      {/* Restaurant Name */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Restaurant Name
@@ -34,7 +27,7 @@ export default function RestaurantForm({
         <p className="text-base font-medium text-gray-600">{formData.name}</p>
       </div>
 
-      {/* Address (Read-only, with Edit button in edit mode) */}
+      {/* Address */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Address
@@ -64,26 +57,27 @@ export default function RestaurantForm({
           {isEditing ? (
             key === "about" ? (
               <textarea
-                value={formData[key]}
-                onChange={(e) => onChange(key, e.target.value)}
+                value={formData[key as keyof Restaurant] as string}
+                onChange={(e) => onChange(key as keyof Restaurant, e.target.value)}
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             ) : (
               <input
                 type={type || "text"}
-                value={formData[key]}
-                onChange={(e) => onChange(key, e.target.value)}
+                value={formData[key as keyof Restaurant] as string}
+                onChange={(e) => onChange(key as keyof Restaurant, e.target.value)}
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             )
           ) : (
             <p className="text-base font-medium text-gray-600 whitespace-pre-line">
-              {formData[key]}
+              {formData[key as keyof Restaurant]}
             </p>
           )}
         </div>
       ))}
 
+      {/* Delivery Fee */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Delivery Fee (Rs)
@@ -92,7 +86,7 @@ export default function RestaurantForm({
           <input
             type="number"
             value={formData.delivery_fee}
-            onChange={(e) => onChange("delivery_fee", e.target.value)}
+            onChange={(e) => onChange("delivery_fee", parseFloat(e.target.value))}
             className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
           />
         ) : (
@@ -102,8 +96,7 @@ export default function RestaurantForm({
         )}
       </div>
 
-
-      {/* Time Pickers */}
+      {/* Operating Hours */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Operating Hours
@@ -138,17 +131,21 @@ export default function RestaurantForm({
             {formData.startTime} - {formData.endTime}
           </p>
         )}
-        {showModal && (
-          <AddressModal
-            savedAddress={formData.address}
-            onClose={() => setShowModal(false)}
-            onSave={(newAddress) => {
-              onChange("address", newAddress);
-              setShowModal(false);
-            }}
-          />
-        )}
       </div>
+
+      {/* Address Modal */}
+      {showModal && (
+        <AddressModal
+          savedAddress={formData.address}
+          onClose={() => setShowModal(false)}
+          onSave={(newAddress: string, coords: { latitude: number; longitude: number }) => {
+            onChange("address", newAddress);
+            onChange("latitude", coords.latitude);
+            onChange("longitude", coords.longitude);
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }
