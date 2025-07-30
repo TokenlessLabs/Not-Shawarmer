@@ -5,7 +5,7 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth, signOut } from "@/auth";
-import { ErrorState,Coordinates } from "./definitions";
+import { ErrorState } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -309,9 +309,14 @@ type CartItem = {
   price: number;
 };
 
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 export async function placeOrder(
   cartItems: CartItem[],
-  address: string,
+  coords: Coordinates | null,
   instructions?: string
 ) {
   try {
@@ -319,20 +324,23 @@ export async function placeOrder(
       throw new Error("Cart is empty");
     }
 
-      const session = await auth();
-
+    const session = await auth();
     const userId = session?.user?.id;
 
     if (!userId)
       return {
-        success: false
+        success: false,
       };
 
+    if (!coords) {
+      throw new Error("Coordinates are missing");
+    }
+
+    const { latitude, longitude } = coords;
+
     const orderResult = await sql`
-      INSERT INTO Orders (userid, instructions, address)
-      VALUES (${userId},${
-      instructions || null
-    },${address})
+      INSERT INTO Orders (userid, instructions, latitude, longitude)
+      VALUES (${userId}, ${instructions || null}, ${latitude}, ${longitude})
       RETURNING id;
     `;
 
@@ -362,14 +370,15 @@ export async function placeOrder(
 
     console.log("✅ Order placed successfully with ID:", orderId);
     return { success: true, orderId };
-  }catch (error: unknown) {
-  console.error("❌ Error placing order:", error instanceof Error ? error.message : error);
-  return {
-    success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
-  };
+
+  } catch (error: unknown) {
+    console.error("❌ Error placing order:", error instanceof Error ? error.message : error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 }
-};
 
 export async function deleteUserAccountAndLogout() {
     const session = await auth();
