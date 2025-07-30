@@ -194,10 +194,10 @@ export async function changePassword(
 
 export async function updateOrderStatus(
   orderId: number,
-  newStatus: string
+  newStatus: number
 ): Promise<ErrorState> {
   try {
-    if (newStatus.toLowerCase() === "delivered") {
+    if (newStatus === 2) {
       await sql`
         UPDATE Orders
         SET status = ${newStatus},
