@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { User } from "../../lib/definitions";
+import React, { useState, useEffect } from "react";
+import { User, Roles } from "../../lib/definitions";
 import AddressModal from "../dashboard/address-modal";
 import Link from "next/link";
 import { updateUserAddress } from "../../lib/actions";
+import { reverseGeocode } from "../../lib/utils";
+import Loading from "@/app/profile/loading";
 
 export default function ProfileForm({
   formData,
@@ -22,6 +24,25 @@ export default function ProfileForm({
     { label: "Email", key: "email", type: "email" },
     { label: "Phone", key: "contact", type: "tel" },
   ];
+
+  const [address, setAddress] = useState("");
+  const [loadingAddress, setLoadingAddress] = useState(true);
+
+  useEffect(() => {
+    const getAddress = async () => {
+      setLoadingAddress(true);
+      if (formData.latitude && formData.longitude) {
+        const addr = await reverseGeocode(
+          formData.latitude,
+          formData.longitude
+        );
+        setAddress(addr);
+      }
+      setLoadingAddress(false);
+    };
+
+    getAddress();
+  }, [formData.latitude, formData.longitude]);
 
   return (
     <>
@@ -45,14 +66,18 @@ export default function ProfileForm({
       ))}
 
       {/* Address Field */}
-      {formData.role === "User" && (
+      {formData.role === Roles.User && (
         <div className="flex flex-col mb-4">
           <label className="text-sm font-medium text-gray-600 mb-1">
             Address
           </label>
           {isEditing ? (
             <>
-              <p className="text-sm mb-1">{formData.address}</p>
+              {loadingAddress ? (
+                <div className="w-2/3 h-4 bg-theme-blue rounded animate-pulse mb-1" />
+              ) : (
+                <p className="text-sm mb-1">{address}</p>
+              )}
               <button
                 type="button"
                 onClick={() => setShowAddressModal(true)}
@@ -61,8 +86,10 @@ export default function ProfileForm({
                 Edit Address
               </button>
             </>
+          ) : loadingAddress ? (
+            <div className="w-2/3 h-5 bg-theme-blue rounded animate-pulse" />
           ) : (
-            <p className="text-lg font-medium">{formData.address}</p>
+            <p className="text-lg font-medium">{address}</p>
           )}
         </div>
       )}
@@ -94,13 +121,21 @@ export default function ProfileForm({
       {/* Modals */}
       {showAddressModal && (
         <AddressModal
-          savedAddress={formData.address}
+          savedAddress={{
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          }}
           onClose={() => setShowAddressModal(false)}
           onSave={(newAddress) => {
             setShowAddressModal(false);
 
-            if (newAddress !== formData.address) {
-              formData.address = newAddress;
+            if (
+              newAddress &&
+              (newAddress?.latitude !== formData.latitude ||
+                newAddress.longitude !== formData.longitude)
+            ) {
+              formData.longitude = newAddress?.longitude;
+              formData.latitude = newAddress.latitude;
               updateUserAddress(newAddress);
             }
           }}

@@ -11,7 +11,9 @@ export default function Card({ item, onClick }: CardProps) {
   const imageUrl = item.image ? item.image : "/images/placeholder.jpg";
   return (
     <div
-      className="max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
+      className={`max-w-xs rounded-2xl overflow-hidden shadow-lg bg-white transition hover:shadow-xl hover:scale-105 ${
+        !item.isavailable ? "opacity-50 grayscale" : ""
+      }`}
       onClick={onClick}
     >
       <img

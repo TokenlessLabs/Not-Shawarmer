@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { updateUser, deleteUserAccountAndLogout } from "../../lib/actions";
-import { User, ErrorState } from "../../lib/definitions";
+import { User, ErrorState, Roles } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 import ConfirmModal from "@/app/admin/ui/confirmation-modal";
 
@@ -113,7 +113,7 @@ export default function ProfileClient({ user }: { user: User }) {
             >
               Edit
             </button>
-            {user.role === "User" && (
+            {user.role === Roles.User && (
               <button
                 type="button"
                 onClick={() => setShowModal(true)}

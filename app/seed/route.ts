@@ -233,7 +233,7 @@ INSERT INTO Orders (userId, status, instructions, latitude, longitude, delivered
 VALUES 
   (1, 0, 'Extra cheese please', 31.5212, 74.3571, NULL),
   (1, 2, 'Leave at the gate', 31.5225, 74.3599, NOW()),
-  (2, 1, 'Be quick!', 31.5190, 74.3600, NULL);
+  (1, 1, 'Be quick!', 31.5190, 74.3600, NULL);
 `;
 }
 

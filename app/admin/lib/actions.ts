@@ -19,7 +19,7 @@ const schema = z.object({
   price: z.string().refine((val) => !isNaN(parseFloat(val)), {
     message: "Invalid price format.",
   }),
-  status: z.enum(["Available", "Unavailable"]),
+  isavailable: z.string().transform((val) => val === "true"),
   description: z.string().min(1),
   category: z.string().min(1),
   removeImage: z.string().optional(),
@@ -48,8 +48,7 @@ export async function updateMenuItem(
     };
   }
 
-  const { id, name, price, status, description, category, removeImage } =
-    parsed.data;
+const { id, name, price, isavailable, description, category, removeImage } = parsed.data;
 
   const itemId = Number(id);
   const imageFile = formData.get("image") as File | null;
@@ -81,7 +80,7 @@ export async function updateMenuItem(
 
     fields.push(`name = $${values.push(name)}`);
     fields.push(`price = $${values.push(parseFloat(price))}`);
-    fields.push(`status = $${values.push(status)}`);
+    fields.push(`isavailable = $${values.push(isavailable)}`);
     fields.push(`description = $${values.push(description)}`);
     if (imageUrl) {
       fields.push(`image = $${values.push(imageUrl)}`);

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import AddressModal from "../../ui/dashboard/address-modal";
+import AddressModal, { Coordinates } from "../../ui/dashboard/address-modal";
 import ConfirmModal from "@/app/admin/ui/confirmation-modal";
 import { placeOrder, updateUserAddress } from "../../lib/actions";
 import { useRouter } from "next/navigation";
+import { reverseGeocode } from "../../lib/utils"; // for converting coordinates to string
 
 type CartItem = {
   name: string;
@@ -15,9 +16,10 @@ type CartItem = {
 const CartPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState<
-    string | null | "Loading..."
-  >("Loading...");
+
+  const [savedAddress, setSavedAddress] = useState<Coordinates>(null); // ✅ now coordinates
+  const [savedAddressText, setSavedAddressText] = useState("Loading..."); // ✅ separate display string
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isPending, startTransition] = useTransition();
   const [instructions, setInstructions] = useState("");
@@ -25,7 +27,6 @@ const CartPage = () => {
   const router = useRouter();
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
 
-  // Fetch cart and address
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -35,11 +36,20 @@ const CartPage = () => {
     const fetchAddress = async () => {
       try {
         const res = await fetch("/api/address");
-        const data = (await res.ok) ? await res.json() : {};
-        setSavedAddress(data.address ?? null);
+        const data = res.ok ? await res.json() : {};
+        const coords: Coordinates = data.address ?? null;
+        setSavedAddress(coords);
+
+        if (coords) {
+          const text = await reverseGeocode(coords.latitude, coords.longitude);
+          setSavedAddressText(text);
+        } else {
+          setSavedAddressText("No address found");
+        }
       } catch (error) {
         console.error("Failed to fetch address", error);
         setSavedAddress(null);
+        setSavedAddressText("Error loading address");
       }
     };
 
@@ -74,7 +84,7 @@ const CartPage = () => {
 
       const result = await placeOrder(
         parsedCart,
-        savedAddress as string,
+        savedAddressText,
         instructions
       );
 
@@ -108,20 +118,25 @@ const CartPage = () => {
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const isAddressInvalid = !savedAddress || savedAddress === "Loading...";
+  const isAddressInvalid = !savedAddress;
 
   return (
     <>
       {/* Address Modal */}
       {openModal && (
         <AddressModal
-          savedAddress={savedAddress ?? undefined} // convert null to undefined
+          savedAddress={savedAddress ?? undefined}
           onClose={() => setOpenModal(false)}
-          onSave={(newAddress) => {
+          onSave={async (newAddress) => {
             setOpenModal(false);
-            if (newAddress !== savedAddress) {
-              setSavedAddress(newAddress);
-              updateUserAddress(newAddress);
+            setSavedAddress(newAddress);
+            if (newAddress) {
+              const text = await reverseGeocode(
+                newAddress.latitude,
+                newAddress.longitude
+              );
+              setSavedAddressText(text);
+              updateUserAddress(newAddress); // ✅ store as coordinates
             }
           }}
         />
@@ -200,7 +215,7 @@ const CartPage = () => {
                 </button>
               </div>
               <p className="text-sm text-theme-dark-blue/70">
-                {savedAddress ?? "Please enter an address..."}
+                {savedAddressText ?? "Please enter an address..."}
               </p>
             </div>
 
@@ -256,11 +271,10 @@ const CartPage = () => {
                     }
                   }}
                   className={`w-full text-center py-3 rounded-lg font-semibold transition
-    ${
-      noItemsWarning
-        ? "animate-shake bg-red-600/80 text-white"
-        : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
-    }
+    ${noItemsWarning
+                      ? "animate-shake bg-red-600/80 text-white"
+                      : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
+                    }
   `}
                 >
                   {isPending ? "Placing Order..." : "Place Order"}

@@ -39,8 +39,8 @@ export default function DashboardClient({
       const matchesSearch = item.name.toLowerCase().includes(value);
       const matchesAvailability =
         availabilityFilter === "all" ||
-        (availabilityFilter === "available" && item.status === "Available") ||
-        (availabilityFilter === "unavailable" && item.status === "Unavailable");
+        (availabilityFilter === "available" && item.isavailable) ||
+        (availabilityFilter === "unavailable" && !item.isavailable);
       return matchesSearch && matchesAvailability;
     });
     setFilteredItems(filtered);

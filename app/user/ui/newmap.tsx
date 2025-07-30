@@ -7,12 +7,11 @@ import {
   Marker,
   Polyline,
   Popup,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L, { LatLngBounds, LatLngExpression } from "leaflet";
-import { toTuple } from "../lib/utils";
+import L, { LatLngBounds } from "leaflet";
 import polyline from "@mapbox/polyline";
-import { useMap } from "react-leaflet";
 
 // Fix default Leaflet icon paths for Next.js
 delete (
@@ -24,11 +23,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "/leaflet/marker-shadow.png",
 });
 
+export type Coordinates = { latitude: number; longitude: number } | null;
+
+// 🔁 Helper: Convert Coordinates to Leaflet tuple
+function toLatLng(coord: Coordinates): [number, number] {
+  return [coord!.latitude, coord!.longitude];
+}
+
 type Props = {
-  location: LatLngExpression | null;
-  onLocationChange: (loc: LatLngExpression) => void;
+  location: Coordinates;
+  onLocationChange: (loc: Coordinates) => void;
   editable?: boolean;
-  userLocation?: LatLngExpression | null;
+  userLocation?: Coordinates;
   showPath?: boolean;
 };
 
@@ -38,10 +44,8 @@ export default function Map({
   userLocation = null,
   showPath = false,
 }: Props) {
-  const [currentLocation, setCurrentLocation] =
-    useState<LatLngExpression | null>(location);
-
-  const [routePoints, setRoutePoints] = useState<LatLngExpression[]>([]);
+  const [currentLocation, setCurrentLocation] = useState<Coordinates>(location);
+  const [routePoints, setRoutePoints] = useState<Coordinates[]>([]);
 
   useEffect(() => {
     if (!showPath || !userLocation || !currentLocation) return;
@@ -49,9 +53,9 @@ export default function Map({
     const fetchRoute = async () => {
       try {
         const res = await fetch(
-          `https://graphhopper.com/api/1/route?point=${toTuple(
+          `https://graphhopper.com/api/1/route?point=${toLatLng(
             currentLocation
-          ).join(",")}&point=${toTuple(userLocation).join(
+          ).join(",")}&point=${toLatLng(userLocation).join(
             ","
           )}&vehicle=car&locale=en&calc_points=true&points_encoded=true&key=bbc9a58c-f338-4623-afcf-f26301ab350a`
         );
@@ -59,11 +63,11 @@ export default function Map({
         const data = await res.json();
 
         if (data.paths && data.paths.length > 0) {
-          const decoded = polyline.decode(data.paths[0].points); // returns [lat, lng]
-          const converted = decoded.map(
-            (p: [number, number]) => [p[0], p[1]] as LatLngExpression
-          );
-
+          const decoded = polyline.decode(data.paths[0].points); // [lat, lng]
+          const converted = decoded.map(([lat, lng]) => ({
+            latitude: lat,
+            longitude: lng,
+          }));
           setRoutePoints(converted);
         }
       } catch (err) {
@@ -77,8 +81,8 @@ export default function Map({
   return currentLocation ? (
     <div className="relative w-full h-full">
       <MapContainer
-        key={toTuple(currentLocation).join("-")}
-        center={currentLocation || [0, 0]}
+        key={toLatLng(currentLocation).join("-")}
+        center={toLatLng(currentLocation)}
         zoom={13}
         scrollWheelZoom
         className="h-full w-full"
@@ -93,29 +97,26 @@ export default function Map({
         )}
 
         {/* Delivery Marker */}
-        <Marker position={currentLocation}>
+        <Marker position={toLatLng(currentLocation)}>
           <Popup>Delivery Location</Popup>
         </Marker>
 
         {/* User Address Marker */}
         {userLocation && (
-          <Marker position={userLocation}>
+          <Marker position={toLatLng(userLocation)}>
             <Popup>Your Address</Popup>
           </Marker>
         )}
 
         {/* Route Line */}
-        {userLocation &&
-          currentLocation &&
-          showPath &&
-          routePoints.length > 0 && (
-            <Polyline
-              positions={routePoints}
-              color="#058ccd"
-              weight={4}
-              dashArray="4"
-            />
-          )}
+        {showPath && routePoints.length > 0 && (
+          <Polyline
+            positions={routePoints.map(toLatLng)}
+            color="#058ccd"
+            weight={4}
+            dashArray="4"
+          />
+        )}
       </MapContainer>
     </div>
   ) : (
@@ -125,15 +126,16 @@ export default function Map({
   );
 }
 
-function FitBoundsHandler({ points }: { points: LatLngExpression[] }) {
+function FitBoundsHandler({ points }: { points: Coordinates[] }) {
   const map = useMap();
 
   useEffect(() => {
-    if (points.length >= 2) {
-      const bounds = new LatLngBounds(points);
+    const latlngs = points.map(toLatLng);
+    if (latlngs.length >= 2) {
+      const bounds = new LatLngBounds(latlngs);
       map.fitBounds(bounds, { padding: [50, 50] });
-    } else if (points.length === 1) {
-      map.setView(points[0], 13);
+    } else if (latlngs.length === 1) {
+      map.setView(latlngs[0], 13);
     }
   }, [points, map]);
 

@@ -21,7 +21,9 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
   const [name, setName] = useState(item.name);
   const [description, setDescription] = useState(item.description ?? "");
   const [price, setPrice] = useState(Number(item.price).toFixed(2));
-  const [status, setStatus] = useState(item.status ?? "Available");
+  const [isavailable, setIsAvailable] = useState<boolean>(
+    item.isavailable ?? true
+  );
   const [category, setCategory] = useState(item.category);
   const [showConfirm, setShowConfirm] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -88,7 +90,7 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
     formData.append("name", name);
     formData.append("description", description);
     formData.append("price", price);
-    formData.append("status", status);
+    formData.append("isavailable", String(isavailable));
     formData.append("category", category);
     if (imageFile !== null) {
       formData.append("image", imageFile);
@@ -176,7 +178,7 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
                   name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full mt-1 border rounded px-3 py-2 h-11 text-gray-800"
+                  className="w-full mt-1 border rounded px-3 py-2 h-17 text-gray-800"
                   rows={3}
                 />
               </div>
@@ -194,19 +196,6 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
               </div>
 
               <div>
-                <label className="text-sm text-gray-500">Status</label>
-                <select
-                  name="status"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full mt-1 border rounded px-3 py-2 text-gray-800"
-                >
-                  <option value="Available">Available</option>
-                  <option value="Unavailable">Unavailable</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="text-sm text-gray-500">Category</label>
                 <select
                   name="category"
@@ -220,6 +209,20 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="flex items-center gap-2 mt-4">
+                <input
+                  type="checkbox"
+                  id="isavailable"
+                  name="isavailable"
+                  checked={isavailable}
+                  onChange={(e) => setIsAvailable(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="isavailable" className="text-sm text-gray-700">
+                  {isavailable ? "Available" : "Unavailable"}
+                </label>
               </div>
 
               {state?.errors && state?.errors?.length > 0 && (
