@@ -1,10 +1,15 @@
 import { PhoneIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getRestaurantDetails } from "../lib/data";
+import { reverseGeocode } from "../lib/utils";
 
 export default async function Footer() {
   const restDetails = await getRestaurantDetails();
-
   if (!restDetails) return null;
+
+  const address =
+    restDetails.latitude && restDetails.longitude
+      ? await reverseGeocode(restDetails.latitude, restDetails.longitude)
+      : "Unknown location";
 
   return (
     <footer
@@ -32,7 +37,7 @@ export default async function Footer() {
         <p className="flex items-center justify-end gap-1 max-w-[200px] overflow-hidden whitespace-nowrap text-ellipsis text-left">
           <MapPinIcon className="w-4 h-4 shrink-0" />
           <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-            {restDetails.address}
+            {address}
           </span>
         </p>
         <p className="flex items-center justify-end gap-1">

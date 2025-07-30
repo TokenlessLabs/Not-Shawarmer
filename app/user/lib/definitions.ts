@@ -22,7 +22,7 @@ export const OrderStatusNames: Record<OrderStatuses, string> = {
   [OrderStatuses.Cancelled]: 'Cancelled',
 };
 
-
+export type Coordinates = { latitude: number; longitude: number } | null;
 
 export type User = {
   id: number;

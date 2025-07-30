@@ -2,15 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { LatLngExpression } from "leaflet";
+import { reverseGeocode } from "../../lib/utils";
 
 const DynamicMap = dynamic(() => import("../map"), { ssr: false });
 
+export type Coordinates = { latitude: number; longitude: number } | null;
+
 type Props = {
-  savedAddress?: string;
+  savedAddress?: Coordinates;
   onClose: () => void;
-  onSave: (address: string, location: LatLngExpression | null) => void;
+  onSave: (location: Coordinates) => void;
 };
+
 type Suggestion = {
   display_name: string;
   lat: string;
@@ -19,64 +22,26 @@ type Suggestion = {
 
 const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
   const [editing, setEditing] = useState(false);
-  const [address, setAddress] = useState(savedAddress || "");
-  const [location, setLocation] = useState<LatLngExpression | null>(null);
-  const [humanLocation, setHumanLocation] = useState(savedAddress || "");
+  const [location, setLocation] = useState<Coordinates>(savedAddress || null);
+  const [humanLocation, setHumanLocation] = useState("Loading...");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  // Load initial savedAddress and geocode it into coordinates
+  // Reverse geocode on initial load
   useEffect(() => {
-    const loadSavedAddress = async () => {
-      if (savedAddress && !location) {
-        setHumanLocation(savedAddress);
-        setAddress(savedAddress);
-
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              savedAddress
-            )}&limit=1&countrycodes=pk&accept-language=en`
-          );
-          const data = await res.json();
-          if (data.length > 0) {
-            setLocation([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-          }
-        } catch (err) {
-          console.error("Error geocoding saved address", err);
-        }
-      }
-    };
-
-    loadSavedAddress();
-  }, [savedAddress, location]);
-
-  // Reverse geocode when coordinates change
-  useEffect(() => {
-    const fetchAddress = async () => {
-      if (!location) return;
-      const [lat, lng] = Array.isArray(location)
-        ? location
-        : [location.lat, location.lng];
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
-        );
-        const data = await res.json();
-        if (data?.display_name) {
-          setHumanLocation(data.display_name);
-          setAddress(data.display_name);
-        } else {
-          setHumanLocation("Unable to retrieve address");
-        }
-      } catch (err) {
-        setHumanLocation("Error fetching address");
-        console.error(err);
-      }
-    };
-
-    if (editing) fetchAddress();
+    if (!location) return;
+    reverseGeocode(location.latitude, location.longitude).then(
+      setHumanLocation
+    );
   }, [location]);
+
+  // Reverse geocode on location change while editing
+  useEffect(() => {
+    if (!editing || !location) return;
+    reverseGeocode(location.latitude, location.longitude).then(
+      setHumanLocation
+    );
+  }, [location, editing]);
 
   // Autocomplete suggestions
   useEffect(() => {
@@ -114,12 +79,14 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
             editable={editing}
             location={location}
             onLocationChange={(loc) => {
-              if (editing) setLocation(loc);
+              if (editing) {
+                setLocation(loc);
+              }
             }}
           />
         </div>
 
-     
+        {/* Address Input */}
         <div className="px-4 pt-3 text-sm text-gray-600">
           <div className="relative">
             {editing ? (
@@ -127,32 +94,33 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
                 <input
                   type="text"
                   value={humanLocation}
-                  onChange={(e) => {
-                    setHumanLocation(e.target.value);
-                  }}
+                  onChange={(e) => setHumanLocation(e.target.value)}
                   placeholder="Search for a location..."
                   className="border rounded p-2 text-sm z-10 relative"
                 />
-
                 {dropdownVisible && suggestions.length > 0 && (
                   <ul className="mt-1 bg-white border border-gray-300 rounded shadow text-sm max-h-48 overflow-y-auto">
-                    {suggestions.map((item, index) => (
-                      <li
-                        key={index}
-                        onClick={() => {
-                          setHumanLocation(item.display_name);
-                          setAddress(item.display_name);
-                          setLocation([
-                            parseFloat(item.lat),
-                            parseFloat(item.lon),
-                          ]);
-                          setDropdownVisible(false);
-                        }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {item.display_name}
-                      </li>
-                    ))}
+                    {suggestions.map((item, index) => {
+                      const lat = parseFloat(item.lat);
+                      const lon = parseFloat(item.lon);
+                      return (
+                        <li
+                          key={index}
+                          onClick={() => {
+                            const newLocation = {
+                              latitude: lat,
+                              longitude: lon,
+                            };
+                            setLocation(newLocation);
+                            setHumanLocation(item.display_name);
+                            setDropdownVisible(false);
+                          }}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          {item.display_name}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
@@ -165,7 +133,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Action Buttons */}
         <div className="p-4 space-y-4 flex flex-col">
           <div className="flex justify-between">
             <button
@@ -177,14 +145,14 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
 
             <button
               onClick={() => {
-                if (editing) {
-                  onSave(address, location);
+                if (editing && location) {
+                  onSave(location);
                 }
                 setEditing(!editing);
               }}
               className="px-4 py-2 text-sm rounded bg-theme-blue text-white hover:bg-theme-bluehighlighted transition"
             >
-              {editing ? "Set this Address" : "Edit Address"}
+              {editing ? "Set this Location" : "Edit Location"}
             </button>
           </div>
         </div>

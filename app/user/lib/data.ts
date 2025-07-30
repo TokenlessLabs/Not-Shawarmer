@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { User, Order, MenuItem } from "./definitions";
+import { User, Order, MenuItem, Coordinates } from "./definitions";
 import { auth } from "@/auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
@@ -12,7 +12,7 @@ export async function getUserData(): Promise<User | null> {
   if (!userId) return null;
 
   const result = await sql<User[]>`
-    SELECT id, username, email, contact, role, address
+    SELECT id, username, email, contact, role, longitude, latitude
     FROM Users
     WHERE id = ${userId}
     LIMIT 1;
@@ -34,9 +34,11 @@ export async function getPastOrders(): Promise<Order[] | null> {
       o.userId AS userId,
       o.createdAt,
       o.deliveredAt,
+      o.updatedAt,
       o.status,
       o.instructions,
-      o.address,
+      o.latitude,
+      o.longitude,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -53,7 +55,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
     LEFT JOIN OrderDetails od ON o.id = od.orderId
     LEFT JOIN Items i ON i.id = od.itemId
     LEFT JOIN RestDetails r ON r.id = 1 -- static for now
-    WHERE o.userId = ${userId} AND o.status IN ('Delivered', 'Cancelled')
+    WHERE o.userId = ${userId} AND o.status >= 2
     GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
@@ -63,9 +65,11 @@ export async function getPastOrders(): Promise<Order[] | null> {
     userId: row.userId,
     createdat: row.createdat,
     deliveredat: row.deliveredat,
+    updatedat: row.updatedat,
     status: row.status,
     instructions: row.instructions,
-    address: row.address,
+    longitude: row.longitude,
+    latitude: row.latitude,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -74,7 +78,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
 }
 
 export async function getCurrentOrders(): Promise<Order[] | null> {
-     const session = await auth();
+  const session = await auth();
 
   const userId = session?.user?.id;
 
@@ -86,9 +90,11 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
       o.userId AS userId,
       o.createdAt,
       o.deliveredAt,
+      o.updatedAt,
       o.status,
       o.instructions,
-      o.address,
+      o.latitude,
+      o.longitude,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -104,8 +110,8 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
     FROM Orders o
     LEFT JOIN OrderDetails od ON o.id = od.orderId
     LEFT JOIN Items i ON i.id = od.itemId
-    LEFT JOIN RestDetails r ON r.id = 1 -- temporary static join
-    WHERE o.userId = ${userId} AND o.status IN ('Cooking', 'Dispatched')
+    LEFT JOIN RestDetails r ON r.id = 1 -- static for now
+    WHERE o.userId = ${userId} AND o.status <= 1
     GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
@@ -115,11 +121,13 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
     userId: row.userId,
     createdat: row.createdat,
     deliveredat: row.deliveredat,
+    updatedat: row.updatedat,
     status: row.status,
     instructions: row.instructions,
-    address: row.address,
-    items: row.items ?? [],
+    longitude: row.longitude,
+    latitude: row.latitude,
     delivery_fee: parseFloat(row.delivery_fee),
+    items: row.items ?? [],
   }));
 
   return orders;
@@ -132,9 +140,11 @@ export async function getAdminPastOrders(): Promise<Order[]> {
       o.userId AS userId,
       o.createdAt,
       o.deliveredAt,
+      o.updatedAt,
       o.status,
       o.instructions,
-      o.address,
+      o.latitude,
+      o.longitude,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -150,8 +160,8 @@ export async function getAdminPastOrders(): Promise<Order[]> {
     FROM Orders o
     LEFT JOIN OrderDetails od ON o.id = od.orderId
     LEFT JOIN Items i ON i.id = od.itemId
-    LEFT JOIN RestDetails r ON r.id = 1 -- default restaurant
-    WHERE o.status IN ('Delivered', 'Cancelled')
+    LEFT JOIN RestDetails r ON r.id = 1 -- static for now
+    WHERE o.status >= 2
     GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
@@ -161,9 +171,11 @@ export async function getAdminPastOrders(): Promise<Order[]> {
     userId: row.userId,
     createdat: row.createdat,
     deliveredat: row.deliveredat,
+    updatedat: row.updatedat,
     status: row.status,
     instructions: row.instructions,
-    address: row.address,
+    longitude: row.longitude,
+    latitude: row.latitude,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -178,9 +190,11 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
       o.userId AS userId,
       o.createdAt,
       o.deliveredAt,
+      o.updatedAt,
       o.status,
       o.instructions,
-      o.address,
+      o.latitude,
+      o.longitude,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -196,8 +210,8 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
     FROM Orders o
     LEFT JOIN OrderDetails od ON o.id = od.orderId
     LEFT JOIN Items i ON i.id = od.itemId
-    LEFT JOIN RestDetails r ON r.id = 1 -- default restaurant
-    WHERE o.status IN ('Cooking', 'Dispatched')
+    LEFT JOIN RestDetails r ON r.id = 1 -- static for now
+    WHERE o.status <= 1
     GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
@@ -207,9 +221,11 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
     userId: row.userId,
     createdat: row.createdat,
     deliveredat: row.deliveredat,
+    updatedat: row.updatedat,
     status: row.status,
     instructions: row.instructions,
-    address: row.address,
+    longitude: row.longitude,
+    latitude: row.latitude,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -219,7 +235,7 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
 
 export async function getRestaurantDetails() {
   const result = await sql`
-    SELECT name, address, about, contact, operatingHoursStart, operatingHoursEnd, delivery_fee
+    SELECT name, latitude, longitude, about, contact, operatingHoursStart, operatingHoursEnd, delivery_fee
     FROM RestDetails
     WHERE id = 1
     LIMIT 1;
@@ -242,7 +258,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     FROM Items
     LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
     LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
-    WHERE status = ${"Available"}
+    WHERE isAvailable = ${true}
     ORDER BY id ASC;
   `;
   return result;
@@ -255,9 +271,11 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
       o."id" AS userId,
       o."createdat" AS createdat,
       o."deliveredat" AS deliveredat,
+      o."updatedat" AS updatedat,
       o.status,
       o.instructions,
-      o.address,
+      o.latitude,
+      o.longitude,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -287,26 +305,37 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
     userId: order.userId,
     createdat: order.createdat,
     deliveredat: order.deliveredat,
+    updatedat: order.updatedat,
     status: order.status,
     instructions: order.instructions,
-    address: order.address,
+    latitude: order.latitude,
+    longitude: order.longitude,
     delivery_fee: parseFloat(order.delivery_fee),
     items: order.items ?? [],
   };
 }
 
-export async function getUserAddress(): Promise<string | null> {
+export async function getUserAddress(): Promise<Coordinates> {
   const session = await auth();
-
   const userId = session?.user?.id;
 
   if (!userId) return null;
 
   const result = await sql`
-    SELECT address
+    SELECT CAST(latitude AS FLOAT) AS latitude,
+           CAST(longitude AS FLOAT) AS longitude
     FROM Users
     WHERE id = ${userId}
     LIMIT 1;
   `;
-  return result.length > 0 ? result[0].address : null;
+
+  if (result.length > 0) {
+    const { latitude, longitude } = result[0];
+    return {
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+    };
+  }
+
+  return null;
 }

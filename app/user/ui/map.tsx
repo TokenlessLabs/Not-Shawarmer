@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
-  Polyline,
   Popup,
+  useMap,
   useMapEvents,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L, { LatLngExpression, LeafletMouseEvent } from "leaflet";
-import { toTuple } from "../lib/utils";
+import L from "leaflet";
+import { Coordinates } from "./dashboard/address-modal";
 
-// Fix default Leaflet icon paths for Next.js
+// Fix Leaflet default icon paths for Next.js
 delete (
   L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: () => string }
 )._getIconUrl;
@@ -24,11 +24,10 @@ L.Icon.Default.mergeOptions({
 });
 
 type Props = {
-  location: LatLngExpression | null;
-  onLocationChange: (loc: LatLngExpression) => void;
+  location: Coordinates;
+  onLocationChange: (coords: Coordinates) => void;
   editable?: boolean;
-  userLocation?: LatLngExpression | null;
-  showPath?: boolean;
+  userLocation?: Coordinates;
 };
 
 export default function Map({
@@ -36,53 +35,39 @@ export default function Map({
   onLocationChange,
   editable = true,
   userLocation = null,
-  showPath = false,
 }: Props) {
-  const [currentLocation, setCurrentLocation] =
-    useState<LatLngExpression | null>(location);
+  const [currentLocation, setCurrentLocation] = useState<Coordinates>(location);
+  const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    if (!location) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const userLoc: LatLngExpression = [
-            pos.coords.latitude,
-            pos.coords.longitude,
-          ];
-          setCurrentLocation(userLoc);
-          onLocationChange(userLoc);
-        },
-        () => {
-          const fallbackLoc: LatLngExpression = [31.5204, 74.3587]; // Lahore
-          setCurrentLocation(fallbackLoc);
-          onLocationChange(fallbackLoc);
-        }
-      );
-    } else {
+    if (location) {
       setCurrentLocation(location);
     }
-  }, [location, onLocationChange]);
+  }, [location]);
+
+  const handleMyLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        };
+        setCurrentLocation(coords);
+        mapRef.current?.setView([coords.latitude, coords.longitude], 16);
+        onLocationChange(coords);
+      },
+      () => {
+        alert("Unable to get your current location.");
+      }
+    );
+  };
 
   return currentLocation ? (
     <div className="relative w-full h-full">
-      {/* 📍 Use My Location button */}
-      {editable && location && (
+      {/* 📍 Use My Location Button */}
+      {editable && (
         <button
-          onClick={() => {
-            navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                const userLoc: LatLngExpression = [
-                  pos.coords.latitude,
-                  pos.coords.longitude,
-                ];
-                setCurrentLocation(userLoc);
-                onLocationChange(userLoc);
-              },
-              () => {
-                alert("Unable to get your current location.");
-              }
-            );
-          }}
+          onClick={handleMyLocation}
           className="absolute top-2 right-2 z-[1000] bg-white p-2 rounded shadow hover:bg-gray-100 transition"
           title="Use my current location"
         >
@@ -91,47 +76,59 @@ export default function Map({
       )}
 
       <MapContainer
-        key={toTuple(currentLocation).join("-")}
-        center={currentLocation}
-        zoom={13}
-        scrollWheelZoom
+        center={[currentLocation.latitude, currentLocation.longitude]}
+        zoom={16}
         className="h-full w-full"
+        zoomControl={editable}
+        scrollWheelZoom={false}
       >
+        <FixZoomCenter />
+
+        <MapInitializer
+          mapRef={mapRef}
+          center={currentLocation}
+          editable={editable}
+        />
+
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"
         />
 
-        {editable && (
-          <ClickToSetMarker
-            setLocation={(loc) => {
-              setCurrentLocation(loc);
-              onLocationChange(loc);
-            }}
-          />
+        {!editable && (
+          <Marker
+            position={[currentLocation.latitude, currentLocation.longitude]}
+          >
+            <Popup>Selected Location</Popup>
+          </Marker>
         )}
 
-        {/* Delivery Marker */}
-        <Marker position={currentLocation}>
-          <Popup>Delivery Location</Popup>
-        </Marker>
-
-        {/* User Address Marker */}
         {userLocation && (
-          <Marker position={userLocation}>
+          <Marker position={[userLocation.latitude, userLocation.longitude]}>
             <Popup>Your Address</Popup>
           </Marker>
         )}
 
-        {/* Line between both locations if Dispatched */}
-        {userLocation && currentLocation && showPath && (
-          <Polyline
-            positions={[currentLocation, userLocation]}
-            color="blue"
-            dashArray="6"
+        {editable && (
+          <MapDragHandler
+            onLocationChange={(coords) => {
+              setCurrentLocation(coords);
+              onLocationChange(coords);
+            }}
           />
         )}
       </MapContainer>
+
+      {/* Center pin (visually fixed) */}
+      {editable && (
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-full">
+          <img
+            src="/leaflet/marker-icon.png"
+            alt="center marker"
+            className="h-10 w-auto"
+          />
+        </div>
+      )}
     </div>
   ) : (
     <div className="h-64 flex items-center justify-center text-gray-500">
@@ -140,16 +137,66 @@ export default function Map({
   );
 }
 
-function ClickToSetMarker({
-  setLocation,
+// Keeps the map reference and recenters on location updates
+function MapInitializer({
+  mapRef,
+  center,
+  editable,
 }: {
-  setLocation: (loc: LatLngExpression) => void;
+  mapRef: React.MutableRefObject<L.Map | null>;
+  center: Coordinates;
+  editable: boolean;
 }) {
-  useMapEvents({
-    click: (e: LeafletMouseEvent) => {
-      const newLoc: LatLngExpression = [e.latlng.lat, e.latlng.lng];
-      setLocation(newLoc);
+  const map = useMap();
+
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map]);
+
+  useEffect(() => {
+    if (center) {
+      map.setView([center.latitude, center.longitude], map.getZoom());
+    }
+  }, [center, map]);
+
+  useEffect(() => {
+    if (editable) {
+      map.dragging.enable();
+      map.scrollWheelZoom.enable();
+      map.doubleClickZoom.enable();
+    } else {
+      map.dragging.disable();
+      map.scrollWheelZoom.disable();
+      map.doubleClickZoom.disable();
+    }
+  }, [editable, map]);
+
+  return null;
+}
+
+// Updates coords when the map is dragged
+function MapDragHandler({
+  onLocationChange,
+}: {
+  onLocationChange: (coords: Coordinates) => void;
+}) {
+  const map = useMapEvents({
+    dragend: () => {
+      const center = map.getCenter();
+      onLocationChange({ latitude: center.lat, longitude: center.lng });
     },
   });
+
+  return null;
+}
+
+function FixZoomCenter() {
+  const map = useMap();
+
+  useEffect(() => {
+    map.options.scrollWheelZoom = "center";
+    map.scrollWheelZoom.enable();
+  }, [map]);
+
   return null;
 }
