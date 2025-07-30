@@ -84,9 +84,10 @@ const CartPage = () => {
 
       const result = await placeOrder(
         parsedCart,
-        savedAddressText,
+        savedAddress,
         instructions
       );
+
 
       if (result.success) {
         localStorage.removeItem("cart");
