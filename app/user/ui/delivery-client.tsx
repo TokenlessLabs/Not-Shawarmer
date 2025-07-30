@@ -2,15 +2,19 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { LatLngExpression } from "leaflet";
-import { Order } from "@/app/user/lib/definitions";
+import {
+  Order,
+  Coordinates,
+  OrderStatuses,
+  OrderStatusNames,
+} from "@/app/user/lib/definitions";
 
 const DynamicMap = dynamic(() => import("../ui/newmap"), { ssr: false });
 
 type Props = {
   order: Order | null;
-  userLocation: [number, number] | null;
-  restaurantLocation: [number, number] | null;
+  userLocation: Coordinates;
+  restaurantLocation: Coordinates;
 };
 
 export default function DeliveryClient({
@@ -18,9 +22,7 @@ export default function DeliveryClient({
   userLocation,
   restaurantLocation,
 }: Props) {
-  const [location, setLocation] = useState<LatLngExpression | null>(
-    restaurantLocation
-  );
+  const [location, setLocation] = useState<Coordinates>(restaurantLocation);
 
   if (!order || !restaurantLocation) {
     return (
@@ -30,12 +32,12 @@ export default function DeliveryClient({
     );
   }
 
-  const isDispatched = order.status === "Dispatched";
+  const isDispatched = order.status === OrderStatuses.Dispatched;
 
   const steps = [
-    { label: "Cooking", colorClass: "bg-yellow-400" },
-    { label: "Dispatched", colorClass: "bg-blue-400" },
-    { label: "Delivered", colorClass: "bg-green-400" },
+    { label: OrderStatuses.Cooking, colorClass: "bg-yellow-400" },
+    { label: OrderStatuses.Dispatched, colorClass: "bg-blue-400" },
+    { label: OrderStatuses.Delivered, colorClass: "bg-green-400" },
   ];
 
   if (!order) {
@@ -93,8 +95,8 @@ export default function DeliveryClient({
                   }`}
                 ></div>
                 <span className="flex items-center gap-2">
-                  {label}
-                  {isCurrent && label === "Dispatched" && (
+                  {OrderStatusNames[label]}
+                  {isCurrent && label === OrderStatuses.Dispatched && (
                     <span className="text-sm font-semibold text-theme-dark-blue/70">
                       (ETA: 25 mins)
                     </span>

@@ -71,7 +71,7 @@ export default function AddressBar({ coordinates }: AddressBarProps) {
           <label className="text-white whitespace-nowrap">
             Current Address:
           </label>
-          <div className="flex-grow px-4 py-2 bg-white text-black rounded-md border border-gray-300">
+          <div className="flex-grow px-4 py-2 bg-white text-black rounded-md border border-gray-300 text-ellipsis whitespace-nowrap overflow-hidden">
             {address || "No address found"}
           </div>
           <button

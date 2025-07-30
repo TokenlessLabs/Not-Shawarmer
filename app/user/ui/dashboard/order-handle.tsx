@@ -2,22 +2,35 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Order } from "@/app/user/lib/definitions";
+import {
+  Order,
+  OrderStatuses,
+  OrderStatusNames,
+} from "@/app/user/lib/definitions";
+import { reverseGeocode } from "../../lib/utils";
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [addresses, setAddresses] = useState<string[]>([]);
 
   useEffect(() => {
-    async function fetchOrders() {
+    const fetchOrders = async () => {
       try {
         const res = await fetch("/api/current-orders");
-        const data = await res.json();
+        const data: Order[] = await res.json();
         setOrders(data);
+
+        const geocodedAddresses = await Promise.all(
+          data.map((order) => reverseGeocode(order.latitude, order.longitude))
+        );
+
+        setAddresses(geocodedAddresses);
       } catch (error) {
         console.error("Failed to fetch current orders:", error);
       }
-    }
+    };
+
     fetchOrders();
   }, []);
 
@@ -72,7 +85,9 @@ const OrderHandle = () => {
                     <p className="text-sm font-semibold text-theme-dark-blue">
                       Delivering to:
                     </p>
-                    <p className="text-sm text-gray-700">{order.address}</p>
+                    <p className="text-sm text-gray-700">
+                      {addresses[index] ? addresses[index] : "Loading..."}
+                    </p>
                   </div>
 
                   {/* Status and Show Details Button */}
@@ -85,28 +100,28 @@ const OrderHandle = () => {
                         className={`
                           inline-block mt-1 px-3 py-1 text-xs font-semibold rounded-full
                           ${
-                            order.status === "Cooking"
+                            order.status === OrderStatuses.Cooking
                               ? "bg-yellow-200 text-yellow-800"
                               : ""
                           }
                           ${
-                            order.status === "Dispatched"
+                            order.status === OrderStatuses.Dispatched
                               ? "bg-blue-200 text-blue-800"
                               : ""
                           }
                           ${
-                            order.status === "Delivered"
+                            order.status === OrderStatuses.Delivered
                               ? "bg-green-200 text-green-800"
                               : ""
                           }
                           ${
-                            order.status === "Cancelled"
+                            order.status === OrderStatuses.Cancelled
                               ? "bg-red-200 text-red-800"
                               : ""
                           }
                         `}
                       >
-                        {order.status}
+                        {OrderStatusNames[order.status]}
                       </span>
                     </div>
 
