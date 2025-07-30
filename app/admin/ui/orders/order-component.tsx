@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition , useEffect } from "react";
 import { Order } from "@/app/user/lib/definitions";
 import { updateOrderStatus, cancelOrder } from "@/app/user/lib/actions";
 import {
@@ -12,6 +12,7 @@ import {
 import ConfirmModal from "../confirmation-modal";
 import { formatDateWithOffset } from "@/app/user/lib/utils";
 import toast from "react-hot-toast";
+import { reverseGeocode } from "@/app/user/lib/utils";
 
 type Props = {
   order: Order;
@@ -22,38 +23,50 @@ export default function OrderComponent({ order }: Props) {
   const [isUpdatingStatus, startStatusTransition] = useTransition();
   const [showConfirm, setShowConfirm] = useState(false);
   const [isProcessing, startCancelTransition] = useTransition();
+  const [address, setAddress] = useState("Loading...");
+
+   useEffect(() => {
+    async function fetchAddress() {
+      const addr = await reverseGeocode(order.latitude, order.longitude);
+      setAddress(addr);
+    }
+
+    if (order.latitude && order.longitude) {
+      fetchAddress();
+    }
+  }, [order.latitude, order.longitude]);
 
   const statuses = [
     {
       label: "Cooking",
-      value: "Cooking",
+      value: 0,
       color: "bg-yellow-100 text-yellow-800",
     },
     {
       label: "Dispatched",
-      value: "Dispatched",
+      value: 1,
       color: "bg-blue-100 text-blue-800",
     },
     {
       label: "Delivered",
-      value: "Delivered",
+      value: 2,
       color: "bg-green-100 text-green-800",
     },
   ];
 
-  const currentStatusIndex = statuses.findIndex(
-    (s) => s.value === order.status
-  );
+  const currentStatusIndex = statuses.findIndex((s) => s.value ===  Number(order.status) );
+ 
   const currentStatus = statuses[currentStatusIndex] ?? statuses[0];
 
   const handleStatusClick = () => {
     const nextIndex = (currentStatusIndex + 1) % statuses.length;
     const nextStatus = statuses[nextIndex].value;
+    const popUpStatus = statuses[nextIndex].label;
 
     startStatusTransition(async () => {
       try {
         await updateOrderStatus(order.id, nextStatus);
-        toast.success(`Order marked as ${nextStatus}`);
+        toast.success(`Order marked as ${popUpStatus}  `);
       } catch (error) {
         toast.error("Failed to update order status");
       }
@@ -72,7 +85,7 @@ export default function OrderComponent({ order }: Props) {
 
   return (
     <>
-      {/* Confirmation Modal */}
+      
       {showConfirm && (
         <ConfirmModal
           heading="Cancel Order"
@@ -107,9 +120,7 @@ export default function OrderComponent({ order }: Props) {
 
           <div className="flex flex-col items-end space-y-2">
             <div
-              className={`${
-                currentStatus.color
-              } text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2 ${
+              className={`${ currentStatus.color } text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2 ${
                 isUpdatingStatus ? "opacity-50 cursor-not-allowed" : ""
               }`}
               onClick={handleStatusClick}
@@ -133,7 +144,7 @@ export default function OrderComponent({ order }: Props) {
               </svg>
             </div>
 
-            {order.status !== "Cancelled" && order.status !== "Delivered" && (
+            {order.status !== 3 && order.status !== 2 && (
               <button
                 onClick={() => setShowConfirm(true)}
                 className="bg-red-500 text-white text-xs px-3 py-1 rounded shadow hover:bg-red-600 transition"
@@ -186,11 +197,14 @@ export default function OrderComponent({ order }: Props) {
               <MapPinIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
                 <span className="font-semibold">Delivery Address:</span>{" "}
-                {order.address}
+               {order.latitude && order.longitude ?( <p>{address}</p>): (
+               <p>Not found </p>
+              
+            )}
               </div>
             </div>
 
-            {order.status === "Delivered" && order.deliveredat && (
+            {order.status === 2 && order.deliveredat && (
               <div className="flex items-start gap-2">
                 <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
