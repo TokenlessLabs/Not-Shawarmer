@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { Roles } from './app/user/lib/definitions';
 
 export const authConfig = {
   pages: {
@@ -20,13 +21,13 @@ authorized({ auth, request: { nextUrl } }) {
 
   // Redirect users trying to access each other's dashboards
   if (isLoggedIn) {
-    const role = user.role?.toLowerCase();
+    const role = user.role as Roles;
 
-    if (role === 'admin' && !path.startsWith('/admin') && !path.startsWith('/profile')) {
+    if (role === Roles.Admin && !path.startsWith('/admin') && !path.startsWith('/profile')) {
       return Response.redirect(new URL('/admin/dashboard', nextUrl));
     }
 
-    if (role === 'user' && !path.startsWith('/user') && !path.startsWith('/profile')) {
+    if (role === Roles.User && !path.startsWith('/user') && !path.startsWith('/profile')) {
       return Response.redirect(new URL('/user/dashboard', nextUrl));
     }
   }
@@ -35,11 +36,10 @@ authorized({ auth, request: { nextUrl } }) {
 },
 
     async jwt({ token, user }) {
-      // First login — attach user info to token
       if (user) {
         token.id = user.id;
         token.username = user.username;
-        token.role = user.role; // store role in token
+        token.role = user.role;
       }
       return token;
     },
@@ -48,10 +48,10 @@ authorized({ auth, request: { nextUrl } }) {
       // Attach info to session from token
       session.user.id = token.id as string;
       session.user.username = token.username as string;
-      session.user.role = token.role as string;
+      session.user.role = token.role as number;
       return session;
     },
   },
 
-  providers: [], // still empty because you're using `auth.ts` for actual provider
+  providers: [],
 } satisfies NextAuthConfig;

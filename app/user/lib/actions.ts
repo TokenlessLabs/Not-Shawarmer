@@ -5,7 +5,7 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth, signOut } from "@/auth";
-import { ErrorState } from "./definitions";
+import { ErrorState,Coordinates } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -20,30 +20,31 @@ const userSchema = z.object({
 });
 
 export async function updateUserAddress(
-  newAddress: string
+  coordinates: Coordinates
 ): Promise<ErrorState> {
   try {
-    if (!newAddress || newAddress.trim().length === 0) {
+    if (!coordinates || coordinates.latitude == null || coordinates.longitude == null) {
       return {
         success: false,
         message: "",
-        errors: ["Address cannot be empty."],
+        errors: ["Coordinates are invalid."],
       };
     }
-    const session = await auth();
 
+    const session = await auth();
     const userId = session?.user?.id;
 
-    if (!userId)
+    if (!userId) {
       return {
         success: false,
         message: "User doesn't exist.",
         errors: [""],
       };
+    }
 
     await sql`
       UPDATE users
-      SET address = ${newAddress}
+      SET latitude = ${coordinates.latitude}, longitude = ${coordinates.longitude}
       WHERE id = ${userId}
     `;
 

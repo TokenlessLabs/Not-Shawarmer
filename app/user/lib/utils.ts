@@ -37,3 +37,19 @@ export function formatDateWithOffset(
 
   return formatted.replace(/\bAM\b/, "am").replace(/\bPM\b/, "pm");
 }
+
+export async function reverseGeocode(
+  latitude: number,
+  longitude: number
+): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+    );
+    const data = await res.json();
+    return data?.display_name || "No Address Found";
+  } catch (err) {
+    console.error("Failed to reverse geocode:", err);
+    return "Error retrieving address";
+  }
+}

@@ -2,32 +2,46 @@
 
 import AddressModal from "./address-modal";
 import React, { useEffect, useState } from "react";
+import AddressBarSkeleton from "./address-bar-skeleton";
+import { Coordinates } from "../../lib/definitions";
+import { reverseGeocode } from "../../lib/utils";
 import { updateUserAddress } from "../../lib/actions";
-import AddressBarSkeleton from "./address-bar-skeleton"; // 👈 import skeleton
 
-export default function AddressBar() {
+type AddressBarProps = {
+  coordinates: Coordinates;
+};
+
+export default function AddressBar({ coordinates }: AddressBarProps) {
   const [openModal, setOpenModal] = useState(false);
-  const [savedAddress, setSavedAddress] = useState("");
-  const [loading, setLoading] = useState(true); // 👈 add loading
+  const [address, setAddress] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Reverse geocode when coordinates change
   useEffect(() => {
     const fetchAddress = async () => {
+      if (!coordinates) {
+        setAddress(null);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const res = await fetch("/api/address");
-        const data = await res.json();
-        setSavedAddress(data.address || "No address found");
+        const addr = await reverseGeocode(
+          coordinates.latitude,
+          coordinates.longitude
+        );
+        setAddress(addr);
       } catch (err) {
-        console.error("Failed to load address", err);
-        setSavedAddress("Error loading address");
+        console.error("Failed to reverse geocode address:", err);
+        setAddress("Unable to fetch address");
       } finally {
-        setLoading(false); // 👈 end loading
+        setLoading(false);
       }
     };
 
     fetchAddress();
-  }, []);
+  }, [coordinates]);
 
-  // 👇 show skeleton while loading
   if (loading) {
     return <AddressBarSkeleton />;
   }
@@ -36,22 +50,29 @@ export default function AddressBar() {
     <>
       {openModal && (
         <AddressModal
-          savedAddress={savedAddress}
+          savedAddress={coordinates}
           onClose={() => setOpenModal(false)}
-          onSave={(newAddress) => {
+          onSave={async (newCoordinates) => {
             setOpenModal(false);
-            if (newAddress !== savedAddress) {
-              setSavedAddress(newAddress);
-              updateUserAddress(newAddress);
+            if (
+              newCoordinates &&
+              (!coordinates ||
+                newCoordinates.latitude !== coordinates.latitude ||
+                newCoordinates.longitude !== coordinates.longitude)
+            ) {
+              setLoading(true);
+              await updateUserAddress(newCoordinates);
             }
           }}
         />
       )}
       <div className="flex justify-center w-full">
         <nav className="bg-theme-blue p-4 rounded-b-lg shadow-md flex items-center gap-4 w-full">
-          <label className="text-white whitespace-nowrap">Current Address:</label>
+          <label className="text-white whitespace-nowrap">
+            Current Address:
+          </label>
           <div className="flex-grow px-4 py-2 bg-white text-black rounded-md border border-gray-300">
-            {savedAddress}
+            {address || "No address found"}
           </div>
           <button
             onClick={() => setOpenModal(true)}
