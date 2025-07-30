@@ -63,7 +63,7 @@ export type MenuItem = {
   price: number;
   image: string | null;
   category: string;
-  isAvailable: boolean;
+  isavailable: boolean;
 };
 
 export type ErrorState = {
