@@ -18,10 +18,13 @@ type DashboardClientProps = {
 };
 
 export default function DashboardClient({ categories }: DashboardClientProps) {
-  const { data: menuItems, error, isLoading } = useSWR<MenuItem[]>(
-    "/api/menu",
-    fetcher
-  );
+  const {
+    data: menuItems,
+    error,
+    isLoading,
+  } = useSWR<MenuItem[]>("/api/menu", fetcher, {
+    refreshInterval: 10000,
+  });
 
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
@@ -109,8 +112,9 @@ export default function DashboardClient({ categories }: DashboardClientProps) {
     }
   };
 
-  if (isLoading) return <Loading />
-  if (error || !menuItems) return <div className="text-center my-10">Failed to load menu.</div>;
+  if (isLoading) return <Loading />;
+  if (error || !menuItems)
+    return <div className="text-center my-10">Failed to load menu.</div>;
 
   const filteredItems = menuItems.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -146,10 +150,11 @@ export default function DashboardClient({ categories }: DashboardClientProps) {
                 buttonRefs.current[idx] = el;
               }}
               onClick={() => scrollToCategory(category, idx)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${activeCategory === category
-                ? "bg-theme-bluehighlighted text-white"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${
+                activeCategory === category
+                  ? "bg-theme-bluehighlighted text-white"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              }`}
             >
               {category}
             </button>
