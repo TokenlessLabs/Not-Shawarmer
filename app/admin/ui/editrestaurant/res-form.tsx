@@ -66,7 +66,7 @@ export default function RestaurantForm({
             <button
               type="button"
               onClick={() => setShowModal(true)}
-              className="p-1 text-theme-blue hover:text-theme-bluehighlighted transition"
+              className="p-1 text-theme-blue hover:text-theme-bluehighlighted transition cursor-pointer"
             >
               <PencilIcon className="w-5 h-5" />
             </button>

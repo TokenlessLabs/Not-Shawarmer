@@ -238,7 +238,7 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
                   type="button"
                   onClick={() => setShowConfirm(true)}
                   disabled={isPending || isDeleting}
-                  className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-700"
+                  className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-700 cursor-pointer"
                 >
                   Delete Item
                 </button>
@@ -247,14 +247,14 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
                     type="button"
                     onClick={onClose}
                     disabled={isPending || isDeleting}
-                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isPending || isDeleting}
-                    className="bg-theme-blue hover:bg-theme-bluehighlighted text-white px-4 py-2 rounded"
+                    className="bg-theme-blue hover:bg-theme-bluehighlighted text-white px-4 py-2 rounded cursor-pointer"
                   >
                     {isPending ? "Saving..." : "Save"}
                   </button>

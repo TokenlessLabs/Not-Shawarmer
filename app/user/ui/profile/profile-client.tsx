@@ -92,14 +92,14 @@ export default function ProfileClient({ user }: { user: User }) {
             <button
               type="submit"
               disabled={isPending}
-              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
+              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted cursor-pointer"
             >
               {isPending ? "Saving..." : "Save"}
             </button>
             <button
               type="button"
               onClick={() => resetForm()}
-              className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
+              className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800 cursor-pointer"
             >
               Close
             </button>
@@ -109,7 +109,7 @@ export default function ProfileClient({ user }: { user: User }) {
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
+              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted cursor-pointer"
             >
               Edit
             </button>
@@ -117,7 +117,7 @@ export default function ProfileClient({ user }: { user: User }) {
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600"
+                className="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 cursor-pointer"
               >
                 Delete Account
               </button>

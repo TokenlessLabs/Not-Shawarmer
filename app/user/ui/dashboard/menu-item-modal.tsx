@@ -72,14 +72,14 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 text-xl"
+                className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 text-xl cursor-pointer"
               >
                 –
               </button>
               <span className="w-8 text-center font-medium">{quantity}</span>
               <button
                 onClick={() => setQuantity((q) => q + 1)}
-                className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 text-xl"
+                className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 text-xl cursor-pointer"
               >
                 +
               </button>
@@ -89,13 +89,13 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
           <div className="mt-6 flex justify-end space-x-3">
             <button
               onClick={onClose}
-              className="bg-red-500 text-white font-bold px-4 py-2 rounded shadow-xl hover:bg-red-700 transition-all duration-200"
+              className="bg-red-500 text-white font-bold px-4 py-2 rounded shadow-xl hover:bg-red-700 transition-all duration-200 cursor-pointer"
             >
               Close
             </button>
             <button
               onClick={handleAddToCart}
-              className="bg-theme-blue text-white font-bold px-4 py-2 rounded shadow-xl hover:bg-theme-bluehighlighted transition-all duration-200"
+              className="bg-theme-blue text-white font-bold px-4 py-2 rounded shadow-xl hover:bg-theme-bluehighlighted transition-all duration-200 cursor-pointer"
             >
               Add to Cart{" "}
               <span className="ml-3">

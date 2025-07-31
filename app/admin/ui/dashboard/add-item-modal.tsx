@@ -130,7 +130,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ categories, onClose }) => {
                 name="category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full mt-1 border rounded px-3 py-2 text-gray-800"
+                className="w-full mt-1 border rounded px-3 py-2 text-gray-800 cursor-pointer"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -155,14 +155,14 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ categories, onClose }) => {
                 type="button"
                 onClick={onClose}
                 disabled={isPending}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-theme-blue hover:bg-theme-bluehighlighted text-white px-4 py-2 rounded"
+                className="bg-theme-blue hover:bg-theme-bluehighlighted text-white px-4 py-2 rounded cursor-pointer"
               >
                 {isPending ? "Adding..." : "Add Item"}
               </button>
