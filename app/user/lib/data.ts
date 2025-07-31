@@ -254,7 +254,7 @@ export async function getCategories(): Promise<string[]> {
 
 export async function getMenuItems(): Promise<MenuItem[]> {
   const result = await sql<MenuItem[]>`
-    SELECT Items.ID, Items.Name, Items.Description, Items.Price, Items.Image, Categories.Name as Category
+    SELECT Items.ID, Items.Name, Items.Description, Items.Price, Items.Image, Items.isAvailable, Categories.Name as Category
     FROM Items
     LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
     LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
