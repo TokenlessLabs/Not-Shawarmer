@@ -1,24 +1,14 @@
 import { getRestaurantDetails } from "@/app/user/lib/data";
 import RestaurantClient from "../ui/editrestaurant/res-client";
 import { Restaurant } from "@/app/user/lib/definitions";
-import RestaurantSkeleton from "./loading";
-import { Suspense } from "react";
 
-export default function RestaurantPageWrapper() {
-  return (
-    <Suspense fallback={<RestaurantSkeleton />}>
-      <RestaurantPage />
-    </Suspense>
-  );
-}
-
-async function RestaurantPage() {
+export default async function RestaurantPage() {
   const rawData = await getRestaurantDetails();
 
   const restaurant: Restaurant = {
     name: rawData.name,
-    latitude: rawData.latitude,         // ✅ use directly
-    longitude: rawData.longitude,       // ✅ use directly
+    latitude: rawData.latitude,
+    longitude: rawData.longitude,
     about: rawData.about,
     startTime: rawData.operatinghoursstart,
     endTime: rawData.operatinghoursend,

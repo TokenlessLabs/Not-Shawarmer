@@ -27,21 +27,19 @@ export default function RestaurantClient({
   });
 
   useEffect(() => {
-    // Simulate loading time if you want skeleton to show
-    const timeout = setTimeout(() => {
-      setFormData(initialData);
-    }, 300); // you can remove this delay in production
-    return () => clearTimeout(timeout);
+    setFormData({
+      ...initialData,
+      delivery_fee: Number(initialData.delivery_fee),
+    });
   }, [initialData]);
 
   const handleChange = (field: keyof Restaurant, value: string | number) => {
     if (!formData) return;
     setFormData((prev) => ({
       ...prev!,
-      [field]: field === "delivery_fee" ? parseFloat(value as string) : value,
+      [field]: value,
     }));
   };
-
 
   const handleCancel = () => {
     setFormData(initialData);

@@ -258,13 +258,13 @@ const restaurantUpdateSchema = z.object({
     .min(6, "Contact must be at least 6 digits")
     .max(20, "Contact must be at most 20 digits")
     .regex(/^\d+$/, "Contact must only contain digits"),
-  delivery_fee: z
-    .string()
-    .min(1, "Delivery fee is required")
-    .regex(/^\d+$/, "Delivery fee must be a valid positive number")
-    .refine((val) => parseInt(val) <= 9999, {
-      message: "Delivery fee must be less than 10000",
-    }),
+delivery_fee: z
+  .string()
+  .min(1, "Delivery fee is required")
+  .regex(/^\d+$/, "Delivery fee must be a valid positive number")
+  .refine((val) => parseInt(val) <= 9999, {
+    message: "Delivery fee must be less than 10000",
+  }),
 });
 
 export async function updateRestaurant(

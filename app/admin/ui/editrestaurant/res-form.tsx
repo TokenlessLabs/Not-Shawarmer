@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import AddressModal from "@/app/user/ui/dashboard/address-modal";
 import { Restaurant } from "@/app/user/lib/definitions";
+import { reverseGeocode } from "@/app/user/lib/utils";
 
 type Props = {
   formData: Restaurant;
@@ -9,13 +12,38 @@ type Props = {
   isEditing: boolean;
 };
 
-export default function RestaurantForm({ formData, onChange, isEditing }: Props) {
+export default function RestaurantForm({
+  formData,
+  onChange,
+  isEditing,
+}: Props) {
   const editableFields = [
     { label: "About Us", key: "about" },
     { label: "Contact Number", key: "contact", type: "tel" },
   ];
 
   const [showModal, setShowModal] = useState(false);
+  const [geoAddress, setGeoAddress] = useState<string>("Loading address...");
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (formData.latitude && formData.longitude) {
+        try {
+          const address = await reverseGeocode(
+            formData.latitude,
+            formData.longitude
+          );
+          setGeoAddress(address);
+        } catch (err) {
+          setGeoAddress("Failed to fetch address");
+        }
+      } else {
+        setGeoAddress("Coordinates not set");
+      }
+    };
+
+    fetchAddress();
+  }, [formData.latitude, formData.longitude]);
 
   return (
     <div className="flex flex-col gap-7">
@@ -33,9 +61,7 @@ export default function RestaurantForm({ formData, onChange, isEditing }: Props)
           Address
         </label>
         <div className="flex items-center justify-between">
-          <p className="text-base font-medium text-gray-600">
-            {formData.address}
-          </p>
+          <p className="text-base font-medium text-gray-600">{geoAddress}</p>
           {isEditing && (
             <button
               type="button"
@@ -58,14 +84,18 @@ export default function RestaurantForm({ formData, onChange, isEditing }: Props)
             key === "about" ? (
               <textarea
                 value={formData[key as keyof Restaurant] as string}
-                onChange={(e) => onChange(key as keyof Restaurant, e.target.value)}
+                onChange={(e) =>
+                  onChange(key as keyof Restaurant, e.target.value)
+                }
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             ) : (
               <input
                 type={type || "text"}
                 value={formData[key as keyof Restaurant] as string}
-                onChange={(e) => onChange(key as keyof Restaurant, e.target.value)}
+                onChange={(e) =>
+                  onChange(key as keyof Restaurant, e.target.value)
+                }
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             )
@@ -86,7 +116,7 @@ export default function RestaurantForm({ formData, onChange, isEditing }: Props)
           <input
             type="number"
             value={formData.delivery_fee}
-            onChange={(e) => onChange("delivery_fee", parseFloat(e.target.value))}
+            onChange={(e) => onChange("delivery_fee", e.target.value)}
             className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
           />
         ) : (
@@ -136,12 +166,16 @@ export default function RestaurantForm({ formData, onChange, isEditing }: Props)
       {/* Address Modal */}
       {showModal && (
         <AddressModal
-          savedAddress={formData.address}
+          savedAddress={{
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          }}
           onClose={() => setShowModal(false)}
-          onSave={(newAddress: string, coords: { latitude: number; longitude: number }) => {
-            onChange("address", newAddress);
-            onChange("latitude", coords.latitude);
-            onChange("longitude", coords.longitude);
+          onSave={(newAddress) => {
+            if (newAddress) {
+              onChange("latitude", newAddress.latitude);
+              onChange("longitude", newAddress.longitude);
+            }
             setShowModal(false);
           }}
         />
