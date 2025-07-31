@@ -272,12 +272,9 @@ const CartPage = () => {
                       setShowConfirmModal(true);
                     }
                   }}
-                  className={`w-full text-center py-3 rounded-lg font-semibold transition
-    ${noItemsWarning
-                      ? "animate-shake bg-red-600/80 text-white"
-                      : "bg-theme-blue hover:bg-theme-bluehighlighted text-white"
-                    }
-  `}
+                  className={`w-full text-center py-3 rounded-lg font-semibold transition${noItemsWarning
+                    ? "animate-shake bg-red-600/80 text-white"
+                    : "bg-theme-blue hover:bg-theme-bluehighlighted text-white cursor-pointer"}`}
                 >
                   {isPending ? "Placing Order..." : "Place Order"}
                 </button>
