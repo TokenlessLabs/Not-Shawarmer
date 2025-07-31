@@ -8,6 +8,7 @@ import { auth, signOut } from "@/auth";
 import { ErrorState,Coordinates } from "./definitions";
 import { OrderStatuses } from "./definitions";
 
+
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const userSchema = z.object({
@@ -239,7 +240,18 @@ export async function cancelOrder(orderId: number): Promise<ErrorState> {
 }
 
 const restaurantUpdateSchema = z.object({
-  address: z.string().min(1, "Address is required"),
+  latitude: z
+    .string()
+    .min(1, "Latitude is required")
+    .refine((val) => !isNaN(parseFloat(val)), {
+      message: "Latitude must be a valid number",
+    }),
+  longitude: z
+    .string()
+    .min(1, "Longitude is required")
+    .refine((val) => !isNaN(parseFloat(val)), {
+      message: "Longitude must be a valid number",
+    }),
   about: z.string().min(1, "About Us is required"),
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
@@ -248,13 +260,13 @@ const restaurantUpdateSchema = z.object({
     .min(6, "Contact must be at least 6 digits")
     .max(20, "Contact must be at most 20 digits")
     .regex(/^\d+$/, "Contact must only contain digits"),
- delivery_fee: z
-    .string()
-    .min(1, "Delivery fee is required")
-    .regex(/^\d+$/, "Delivery fee must be a valid positive number")
-    .refine((val) => parseInt(val) <= 9999, {
-      message: "Delivery fee must be less than 10000",
-    }),
+delivery_fee: z
+  .string()
+  .min(1, "Delivery fee is required")
+  .regex(/^\d+$/, "Delivery fee must be a valid positive number")
+  .refine((val) => parseInt(val) <= 9999, {
+    message: "Delivery fee must be less than 10000",
+  }),
 });
 
 export async function updateRestaurant(
@@ -263,14 +275,14 @@ export async function updateRestaurant(
 ): Promise<{ success: boolean; message: string | null; errors: string[] }> {
   try {
     const rawData = {
-  address: formData.get("address")?.toString().trim() ?? "",
-  about: formData.get("about")?.toString().trim() ?? "",
-  startTime: formData.get("startTime")?.toString().trim() ?? "",
-  endTime: formData.get("endTime")?.toString().trim() ?? "",
-  contact: formData.get("contact")?.toString().trim() ?? "",
-  delivery_fee: formData.get("delivery_fee")?.toString().trim() ?? "",
-};
-
+      latitude: formData.get("latitude")?.toString().trim() ?? "",
+      longitude: formData.get("longitude")?.toString().trim() ?? "",
+      about: formData.get("about")?.toString().trim() ?? "",
+      startTime: formData.get("startTime")?.toString().trim() ?? "",
+      endTime: formData.get("endTime")?.toString().trim() ?? "",
+      contact: formData.get("contact")?.toString().trim() ?? "",
+      delivery_fee: formData.get("delivery_fee")?.toString().trim() ?? "",
+    };
 
     const parsed = restaurantUpdateSchema.safeParse(rawData);
 
@@ -279,18 +291,27 @@ export async function updateRestaurant(
       return { success: false, message: null, errors };
     }
 
-    const { address, about, startTime, endTime, contact, delivery_fee } = parsed.data;
+    const {
+      latitude,
+      longitude,
+      about,
+      startTime,
+      endTime,
+      contact,
+      delivery_fee,
+    } = parsed.data;
 
-   await sql`
-  UPDATE RestDetails
-  SET address = ${address},
-      about = ${about},
-      operatingHoursStart = ${startTime},
-      operatingHoursEnd = ${endTime},
-      contact = ${contact},
-      delivery_fee = ${delivery_fee}
-  WHERE id = 1
-`;
+    await sql`
+      UPDATE RestDetails
+      SET latitude = ${parseFloat(latitude)},
+          longitude = ${parseFloat(longitude)},
+          about = ${about},
+          operatingHoursStart = ${startTime},
+          operatingHoursEnd = ${endTime},
+          contact = ${contact},
+          delivery_fee = ${delivery_fee}
+      WHERE id = 1
+    `;
 
     revalidatePath("/admin/editrestaurant");
 
@@ -304,15 +325,23 @@ export async function updateRestaurant(
     };
   }
 }
+
+
+
 type CartItem = {
   name: string;
   quantity: number;
   price: number;
 };
 
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 export async function placeOrder(
   cartItems: CartItem[],
-  address: string,
+  coords: Coordinates | null,
   instructions?: string
 ) {
   try {
@@ -320,20 +349,23 @@ export async function placeOrder(
       throw new Error("Cart is empty");
     }
 
-      const session = await auth();
-
+    const session = await auth();
     const userId = session?.user?.id;
 
     if (!userId)
       return {
-        success: false
+        success: false,
       };
 
+    if (!coords) {
+      throw new Error("Coordinates are missing");
+    }
+
+    const { latitude, longitude } = coords;
+
     const orderResult = await sql`
-      INSERT INTO Orders (userid, instructions, address)
-      VALUES (${userId},${
-      instructions || null
-    },${address})
+      INSERT INTO Orders (userid, instructions, latitude, longitude)
+      VALUES (${userId}, ${instructions || null}, ${latitude}, ${longitude})
       RETURNING id;
     `;
 
@@ -363,14 +395,15 @@ export async function placeOrder(
 
     console.log("✅ Order placed successfully with ID:", orderId);
     return { success: true, orderId };
-  }catch (error: unknown) {
-  console.error("❌ Error placing order:", error instanceof Error ? error.message : error);
-  return {
-    success: false,
-    error: error instanceof Error ? error.message : "Unknown error",
-  };
+
+  } catch (error: unknown) {
+    console.error("❌ Error placing order:", error instanceof Error ? error.message : error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 }
-};
 
 export async function deleteUserAccountAndLogout() {
     const session = await auth();

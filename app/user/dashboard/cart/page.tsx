@@ -84,9 +84,10 @@ const CartPage = () => {
 
       const result = await placeOrder(
         parsedCart,
-        savedAddressText,
+        savedAddress,
         instructions
       );
+
 
       if (result.success) {
         localStorage.removeItem("cart");
@@ -152,6 +153,7 @@ const CartPage = () => {
           acceptLabel="Yes, Place Order"
           cancelLabel="No, Go Back"
           isProcessing={isPending}
+          good={true}
         />
       )}
 

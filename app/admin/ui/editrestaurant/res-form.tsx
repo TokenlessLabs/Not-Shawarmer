@@ -1,32 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
-import { Restaurant } from "@/app/user/lib/definitions";
+import React, { useState, useEffect } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import AddressModal from "@/app/user/ui/dashboard/address-modal";
+import { Restaurant } from "@/app/user/lib/definitions";
+import { reverseGeocode } from "@/app/user/lib/utils";
+
+type Props = {
+  formData: Restaurant;
+  onChange: (field: keyof Restaurant, value: string | number) => void;
+  isEditing: boolean;
+};
 
 export default function RestaurantForm({
   formData,
   onChange,
   isEditing,
-}: {
-  formData: Restaurant;
-  onChange: (field: keyof Restaurant, value: string) => void;
-  isEditing: boolean;
-}) {
-  const editableFields: {
-    label: string;
-    key: keyof Restaurant;
-    type?: string;
-  }[] = [
-      { label: "About Us", key: "about" },
-      { label: "Contact Number", key: "contact", type: "tel" },
-    ];
+}: Props) {
+  const editableFields = [
+    { label: "About Us", key: "about" },
+    { label: "Contact Number", key: "contact", type: "tel" },
+  ];
+
   const [showModal, setShowModal] = useState(false);
+  const [geoAddress, setGeoAddress] = useState<string>("Loading address...");
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (formData.latitude && formData.longitude) {
+        try {
+          const address = await reverseGeocode(
+            formData.latitude,
+            formData.longitude
+          );
+          setGeoAddress(address);
+        } catch (err) {
+          setGeoAddress("Failed to fetch address");
+        }
+      } else {
+        setGeoAddress("Coordinates not set");
+      }
+    };
+
+    fetchAddress();
+  }, [formData.latitude, formData.longitude]);
 
   return (
     <div className="flex flex-col gap-7">
-      {/* Restaurant Name (Always Visible, Never Editable) */}
+      {/* Restaurant Name */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Restaurant Name
@@ -34,15 +55,13 @@ export default function RestaurantForm({
         <p className="text-base font-medium text-gray-600">{formData.name}</p>
       </div>
 
-      {/* Address (Read-only, with Edit button in edit mode) */}
+      {/* Address */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Address
         </label>
         <div className="flex items-center justify-between">
-          <p className="text-base font-medium text-gray-600">
-            {formData.address}
-          </p>
+          <p className="text-base font-medium text-gray-600">{geoAddress}</p>
           {isEditing && (
             <button
               type="button"
@@ -64,26 +83,31 @@ export default function RestaurantForm({
           {isEditing ? (
             key === "about" ? (
               <textarea
-                value={formData[key]}
-                onChange={(e) => onChange(key, e.target.value)}
+                value={formData[key as keyof Restaurant] as string}
+                onChange={(e) =>
+                  onChange(key as keyof Restaurant, e.target.value)
+                }
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             ) : (
               <input
                 type={type || "text"}
-                value={formData[key]}
-                onChange={(e) => onChange(key, e.target.value)}
+                value={formData[key as keyof Restaurant] as string}
+                onChange={(e) =>
+                  onChange(key as keyof Restaurant, e.target.value)
+                }
                 className="border rounded px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-theme-light-blue"
               />
             )
           ) : (
             <p className="text-base font-medium text-gray-600 whitespace-pre-line">
-              {formData[key]}
+              {formData[key as keyof Restaurant]}
             </p>
           )}
         </div>
       ))}
 
+      {/* Delivery Fee */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Delivery Fee (Rs)
@@ -102,8 +126,7 @@ export default function RestaurantForm({
         )}
       </div>
 
-
-      {/* Time Pickers */}
+      {/* Operating Hours */}
       <div className="flex flex-col gap-1">
         <label className="text-xl font-semibold text-theme-dark-blue">
           Operating Hours
@@ -138,17 +161,25 @@ export default function RestaurantForm({
             {formData.startTime} - {formData.endTime}
           </p>
         )}
-        {showModal && (
-          <AddressModal
-            savedAddress={formData.address}
-            onClose={() => setShowModal(false)}
-            onSave={(newAddress) => {
-              onChange("address", newAddress);
-              setShowModal(false);
-            }}
-          />
-        )}
       </div>
+
+      {/* Address Modal */}
+      {showModal && (
+        <AddressModal
+          savedAddress={{
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          }}
+          onClose={() => setShowModal(false)}
+          onSave={(newAddress) => {
+            if (newAddress) {
+              onChange("latitude", newAddress.latitude);
+              onChange("longitude", newAddress.longitude);
+            }
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

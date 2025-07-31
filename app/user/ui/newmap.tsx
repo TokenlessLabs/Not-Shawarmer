@@ -25,7 +25,6 @@ L.Icon.Default.mergeOptions({
 
 export type Coordinates = { latitude: number; longitude: number } | null;
 
-// 🔁 Helper: Convert Coordinates to Leaflet tuple
 function toLatLng(coord: Coordinates): [number, number] {
   return [coord!.latitude, coord!.longitude];
 }
@@ -36,13 +35,16 @@ type Props = {
   editable?: boolean;
   userLocation?: Coordinates;
   showPath?: boolean;
+  onEtaChange?: (eta: number | null) => void;
 };
 
 export default function Map({
   location,
   onLocationChange,
+  editable = false,
   userLocation = null,
   showPath = false,
+  onEtaChange,
 }: Props) {
   const [currentLocation, setCurrentLocation] = useState<Coordinates>(location);
   const [routePoints, setRoutePoints] = useState<Coordinates[]>([]);
@@ -53,30 +55,33 @@ export default function Map({
     const fetchRoute = async () => {
       try {
         const res = await fetch(
-          `https://graphhopper.com/api/1/route?point=${toLatLng(
-            currentLocation
-          ).join(",")}&point=${toLatLng(userLocation).join(
-            ","
-          )}&vehicle=car&locale=en&calc_points=true&points_encoded=true&key=bbc9a58c-f338-4623-afcf-f26301ab350a`
+          `https://graphhopper.com/api/1/route?point=${toLatLng(userLocation).join(",")}&point=${toLatLng(currentLocation).join(",")}&vehicle=car&locale=en&calc_points=true&points_encoded=true&key=bbc9a58c-f338-4623-afcf-f26301ab350a`
         );
 
         const data = await res.json();
 
         if (data.paths && data.paths.length > 0) {
-          const decoded = polyline.decode(data.paths[0].points); // [lat, lng]
+          const decoded = polyline.decode(data.paths[0].points);
           const converted = decoded.map(([lat, lng]) => ({
             latitude: lat,
             longitude: lng,
           }));
           setRoutePoints(converted);
+
+          // Set ETA in minutes
+          const timeInMin = Math.round(data.paths[0].time / 60000);
+          onEtaChange?.(timeInMin);
+        } else {
+          onEtaChange?.(null);
         }
       } catch (err) {
         console.error("Failed to fetch route", err);
+        onEtaChange?.(null);
       }
     };
 
     fetchRoute();
-  }, [showPath, userLocation, currentLocation]);
+  }, [showPath, userLocation, currentLocation, onEtaChange]);
 
   return currentLocation ? (
     <div className="relative w-full h-full">
@@ -96,19 +101,16 @@ export default function Map({
           <FitBoundsHandler points={[userLocation, currentLocation]} />
         )}
 
-        {/* Delivery Marker */}
         <Marker position={toLatLng(currentLocation)}>
           <Popup>Delivery Location</Popup>
         </Marker>
 
-        {/* User Address Marker */}
         {userLocation && (
           <Marker position={toLatLng(userLocation)}>
             <Popup>Your Address</Popup>
           </Marker>
         )}
 
-        {/* Route Line */}
         {showPath && routePoints.length > 0 && (
           <Polyline
             positions={routePoints.map(toLatLng)}

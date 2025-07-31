@@ -23,6 +23,8 @@ export default function DeliveryClient({
   restaurantLocation,
 }: Props) {
   const [location, setLocation] = useState<Coordinates>(restaurantLocation);
+  const [eta, setEta] = useState<number | null>(null);
+
 
   if (!order || !restaurantLocation) {
     return (
@@ -59,7 +61,9 @@ export default function DeliveryClient({
           onLocationChange={setLocation}
           userLocation={userLocation}
           showPath={isDispatched}
+          onEtaChange={setEta}
         />
+
       </div>
 
       {/* Right - Delivery Info */}
@@ -77,28 +81,26 @@ export default function DeliveryClient({
             return (
               <div
                 key={label}
-                className={`flex items-center gap-4 ${
-                  isPast
-                    ? "text-gray-400"
-                    : isFuture
+                className={`flex items-center gap-4 ${isPast
+                  ? "text-gray-400"
+                  : isFuture
                     ? "text-gray-500/70"
                     : "font-bold"
-                }`}
+                  }`}
               >
                 <div
-                  className={`h-4 w-4 rounded-full ${
-                    isPast
-                      ? "bg-gray-400"
-                      : isCurrent
+                  className={`h-4 w-4 rounded-full ${isPast
+                    ? "bg-gray-400"
+                    : isCurrent
                       ? colorClass
                       : "bg-gray-200"
-                  }`}
+                    }`}
                 ></div>
                 <span className="flex items-center gap-2">
                   {OrderStatusNames[label]}
                   {isCurrent && label === OrderStatuses.Dispatched && (
                     <span className="text-sm font-semibold text-theme-dark-blue/70">
-                      (ETA: 25 mins)
+                      (ETA: {eta !== null ? `${eta} mins` : "Calculating..."})
                     </span>
                   )}
                 </span>
