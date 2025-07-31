@@ -137,6 +137,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
         <div className="p-4 space-y-4 flex flex-col">
           <div className="flex justify-between">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm rounded bg-gray-200 hover:bg-gray-300 transition"
             >
@@ -150,6 +151,7 @@ const AddressModal = ({ savedAddress, onClose, onSave }: Props) => {
                 }
                 setEditing(!editing);
               }}
+              type="button"
               className="px-4 py-2 text-sm rounded bg-theme-blue text-white hover:bg-theme-bluehighlighted transition"
             >
               {editing ? "Set this Location" : "Edit Location"}
