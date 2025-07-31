@@ -5,7 +5,9 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth, signOut } from "@/auth";
-import { ErrorState } from "./definitions";
+import { ErrorState,Coordinates } from "./definitions";
+import { OrderStatuses } from "./definitions";
+
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -225,7 +227,7 @@ export async function cancelOrder(orderId: number): Promise<ErrorState> {
   try {
     await sql`
       UPDATE Orders
-      SET status = 'Cancelled'
+      SET status = ${OrderStatuses.Cancelled}
       WHERE id = ${orderId}
     `;
 
