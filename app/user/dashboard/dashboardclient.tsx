@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
+import useSWR from "swr";
 import { useRouter, useSearchParams } from "next/navigation";
 import Card from "../ui/dashboard/menu-item-card";
 import Cart from "../ui/dashboard/cart";
@@ -8,18 +9,23 @@ import OrderHandle from "../ui/dashboard/order-handle";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 import { MenuItem } from "../lib/definitions";
 import MenuItemModal from "../ui/dashboard/menu-item-modal";
+import Loading from "@/app/user/dashboard/loading";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type DashboardClientProps = {
   categories: string[];
-  menuItems: MenuItem[];
 };
 
-export default function DashboardClient({
-  categories,
-  menuItems,
-}: DashboardClientProps) {
+export default function DashboardClient({ categories }: DashboardClientProps) {
+  const { data: menuItems, error, isLoading } = useSWR<MenuItem[]>(
+    "/api/menu",
+    fetcher
+  );
+
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
+  const [searchValue, setSearchValue] = useState("");
 
   const categoryBarRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -27,11 +33,10 @@ export default function DashboardClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
-  const [searchValue, setSearchValue] = useState(searchQuery);
 
-  const filteredItems = menuItems.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    setSearchValue(searchQuery);
+  }, [searchQuery]);
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -58,9 +63,7 @@ export default function DashboardClient({
       for (const entry of entries) {
         if (entry.isIntersecting) {
           const sectionId = entry.target.getAttribute("id");
-          if (sectionId) {
-            setActiveCategory(sectionId);
-          }
+          if (sectionId) setActiveCategory(sectionId);
           break;
         }
       }
@@ -73,17 +76,13 @@ export default function DashboardClient({
 
     categories.forEach((category) => {
       const section = document.getElementById(category);
-      if (section) {
-        observer.observe(section);
-      }
+      if (section) observer.observe(section);
     });
 
     return () => {
       categories.forEach((category) => {
         const section = document.getElementById(category);
-        if (section) {
-          observer.unobserve(section);
-        }
+        if (section) observer.unobserve(section);
       });
     };
   }, [categories]);
@@ -110,9 +109,16 @@ export default function DashboardClient({
     }
   };
 
+  if (isLoading) return <Loading />
+  if (error || !menuItems) return <div className="text-center my-10">Failed to load menu.</div>;
+
+  const filteredItems = menuItems.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
-      {/* Search bar */}
+      {/* Search Bar */}
       <div className="flex justify-center mt-7">
         <div className="flex items-center gap-2 w-full max-w-5xl mx-auto mt-8 px-4">
           <MagnifyingGlassIcon className="text-gray-500 w-8 h-8" />
@@ -126,7 +132,7 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Category bar */}
+      {/* Category Bar */}
       <div
         ref={categoryBarRef}
         className="sticky top-0 bg-white z-10 overflow-x-auto whitespace-nowrap py-3 shadow-sm border-t border-b my-6 pl-6 md:pl-10"
@@ -141,8 +147,8 @@ export default function DashboardClient({
               }}
               onClick={() => scrollToCategory(category, idx)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${activeCategory === category
-                  ? "bg-theme-bluehighlighted text-white"
-                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                ? "bg-theme-bluehighlighted text-white"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
                 }`}
             >
               {category}
@@ -164,9 +170,7 @@ export default function DashboardClient({
                   <Card
                     key={item.id}
                     item={item}
-                    onClick={() => {
-                      setSelectedItem(item);
-                    }}
+                    onClick={() => setSelectedItem(item)}
                   />
                 ))}
               </div>
@@ -187,9 +191,7 @@ export default function DashboardClient({
                       <Card
                         key={item.id}
                         item={item}
-                        onClick={() => {
-                          setSelectedItem(item);
-                        }}
+                        onClick={() => setSelectedItem(item)}
                       />
                     ))
                   ) : (
