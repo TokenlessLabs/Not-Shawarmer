@@ -153,6 +153,7 @@ const CartPage = () => {
           acceptLabel="Yes, Place Order"
           cancelLabel="No, Go Back"
           isProcessing={isPending}
+          good={true}
         />
       )}
 
