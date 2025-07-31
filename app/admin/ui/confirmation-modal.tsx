@@ -10,6 +10,7 @@ type ConfirmModalProps = {
   acceptLabel?: string;
   cancelLabel?: string;
   isProcessing?: boolean;
+  good?: boolean;
 };
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -20,6 +21,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   acceptLabel = "Confirm",
   cancelLabel = "Cancel",
   isProcessing = false,
+  good = false,
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -40,7 +42,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <button
             onClick={onAccept}
             disabled={isProcessing}
-            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white bg-red-500 hover:bg-red-600 transition disabled:opacity-50"
+            className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white transition disabled:opacity-50 ${good ? "bg-theme-blue hover:theme-bluehighlighted" : " bg-red-500 hover:bg-red-600"}`}
           >
             {isProcessing ? "Processing..." : acceptLabel}
           </button>
