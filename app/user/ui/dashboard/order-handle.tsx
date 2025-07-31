@@ -8,13 +8,11 @@ import {
   OrderStatuses,
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
-import { reverseGeocode } from "../../lib/utils";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [addresses, setAddresses] = useState<string[]>([]);
 
   // 🔁 Real-time orders fetch every 10 seconds
   const {
@@ -24,19 +22,6 @@ const OrderHandle = () => {
   } = useSWR<Order[]>("/api/current-orders", fetcher, {
     refreshInterval: 10000,
   });
-
-  useEffect(() => {
-    if (!orders) return;
-
-    const fetchAddresses = async () => {
-      const geocodedAddresses = await Promise.all(
-        orders.map((order) => reverseGeocode(order.latitude, order.longitude))
-      );
-      setAddresses(geocodedAddresses);
-    };
-
-    fetchAddresses();
-  }, [orders]);
 
   return (
     <>
@@ -82,15 +67,7 @@ const OrderHandle = () => {
                     <span>Rs {total.toFixed(2)}</span>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-semibold text-theme-dark-blue">
-                      Delivering to:
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {addresses[index] ? addresses[index] : "Loading..."}
-                    </p>
-                  </div>
-
+                  {/* Status and Show Details Button */}
                   <div className="flex items-center justify-between mt-2">
                     <div>
                       <p className="text-sm font-semibold text-theme-dark-blue">
