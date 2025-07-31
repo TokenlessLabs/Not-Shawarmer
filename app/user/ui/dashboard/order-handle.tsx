@@ -7,12 +7,10 @@ import {
   OrderStatuses,
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
-import { reverseGeocode } from "../../lib/utils";
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [addresses, setAddresses] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -20,12 +18,6 @@ const OrderHandle = () => {
         const res = await fetch("/api/current-orders");
         const data: Order[] = await res.json();
         setOrders(data);
-
-        const geocodedAddresses = await Promise.all(
-          data.map((order) => reverseGeocode(order.latitude, order.longitude))
-        );
-
-        setAddresses(geocodedAddresses);
       } catch (error) {
         console.error("Failed to fetch current orders:", error);
       }
@@ -78,16 +70,6 @@ const OrderHandle = () => {
                   <div className="flex justify-between text-base font-semibold text-theme-dark-blue">
                     <span>Total:</span>
                     <span>Rs {total.toFixed(2)}</span>
-                  </div>
-
-                  {/* Address */}
-                  <div>
-                    <p className="text-sm font-semibold text-theme-dark-blue">
-                      Delivering to:
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {addresses[index] ? addresses[index] : "Loading..."}
-                    </p>
                   </div>
 
                   {/* Status and Show Details Button */}
