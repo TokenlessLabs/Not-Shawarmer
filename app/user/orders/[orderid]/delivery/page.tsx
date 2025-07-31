@@ -23,12 +23,13 @@ export default async function DeliveryPage(props: {
 
   return (
     <DeliveryClient
-      order={order}
+      orderId={order.id} // ✅ Pass the ID instead
       userLocation={userAddress}
       restaurantLocation={{
         longitude: restaurantAddress.longitude,
         latitude: restaurantAddress.latitude,
       }}
     />
+
   );
 }

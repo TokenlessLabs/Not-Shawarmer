@@ -1,32 +1,42 @@
 "use client";
 
 import React, { useState } from "react";
+import useSWR from "swr";
 import dynamic from "next/dynamic";
 import {
-  Order,
   Coordinates,
+  Order,
   OrderStatuses,
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
 
 const DynamicMap = dynamic(() => import("../ui/newmap"), { ssr: false });
 
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 type Props = {
-  order: Order | null;
+  orderId: number;
   userLocation: Coordinates;
   restaurantLocation: Coordinates;
 };
 
 export default function DeliveryClient({
-  order,
+  orderId,
   userLocation,
   restaurantLocation,
 }: Props) {
   const [location, setLocation] = useState<Coordinates>(restaurantLocation);
   const [eta, setEta] = useState<number | null>(null);
 
+  const { data: order, error, isLoading } = useSWR<Order>(
+    `/api/orders/${orderId}/delivery`,
+    fetcher,
+    { refreshInterval: 5000 } // Poll every 5 seconds
+  );
 
-  if (!order || !restaurantLocation) {
+
+
+  if (error || !order || !restaurantLocation) {
     return (
       <div className="p-10 text-center text-red-500">
         No active delivery found.
@@ -42,18 +52,11 @@ export default function DeliveryClient({
     { label: OrderStatuses.Delivered, colorClass: "bg-green-400" },
   ];
 
-  if (!order) {
-    return (
-      <div className="p-10 text-center text-red-500">
-        No active delivery found.
-      </div>
-    );
-  }
-
   let currentFound = false;
 
   return (
     <div className="h-screen w-full flex flex-col md:flex-row text-theme-dark-blue">
+      {/* Left Map Section */}
       <div className="w-full md:w-1/2 h-full flex-1">
         <DynamicMap
           editable={false}
@@ -63,10 +66,9 @@ export default function DeliveryClient({
           showPath={isDispatched}
           onEtaChange={setEta}
         />
-
       </div>
 
-      {/* Right - Delivery Info */}
+      {/* Right Delivery Info */}
       <div className="w-full md:w-1/2 flex flex-col px-6 py-8 space-y-6">
         <h2 className="text-2xl font-bold text-center">Delivery Status</h2>
 
