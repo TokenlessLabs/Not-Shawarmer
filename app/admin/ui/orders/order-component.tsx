@@ -13,6 +13,7 @@ import ConfirmModal from "../confirmation-modal";
 import { formatDateWithOffset } from "@/app/user/lib/utils";
 import toast from "react-hot-toast";
 import { reverseGeocode } from "@/app/user/lib/utils";
+import { OrderStatuses } from "@/app/user/lib/definitions";
 
 type Props = {
   order: Order;
@@ -36,7 +37,8 @@ export default function OrderComponent({ order }: Props) {
     }
   }, [order.latitude, order.longitude]);
 
-  const statuses = [
+
+  const statusOptions = [
     {
       label: "Cooking",
       value: 0,
@@ -53,25 +55,22 @@ export default function OrderComponent({ order }: Props) {
       color: "bg-green-100 text-green-800",
     },
   ];
+  
 
-  const currentStatusIndex = statuses.findIndex((s) => s.value ===  Number(order.status) );
- 
-  const currentStatus = statuses[currentStatusIndex] ?? statuses[0];
+const handleStatusChange = (newStatus: number) => {
+  const popUpStatus = statusOptions.find((s) => s.value === newStatus)?.label ?? "Updated";
 
-  const handleStatusClick = () => {
-    const nextIndex = (currentStatusIndex + 1) % statuses.length;
-    const nextStatus = statuses[nextIndex].value;
-    const popUpStatus = statuses[nextIndex].label;
+  startStatusTransition(async () => {
+    try {
+      await updateOrderStatus(order.id, newStatus);
+      toast.success(`Order marked as ${popUpStatus}`);
+    } catch (error) {
+      toast.error("Failed to update order status");
+    }
+  });
+};
 
-    startStatusTransition(async () => {
-      try {
-        await updateOrderStatus(order.id, nextStatus);
-        toast.success(`Order marked as ${popUpStatus}  `);
-      } catch (error) {
-        toast.error("Failed to update order status");
-      }
-    });
-  };
+ const currentStatus = statusOptions.find(option => option.value === order.status);
 
   const deliveryCharges = order.delivery_fee ?? 0;
   const subtotal =
@@ -119,32 +118,7 @@ export default function OrderComponent({ order }: Props) {
           </div>
 
           <div className="flex flex-col items-end space-y-2">
-            <div
-              className={`${ currentStatus.color } text-sm font-medium px-3 py-1 rounded-full cursor-pointer flex items-center space-x-2 ${
-                isUpdatingStatus ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={handleStatusClick}
-            >
-              <span>
-                {isUpdatingStatus ? "Updating..." : currentStatus.label}
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69ZM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69Z"
-                />
-              </svg>
-            </div>
-
-            {order.status !== 3 && order.status !== 2 && (
+           {order.status !== OrderStatuses.Cancelled && order.status !== OrderStatuses.Delivered && (
               <button
                 onClick={() => setShowConfirm(true)}
                 className="bg-red-500 text-white text-xs px-3 py-1 rounded shadow hover:bg-red-600 transition"
@@ -153,8 +127,49 @@ export default function OrderComponent({ order }: Props) {
                 {showConfirm ? "Cancelling..." : "Cancel Order"}
               </button>
             )}
+
+
+            <div className="relative inline-block">
+          <select
+            value={order.status}
+            onChange={(e) => handleStatusChange(Number(e.target.value))}
+            className={`appearance-none pr-6 ${currentStatus?.color} text-sm font-medium px-3 py-1 rounded-full cursor-pointer ${
+              isUpdatingStatus ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isUpdatingStatus}
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value} className="text-black">
+                {option.label}
+               
+              </option>
+            ))}
+          </select>
+
+          {/* Down arrow icon */}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-4 h-4 text-gray-600"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+              />
+            </svg>
           </div>
         </div>
+          </div>
+        </div>
+
+
+
+
 
         <div className="flex justify-between items-center mt-2">
           <button
@@ -204,7 +219,7 @@ export default function OrderComponent({ order }: Props) {
               </div>
             </div>
 
-            {order.status === 2 && order.deliveredat && (
+            {order.status === OrderStatuses.Delivered && order.deliveredat && (
               <div className="flex items-start gap-2">
                 <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
