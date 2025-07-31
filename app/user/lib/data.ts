@@ -258,7 +258,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     FROM Items
     LEFT JOIN ItemCategories ON Items.ID = ItemCategories.ItemID
     LEFT JOIN Categories ON ItemCategories.CategoryID = Categories.ID
-    WHERE isAvailable = ${true}
+    WHERE Items.isAvailable = ${true}
     ORDER BY id ASC;
   `;
   return result;
