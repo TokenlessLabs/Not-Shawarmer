@@ -9,6 +9,7 @@ import {
   OrderStatuses,
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
+import Loading from "../orders/loading";
 
 const DynamicMap = dynamic(() => import("../ui/newmap"), { ssr: false });
 
@@ -34,7 +35,7 @@ export default function DeliveryClient({
     { refreshInterval: 5000 } // Poll every 5 seconds
   );
 
-
+  if (isLoading) return <Loading />;
 
   if (error || !order || !restaurantLocation) {
     return (

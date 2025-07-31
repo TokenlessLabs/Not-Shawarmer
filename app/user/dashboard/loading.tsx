@@ -38,8 +38,8 @@ function CardSkeleton() {
 export default function Loading() {
   return (
     <div className="">
-      {/* Address Bar */}
-      <AddressBarSkeleton />
+      {/* Address Bar
+      <AddressBarSkeleton /> */}
 
       {/* Search Bar */}
       <SearchBarSkeleton />
@@ -56,9 +56,9 @@ export default function Loading() {
         </div>
       </div>
 
-     
-          <div className="mb-12 m-7">
-        
+
+      <div className="mb-12 m-7">
+
         <div className="h-7 bg-gray-300 rounded w-40 mb-2" />
         <div className="border-b-2 border-black-200 mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
@@ -68,8 +68,8 @@ export default function Loading() {
         </div>
       </div>
 
-          <div className="mb-12 m-7">
-        
+      <div className="mb-12 m-7">
+
         <div className="h-7 bg-gray-300 rounded w-40 mb-2" />
         <div className="border-b-2 border-black-200 mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
@@ -78,7 +78,7 @@ export default function Loading() {
           ))}
         </div>
       </div>
-        
+
 
     </div>
   );
