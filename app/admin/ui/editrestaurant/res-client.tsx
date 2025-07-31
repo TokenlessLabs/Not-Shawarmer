@@ -107,7 +107,7 @@ export default function RestaurantClient({
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
+                className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted cursor-pointer"
               >
                 {isPending ? "Saving..." : "Save"}
               </button>
@@ -115,7 +115,7 @@ export default function RestaurantClient({
                 type="button"
                 onClick={handleCancel}
                 disabled={isPending}
-                className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800"
+                className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800 cursor-pointer"
               >
                 Close
               </button>
@@ -124,7 +124,7 @@ export default function RestaurantClient({
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted"
+              className="bg-theme-blue text-white px-4 py-2 rounded-md font-medium hover:bg-theme-bluehighlighted cursor-pointer"
             >
               Edit
             </button>

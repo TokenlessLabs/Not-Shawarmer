@@ -140,11 +140,10 @@ export default function DashboardClient({
                 buttonRefs.current[idx] = el;
               }}
               onClick={() => scrollToCategory(category, idx)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-                activeCategory === category
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer ${activeCategory === category
                   ? "bg-theme-bluehighlighted text-white"
                   : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-              }`}
+                }`}
             >
               {category}
             </button>

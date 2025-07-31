@@ -81,7 +81,7 @@ export default function ProfileForm({
               <button
                 type="button"
                 onClick={() => setShowAddressModal(true)}
-                className="text-theme-blue hover:underline text-left text-sm"
+                className="text-theme-blue hover:underline text-left text-sm cursor-pointer"
               >
                 Edit Address
               </button>

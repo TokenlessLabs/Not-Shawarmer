@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { Order } from "../../lib/definitions";
+import { reverseGeocode } from "../../lib/utils";
+import { OrderStatuses } from "../../lib/definitions";
 import {
   ClockIcon,
   ShoppingBagIcon,
@@ -12,6 +14,19 @@ import { formatDateWithOffset } from "../../lib/utils";
 
 export default function OrderCompo({ order }: { order: Order }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [address, setAddress] = useState("Loading...");
+  
+     useEffect(() => {
+      async function fetchAddress() {
+        const addr = await reverseGeocode(order.latitude, order.longitude);
+        setAddress(addr);
+      }
+  
+      if (order.latitude && order.longitude) {
+        fetchAddress();
+      }
+    }, [order.latitude, order.longitude]);
+
   const deliveryCharges = order.delivery_fee ?? 0;
 
   const subtotal =
@@ -20,6 +35,13 @@ export default function OrderCompo({ order }: { order: Order }) {
 
   const total = subtotal + deliveryCharges;
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0);
+
+   const OrderStatusLabels = {
+  [OrderStatuses.Cooking]: "Cooking",
+  [OrderStatuses.Dispatched]: "Dispatched",
+  [OrderStatuses.Delivered]: "Delivered",
+  [OrderStatuses.Cancelled]: "Cancelled",
+};
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-theme-blue transition-all duration-300">
@@ -41,13 +63,13 @@ export default function OrderCompo({ order }: { order: Order }) {
         <span
           className={`
             text-sm font-medium px-4 py-1 rounded-full
-            ${order.status === "Cooking" ? "bg-yellow-100 text-yellow-800" : ""}
-            ${order.status === "Dispatched" ? "bg-blue-100 text-blue-800" : ""}
-            ${order.status === "Delivered" ? "bg-green-100 text-green-800" : ""}
-            ${order.status === "Cancelled" ? "bg-red-100 text-red-800" : ""}
+            ${order.status === OrderStatuses.Cooking    ? "bg-yellow-100 text-yellow-800" : ""}
+            ${order.status === OrderStatuses.Dispatched   ? "bg-blue-100 text-blue-800" : ""}
+            ${order.status === OrderStatuses.Delivered  ? "bg-green-100 text-green-800" : ""}
+            ${order.status === OrderStatuses.Cancelled ? "bg-red-100 text-red-800" : ""}
           `}
         >
-          {order.status}
+         {OrderStatusLabels[order.status]}
         </span>
       </div>
 
@@ -59,7 +81,7 @@ export default function OrderCompo({ order }: { order: Order }) {
           {isExpanded ? "Hide Details" : "View Details"}
         </button>
 
-        {["Cooking", "Dispatched"].includes(order.status) && (
+        {[OrderStatuses.Cooking, OrderStatuses.Dispatched].includes(order.status) && (
           <a
             href={`/user/orders/${order.id}/delivery/`}
             className="text-sm text-theme-blue underline ml-4"
@@ -101,11 +123,14 @@ export default function OrderCompo({ order }: { order: Order }) {
             <MapPinIcon className="h-5 w-5 text-gray-500 mt-0.5" />
             <div>
               <span className="font-semibold">Delivery Address:</span>{" "}
-              {order.address}
+              {order.latitude && order.longitude ?( <p>{address}</p>): (
+               <p>Not found </p>
+              
+            )}
             </div>
           </div>
 
-          {order.status === "Delivered" && order.deliveredat && (
+          {order.status === OrderStatuses.Delivered && order.deliveredat && (
             <div className="flex items-start gap-2 text-sm text-gray-700">
               <ClockIcon className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>

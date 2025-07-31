@@ -76,7 +76,7 @@ export default function AddressBar({ coordinates }: AddressBarProps) {
           </div>
           <button
             onClick={() => setOpenModal(true)}
-            className="bg-white text-theme-blue font-semibold px-4 py-2 rounded-md hover:scale-105 transition"
+            className="bg-white text-theme-blue font-semibold px-4 py-2 rounded-md hover:scale-105 transition cursor-pointer"
           >
             Edit
           </button>

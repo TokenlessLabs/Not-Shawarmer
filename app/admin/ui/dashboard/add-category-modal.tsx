@@ -49,14 +49,14 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ onClose }) => {
         <div className="mt-6 flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleAdd}
             disabled={isLoading}
-            className="bg-theme-blue text-white px-4 py-2 rounded hover:bg-theme-bluehighlighted transition disabled:opacity-50"
+            className="bg-theme-blue text-white px-4 py-2 rounded hover:bg-theme-bluehighlighted transition disabled:opacity-50 cursor-pointer"
           >
             {isLoading ? "Adding..." : "Add Category"}
           </button>
