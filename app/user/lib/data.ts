@@ -129,9 +129,10 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
-
-  return orders;
+//console.log("useris : " ,  userId)
+  return orders ;
 }
+
 
 export async function getAdminPastOrders(): Promise<Order[]> {
   const result = await sql`

@@ -1,9 +1,10 @@
-import { getCurrentOrders } from "../lib/data";
-import OrderCompo from "@/app/user/ui/orders/order-component";
+//import { getCurrentOrders } from "../lib/data";
+//import OrderCompo from "@/app/user/ui/orders/order-component";
 import Link from "next/link";
+import CurrentOrdersClient from "../ui/orders/CurrentOrdersClient";
 
 export default async function Currentorder() {
-  const orders = await getCurrentOrders();
+  // const orders = await getCurrentOrders();
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -19,11 +20,7 @@ export default async function Currentorder() {
         </Link>
       </div>
 
-      {!orders || orders.length === 0 ? (
-        <p className="text-center text-gray-500">No current orders found.</p>
-      ) : (
-        orders.map((order) => <OrderCompo key={order.id} order={order} />)
-      )}
+        <CurrentOrdersClient />
     </div>
   );
 }
