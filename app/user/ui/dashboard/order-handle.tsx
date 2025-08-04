@@ -1,62 +1,41 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   Order,
   OrderStatuses,
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
 
-const fetchOrders = async (): Promise<Order[]> => {
-  const res = await fetch("/api/current-orders");
-  if (!res.ok) throw new Error("Failed to fetch orders");
-  return res.json();
-};
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 const OrderHandle = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [orders, setOrders] = useState<Order[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // ✅ Fetch orders only when isOpen is true
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    const fetchAndSetOrders = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchOrders();
-        setOrders(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch orders");
-        setOrders(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchAndSetOrders();
-      interval = setInterval(fetchAndSetOrders, 10000); // fetch every 10 sec while open
-    }
-
-    return () => clearInterval(interval);
-  }, [isOpen]);
+  const {
+    data: orders,
+    error,
+    isLoading,
+  } = useSWR<Order[]>(
+    isOpen ? "/api/current-orders" : null,
+    fetcher,
+    { refreshInterval: isOpen ? 10000 : 0 }
+  );
 
   return (
     <>
       {/* Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full bg-white shadow-lg border-l border-gray-300 z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0 w-80" : "translate-x-full w-80"}`}
+        className={`fixed top-0 right-0 h-full bg-white shadow-lg border-l border-gray-300 z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0 w-80" : "translate-x-full w-80"
+          }`}
       >
         <div className="p-6 overflow-y-auto h-full space-y-8">
           {isLoading ? (
             <p className="text-sm text-gray-500">Loading orders...</p>
           ) : error ? (
-            <p className="text-sm text-red-500">{error}</p>
+            <p className="text-sm text-red-500">Failed to fetch orders.</p>
           ) : !orders || orders.length === 0 ? (
             <p className="text-sm text-gray-500">No active orders found.</p>
           ) : (
