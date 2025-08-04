@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import {
@@ -10,6 +10,9 @@ import {
   OrderStatusNames,
 } from "@/app/user/lib/definitions";
 import Loading from "../orders/loading";
+import { reverseGeocode } from "../lib/utils";
+import { MapPinIcon } from "@heroicons/react/24/solid";
+
 
 const DynamicMap = dynamic(() => import("../ui/newmap"), { ssr: false });
 
@@ -28,16 +31,32 @@ export default function DeliveryClient({
 }: Props) {
   const [location, setLocation] = useState<Coordinates>(restaurantLocation);
   const [eta, setEta] = useState<number | null>(null);
+  const [userAddressText, setUserAddressText] = useState<string>("");
 
-  const { data: order, error, isLoading } = useSWR<Order>(
-    `/api/orders/${orderId}/delivery`,
-    fetcher,
-    { refreshInterval: 5000 } // Poll every 5 seconds
-  );
+  const {
+    data: order,
+    error: orderError,
+    isLoading: orderLoading,
+  } = useSWR<Order>(`/api/orders/${orderId}/delivery`, fetcher, {
+    refreshInterval: 5000,
+  });
 
-  if (isLoading) return <Loading />;
+  const {
+    data: userAddress,
+    error: addressError,
+    isLoading: addressLoading,
+  } = useSWR<{ address: Coordinates }>("/api/address", fetcher);
 
-  if (error || !order || !restaurantLocation) {
+  useEffect(() => {
+    if (userAddress?.address) {
+      const { latitude, longitude } = userAddress.address;
+      reverseGeocode(latitude, longitude).then(setUserAddressText);
+    }
+  }, [userAddress]);
+
+  if (orderLoading) return <Loading />;
+
+  if (orderError || !order || !restaurantLocation) {
     return (
       <div className="p-10 text-center text-red-500">
         No active delivery found.
@@ -57,7 +76,7 @@ export default function DeliveryClient({
 
   return (
     <div className="h-screen w-full flex flex-col md:flex-row text-theme-dark-blue">
-      {/* Left Map Section */}
+      {/* Map Section */}
       <div className="w-full md:w-1/2 h-full flex-1">
         <DynamicMap
           editable={false}
@@ -69,10 +88,12 @@ export default function DeliveryClient({
         />
       </div>
 
-      {/* Right Delivery Info */}
+      {/* Delivery Info Section */}
       <div className="w-full md:w-1/2 flex flex-col px-6 py-8 space-y-6">
         <h2 className="text-2xl font-bold text-center">Delivery Status</h2>
 
+
+        {/* Status Steps */}
         <div className="flex flex-col gap-5 mt-4">
           {steps.map(({ label, colorClass }) => {
             if (!currentFound && label === order.status) currentFound = true;
@@ -111,6 +132,21 @@ export default function DeliveryClient({
             );
           })}
         </div>
+
+
+        {/* User Address */}
+        {addressLoading ? (
+          <p className="text-sm text-gray-500">Loading address...</p>
+        ) : addressError ? (
+          <p className="text-sm text-red-500">Failed to load address.</p>
+        ) : (
+          userAddressText && (
+            <div className="flex items-start gap-3 text-sm text-gray-700 mt-3">
+              <MapPinIcon className="h-5 w-5 text-theme-dark-blue shrink-0" />
+              <span>{userAddressText}</span>
+            </div>
+          )
+        )}
 
         <hr className="border-theme-dark-blue/30 my-4" />
 
