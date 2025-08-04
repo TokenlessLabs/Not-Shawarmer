@@ -1,9 +1,13 @@
-import Link from "next/link";
-import { getAdminCurrentOrders } from "@/app/user/lib/data";
-import OrderComponent from "../ui/orders/order-component";
+'use client'
 
-export default async function CurrentOrdersPage() {
-  const orders = await getAdminCurrentOrders();
+import Link from "next/link";
+//import { getAdminCurrentOrders } from "@/app/user/lib/data";
+import OrderComponent from "../ui/orders/order-component";
+import { useAdminOrders } from "../lib/admin-order";
+
+export default  function CurrentOrdersPage() {
+  const { orders  } = useAdminOrders();
+ // const orders = await getAdminCurrentOrders();
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -20,11 +24,13 @@ export default async function CurrentOrdersPage() {
       </div>
 
       {/* Render current orders */}
-      {orders.length === 0 ? (
-        <p className="text-center text-gray-500">No current orders found.</p>
-      ) : (
-        orders.map((order) => <OrderComponent key={order.id} order={order} />)
-      )}
+     {orders?.length === 0 ? (
+  <p className="text-center text-gray-500">No current orders found.</p>
+) : (
+  orders?.map((order) => (
+    <OrderComponent key={order.id} order={order} />
+  ))
+)}
     </div>
   );
 }

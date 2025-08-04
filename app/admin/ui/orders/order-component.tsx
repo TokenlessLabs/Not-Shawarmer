@@ -14,6 +14,7 @@ import { formatDateWithOffset } from "@/app/user/lib/utils";
 import toast from "react-hot-toast";
 import { reverseGeocode } from "@/app/user/lib/utils";
 import { OrderStatuses } from "@/app/user/lib/definitions";
+import { useAdminOrders } from "../../lib/admin-order";
 
 type Props = {
   order: Order;
@@ -56,14 +57,15 @@ export default function OrderComponent({ order }: Props) {
     },
   ];
   
-
-const handleStatusChange = (newStatus: number) => {
+  const { mutate  } = useAdminOrders();
+const handleStatusChange = (newStatus: number ) => {
   const popUpStatus = statusOptions.find((s) => s.value === newStatus)?.label ?? "Updated";
 
   startStatusTransition(async () => {
     try {
       await updateOrderStatus(order.id, newStatus);
       toast.success(`Order marked as ${popUpStatus}`);
+        mutate();
     } catch (error) {
       toast.error("Failed to update order status");
     }
