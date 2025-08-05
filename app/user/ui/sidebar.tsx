@@ -1,8 +1,10 @@
+
 import React from "react";
 import NavLinks from "@/app/ui/sidebar/navlinks";
-import { signOut, auth } from "@/auth";
-import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { auth } from "@/auth";
 import { Roles } from "../lib/definitions";
+import LogoutButton from "@/app/api/components/LogoutButton";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const userLinks = [
   {
@@ -40,9 +42,7 @@ const adminLinks = [
 
 const Sidebar = async () => {
   const session = await auth();
-
   const role = session?.user?.role;
-
   const navItems = role === Roles.Admin ? adminLinks : userLinks;
 
   return (
@@ -55,17 +55,8 @@ const Sidebar = async () => {
 
       <div className="border-t-3 border-theme-dark-blue mt-4 mb-3 -mx-2"></div>
 
-      <form
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}
-      >
-        <button className="flex items-center gap-4 text-xl px-4 py-3 rounded-lg transition-all duration-200 text-red-400 hover:text-white hover:bg-red-400 font-medium w-full text-left cursor-pointer">
-          <ArrowRightStartOnRectangleIcon className="h-10 w-10" />
-          <span>Logout</span>
-        </button>
-      </form>
+      {/* Only keep the client LogoutButton */}
+      <LogoutButton />
     </aside>
   );
 };
