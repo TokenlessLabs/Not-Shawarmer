@@ -1,3 +1,4 @@
+// profile-client.tsx
 "use client";
 
 import React, {
@@ -10,10 +11,14 @@ import { updateUser, deleteUserAccountAndLogout } from "../../lib/actions";
 import { User, ErrorState, Roles } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 import ConfirmModal from "@/app/admin/ui/confirmation-modal";
+import { useUser } from "../../lib/hooks/useUser";
+import ProfileLoadingSkeleton from "@/app/profile/loading-skeleton";
 
-export default function ProfileClient({ user }: { user: User }) {
+export default function ProfileClient() {
+  const { user, isLoading, isError } = useUser();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(user);
+  const [formData, setFormData] = useState<User | null>(null);
+
   const initialState: ErrorState = {
     success: undefined,
     message: null,
@@ -23,14 +28,19 @@ export default function ProfileClient({ user }: { user: User }) {
     updateUser,
     initialState
   );
-  const [actionState, setActionState] = useState<ErrorState>({
-    success: false,
-    message: null,
-    errors: [],
-  });
-
+  const [actionState, setActionState] = useState<ErrorState>(initialState);
   const [showModal, setShowModal] = useState(false);
   const [isPendingDelete, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    setActionState(state);
+  }, [state]);
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -39,22 +49,21 @@ export default function ProfileClient({ user }: { user: User }) {
   };
 
   const handleChange = (field: keyof User, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (formData) {
+      setFormData((prev) => ({ ...prev!, [field]: value }));
+    }
   };
-
-  useEffect(() => {
-    setActionState(state);
-  }, [state]);
 
   const resetForm = () => {
-    setFormData(user);
-    setIsEditing(false);
-    setActionState({
-      message: null,
-      success: false,
-      errors: [],
-    });
+    if (user) {
+      setFormData(user);
+      setIsEditing(false);
+      setActionState(initialState);
+    }
   };
+
+  if (isLoading || !formData) return <ProfileLoadingSkeleton />
+  if (isError) return <p>Failed to load user data.</p>;
 
   return (
     <form
@@ -98,7 +107,7 @@ export default function ProfileClient({ user }: { user: User }) {
             </button>
             <button
               type="button"
-              onClick={() => resetForm()}
+              onClick={resetForm}
               className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-800 cursor-pointer"
             >
               Close
@@ -113,7 +122,7 @@ export default function ProfileClient({ user }: { user: User }) {
             >
               Edit
             </button>
-            {user.role === Roles.User && (
+            {formData.role === Roles.User && (
               <button
                 type="button"
                 onClick={() => setShowModal(true)}
