@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import useSWR from "swr";
 import {
   Squares2X2Icon,
   ShoppingBagIcon,
@@ -11,6 +10,7 @@ import {
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
+import { useUser } from "../../user/lib/hooks/useUser";
 
 type NavItem = {
   name: string;
@@ -30,12 +30,11 @@ const iconMap: Record<string, React.ElementType> = {
   Statistics: ChartBarIcon,
 };
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 const NavLinks: React.FC<NavLinksProps> = ({ items }) => {
   const pathname = usePathname();
-  const {data} =useSWR('api/user/profile' , fetcher);
-  const usename = data?.name ;
+  const {user} =useUser();
+  console.log("User from hook:", user);
+  const usename = user?.name ;
 
   return (
     <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
@@ -43,7 +42,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ items }) => {
         const isActive = pathname.startsWith(href);
         const Icon = iconMap[name];
 
-         const displayName = name === "Profile" && usename ? `${name} (${usename})` : name;
+         const displayName =( name === "Profile" && usename ? `${name} (${usename})` : name);
 
         return (
           <Link
