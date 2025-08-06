@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
 import React from "react";
 import NavLinks from "@/app/ui/sidebar/navlinks";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useUser } from "../lib/hooks/useUser";
 import { Roles } from "../lib/definitions";
-import { handleSignOut } from "../lib/actions";
+import { logout } from "@/app/signup/actions";
 
 const userLinks = [
   { name: "Dashboard", href: "/user/dashboard" },
@@ -27,9 +27,7 @@ const Sidebar = () => {
     return <div className="p-4 text-gray-500">Loading sidebar...</div>;
   }
 
-  const navItems =
-    user.role === Roles.Admin ? adminLinks : userLinks;
-
+  const navItems = user.role === Roles.Admin ? adminLinks : userLinks;
   const username = user.username;
 
   return (
@@ -42,12 +40,22 @@ const Sidebar = () => {
 
       <div className="border-t-3 border-theme-dark-blue mt-4 mb-3 -mx-2"></div>
 
-      <form action={handleSignOut}>
+      {/* ✅ Use the server action from separate file */}
+      <form action={logout}>
         <button className="flex items-center gap-4 text-xl px-4 py-3 rounded-lg transition-all duration-200 text-red-400 hover:text-white hover:bg-red-400 font-medium w-full text-left cursor-pointer">
           <ArrowRightStartOnRectangleIcon className="h-10 w-10" />
           <span>Logout</span>
         </button>
       </form>
+
+      {/* Local logout effect */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            localStorage.setItem('logout', Date.now().toString());
+          `,
+        }}
+      />
     </aside>
   );
 };
