@@ -1,49 +1,36 @@
+"use client";
+
 import React from "react";
 import NavLinks from "@/app/ui/sidebar/navlinks";
-import { signOut, auth } from "@/auth";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { useUser } from "../lib/hooks/useUser";
 import { Roles } from "../lib/definitions";
+import { handleSignOut } from "../lib/actions";
 
 const userLinks = [
-  {
-    name: "Dashboard",
-    href: "/user/dashboard",
-  },
-  {
-    name: "Orders",
-    href: "/user/orders",
-  },
-  {
-    name: "Profile",
-    href: "/profile",
-  },
+  { name: "Dashboard", href: "/user/dashboard" },
+  { name: "Orders", href: "/user/orders" },
+  { name: "Profile", href: "/profile" },
 ];
 
 const adminLinks = [
-  {
-    name: "Dashboard",
-    href: "/admin/dashboard",
-  },
-  {
-    name: "Orders",
-    href: "/admin/orders",
-  },
-  {
-    name: "Edit Restaurant",
-    href: "/admin/editrestaurant",
-  },
-  {
-    name: "Profile",
-    href: "/profile",
-  },
+  { name: "Dashboard", href: "/admin/dashboard" },
+  { name: "Orders", href: "/admin/orders" },
+  { name: "Edit Restaurant", href: "/admin/editrestaurant" },
+  { name: "Profile", href: "/profile" },
 ];
 
-const Sidebar = async () => {
-  const session = await auth();
+const Sidebar = () => {
+  const { user, isLoading } = useUser();
 
-  const role = session?.user?.role;
+  if (isLoading || !user) {
+    return <div className="p-4 text-gray-500">Loading sidebar...</div>;
+  }
 
-  const navItems = role === Roles.Admin ? adminLinks : userLinks;
+  const navItems =
+    user.role === Roles.Admin ? adminLinks : userLinks;
+
+  const username = user.username;
 
   return (
     <aside className="h-full w-full bg-theme-light-blue text-white px-2 pt-6 pb-3 flex flex-col border-r-3 border-theme-dark-blue">
@@ -51,7 +38,7 @@ const Sidebar = async () => {
 
       <div className="border-t-3 border-theme-dark-blue mt-6 mb-6 -mx-2"></div>
 
-      <NavLinks items={navItems} />
+      <NavLinks items={navItems} username={username} />
 
       <div className="border-t-3 border-theme-dark-blue mt-4 mb-3 -mx-2"></div>
 
