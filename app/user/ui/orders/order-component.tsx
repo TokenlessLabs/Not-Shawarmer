@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect  } from "react";
 import { Order } from "../../lib/definitions";
 import { reverseGeocode } from "../../lib/utils";
 import { OrderStatuses } from "../../lib/definitions";
@@ -11,12 +11,23 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/outline";
 import { formatDateWithOffset } from "../../lib/utils";
+import { StarIcon as StarSolid , StarIcon as StarOutline } from '@heroicons/react/20/solid';
+import ConfirmModal from "@/app/admin/ui/confirmation-modal";
+import { UpdateOrderRating } from "../../lib/actions";
 
-
-
-export default function OrderCompo({ order }: { order: Order }) {
+type OrderCompoProps = {
+  order: Order;
+  user: string;
+};
+export default function OrderCompo({ order , user }: OrderCompoProps  ) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [address, setAddress] = useState("Loading...");
+  const [rating, setRating] = useState<number>(Number(order.rating ?? 0));
+  const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [showModal, setShowModal] = useState<boolean>(false);
+
+    
+ 
 
   useEffect(() => {
     async function fetchAddress() {
@@ -49,6 +60,7 @@ export default function OrderCompo({ order }: { order: Order }) {
     [OrderStatuses.Delivered]: "Delivered",
     [OrderStatuses.Cancelled]: "Cancelled",
   };
+ 
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 mb-4 border-l-4 border-theme-blue transition-all duration-300">
@@ -67,7 +79,8 @@ export default function OrderCompo({ order }: { order: Order }) {
           </div>
         </div>
 
-        <span
+     
+         <span
           className={`
             text-sm font-medium px-4 py-1 rounded-full
             ${
@@ -114,8 +127,55 @@ export default function OrderCompo({ order }: { order: Order }) {
             View Delivery Status
           </a>
         )}
-      </div>
+         {order.status === OrderStatuses.Delivered && rating === 0 && user != "admin" && (
+              <p className="text-sm text-gray-500 mb-2">Would you like to rate this order?</p>
+        )}  
+       
+ {order.status === OrderStatuses.Delivered && user != "admin" &&(
+               <div className="flex gap-1 mt-4 text-xl">
+  {Array.from({ length: 5 }).map((_, index) => (
+    <button
+      key={index}
+      onClick={() => {
+        if (rating === 0) {
+          setSelectedRating(index + 1);
+          setShowModal(true);
+        }
+      }}
+      className={`transition-colors ${
+        rating === 0 ? "cursor-pointer hover:text-yellow-400" : "cursor-default"
+      }`}
+      disabled={rating !== 0}
+    >
+      {index <rating ? (
+        <StarSolid className="w-6 h-6 text-yellow-500" />
+      ) : (
+        <StarOutline className="w-6 h-6 text-gray-400" />
+      )}
+    </button>
+  ))}
+</div>
+)}  </div>
 
+     
+{showModal && (
+  <ConfirmModal
+    heading="Confirm Your Rating"
+    message={`Are you sure you want to give this order a ${selectedRating}-star rating?`}
+    acceptLabel="Yes, Rate"
+    cancelLabel="Cancel"
+    good={true}
+    onAccept={async () => {
+      setRating(selectedRating);
+      setShowModal(false);
+      await UpdateOrderRating(order.id, selectedRating); 
+    }}
+    onCancel={() => {
+      setSelectedRating(0);
+      setShowModal(false);
+    }}
+  />
+)}
       {isExpanded && (
         <div className="mt-4 space-y-4">
           <div>

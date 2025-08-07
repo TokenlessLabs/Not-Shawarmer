@@ -52,6 +52,7 @@ export type Order = {
   instructions: string | null;
   longitude: number;
   latitude: number;
+  rating :number ;
   delivery_fee: number;
   items: OrderItem[];
 };
@@ -87,3 +88,4 @@ export type Credentials = {
   username: string;
   password: string;
 };
+

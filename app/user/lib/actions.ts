@@ -420,3 +420,17 @@ export async function deleteUserAccountAndLogout() {
 
     await signOut({ redirectTo: "/" });
 }
+
+
+export async function UpdateOrderRating(orderId:number , rating :number) {
+  try{await sql `
+    Update Orders set rating = ${rating}
+    where id= ${orderId}` ;
+  revalidatePath('user/orders/past');
+  return { success : true } ;
+}
+  catch(error){
+    return { success: false, message: "Failed to update rating" };
+  }
+
+}

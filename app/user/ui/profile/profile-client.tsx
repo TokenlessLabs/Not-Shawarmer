@@ -11,7 +11,7 @@ import { updateUser, deleteUserAccountAndLogout } from "../../lib/actions";
 import { User, ErrorState, Roles } from "../../lib/definitions";
 import ProfileForm from "./profile-form";
 import ConfirmModal from "@/app/admin/ui/confirmation-modal";
-import { useUser } from "../../lib/hooks/useUser";
+import { useUser } from "../../lib/SWR-hooks/useUser";
 import ProfileLoadingSkeleton from "@/app/profile/loading-skeleton";
 
 export default function ProfileClient() {

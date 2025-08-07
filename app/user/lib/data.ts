@@ -39,6 +39,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
       o.instructions,
       o.latitude,
       o.longitude,
+      o.rating,
       r.delivery_fee,
       COALESCE(
         json_agg(
@@ -59,6 +60,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
     GROUP BY o.id, r.delivery_fee
     ORDER BY o.createdAt DESC;
   `;
+   //console.log(result[0]);
 
   const orders: Order[] = result.map((row):Order => ({
     id: row.id,
@@ -70,6 +72,7 @@ export async function getPastOrders(): Promise<Order[] | null> {
     instructions: row.instructions,
     longitude: row.longitude,
     latitude: row.latitude,
+    rating: row.rating,  
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -126,10 +129,11 @@ export async function getCurrentOrders(): Promise<Order[] | null> {
     instructions: row.instructions,
     longitude: row.longitude,
     latitude: row.latitude,
+    rating : row.rating,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
-//console.log("useris : " ,  userId)
+//console.log("user_is : " ,  userId)
   return orders ;
 }
 
@@ -177,6 +181,7 @@ export async function getAdminPastOrders(): Promise<Order[]> {
     instructions: row.instructions,
     longitude: row.longitude,
     latitude: row.latitude,
+    rating : row.rating,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -227,6 +232,7 @@ export async function getAdminCurrentOrders(): Promise<Order[]> {
     instructions: row.instructions,
     longitude: row.longitude,
     latitude: row.latitude,
+    rating : row.rating,
     delivery_fee: parseFloat(row.delivery_fee),
     items: row.items ?? [],
   }));
@@ -311,6 +317,7 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
     instructions: order.instructions,
     latitude: order.latitude,
     longitude: order.longitude,
+    rating : order.rating,
     delivery_fee: parseFloat(order.delivery_fee),
     items: order.items ?? [],
   };
