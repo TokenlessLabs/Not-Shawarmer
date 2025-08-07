@@ -5,7 +5,7 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth, signOut } from "@/auth";
-import { ErrorState,Coordinates } from "./definitions";
+import { ErrorState} from "./definitions";
 import { OrderStatuses } from "./definitions";
 
 
@@ -434,3 +434,9 @@ export async function UpdateOrderRating(orderId:number , rating :number) {
   }
 
 }
+
+
+export async function handleSignOut() {
+  await signOut({ redirectTo: "/" });
+}
+

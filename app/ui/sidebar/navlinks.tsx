@@ -10,7 +10,9 @@ import {
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
+
 import { useUser } from "../../user/lib/SWR-hooks/useUser";
+
 
 type NavItem = {
   name: string;
@@ -19,8 +21,8 @@ type NavItem = {
 
 type NavLinksProps = {
   items: NavItem[];
+  username?: string;
 };
-
 
 const iconMap: Record<string, React.ElementType> = {
   Dashboard: Squares2X2Icon,
@@ -30,27 +32,26 @@ const iconMap: Record<string, React.ElementType> = {
   Statistics: ChartBarIcon,
 };
 
-const NavLinks: React.FC<NavLinksProps> = ({ items }) => {
+const NavLinks: React.FC<NavLinksProps> = ({ items, username }) => {
   const pathname = usePathname();
-  const {user} =useUser();
-  console.log("User from hook:", user);
-  const usename = user?.name ;
-
+  console.log(username)
   return (
     <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
       {items.map(({ name, href }) => {
-        const isActive = pathname.startsWith(href);
-        const Icon = iconMap[name];
 
-         const displayName =( name === "Profile" && usename ? `${name} (${usename})` : name);
+        const isActive = pathname ? pathname.startsWith(href) : false;
+
+        const Icon = iconMap[name] || Squares2X2Icon; // Default icon fallback
+
+
+        const displayName = name === "Profile" && username ? `${name} (${username})` : name;
 
         return (
           <Link
             key={name}
             href={href}
-            className={`w-full rounded-lg transition-all duration-200 ${
-              isActive ? "bg-theme-blue text-white" : "hover:bg-blue-200"
-            }`}
+            className={`w-full rounded-lg transition-all duration-200 ${isActive ? "bg-theme-blue text-white" : "hover:bg-blue-200"
+              }`}
           >
             <div className="flex items-center gap-4 text-xl px-4 py-3 font-medium">
               <Icon className="h-10 w-10" />

@@ -66,11 +66,6 @@ export default function Loading() {
   // Default orders skeleton
   return (
     <div className="min-h-screen bg-gray-100 p-5 animate-pulse mt-3">
-      <div className="flex justify-center mb-6 space-x-6">
-        <div className="w-32 h-6 bg-blue-200 rounded" />
-        <div className="w-32 h-6 bg-gray-300 rounded" />
-      </div>
-
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
           <div

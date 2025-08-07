@@ -6,6 +6,7 @@ import {signupSchema } from "./schema"
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { ErrorState } from "../user/lib/definitions";
+import { signOut } from '@/auth'
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -97,4 +98,9 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+
+export async function logout() {
+  await signOut({ redirectTo: '/' })
 }

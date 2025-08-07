@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+
 import OrderStatusListener from "./compoent/orderlistner";
 
+
+import SessionSync from "./user/ui/session-sync";
 
 
 const geistSans = Geist({
@@ -38,7 +41,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster position="top-right" />
+
         <OrderStatusListener/>
+
+        <SessionSync /> {/* 👈 Add this here */}
+
         {children}
       </body>
     </html>
