@@ -21,7 +21,7 @@ export default async function Pastorder() {
       {orders.length === 0 ? (
         <p className="text-center text-gray-500">No past orders found.</p>
       ) : (
-        orders.map((order) => <OrderCompo key={order.id} order={order} />)
+        orders.map((order) => <OrderCompo key={order.id} order={order} user={"admin"} />)
       )}
     </div>
   );

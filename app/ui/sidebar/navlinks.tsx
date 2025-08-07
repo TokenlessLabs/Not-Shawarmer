@@ -11,6 +11,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
+import { useUser } from "../../user/lib/SWR-hooks/useUser";
+
+
 type NavItem = {
   name: string;
   href: string;

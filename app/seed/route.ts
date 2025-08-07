@@ -77,9 +77,17 @@ CREATE TABLE Orders (
   instructions TEXT,
   latitude NUMERIC(9,6),
   longitude NUMERIC(9,6),
+  rating SMALLINT DEFAULT 0 CHECK (status Between 0 AND 5), -- 0: Unavailable, 1: onestar, 3: threestar , 5: fivestar,
   FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 `;
+
+// await sql`
+// CREATE TABLE Ratings(
+// id SERIAL PRIMARY KEY
+// itemRating INTEGER
+
+//  )`
 
   await sql`
 CREATE TABLE OrderDetails (
@@ -150,6 +158,8 @@ async function seedRestaurants() {
       ('Not Shawarmer', 31.5216, 74.3568, '10:00', '22:00', 'Authentic Arabian Cuisine', '03334567898', 200);
   `;
 }
+
+
 
 async function seedCategories() {
   const categories = ["Starters", "Fast Food", "Italian", "Drinks", "Desserts"];
