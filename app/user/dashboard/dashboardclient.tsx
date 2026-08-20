@@ -53,7 +53,7 @@ export default function DashboardClient({ categories }: DashboardClientProps) {
     }, 300);
 
     return () => clearTimeout(debounce);
-  }, [searchValue]);
+  }, [router, searchParams, searchValue]);
 
   useEffect(() => {
     const observerOptions = {

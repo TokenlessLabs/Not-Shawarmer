@@ -40,13 +40,11 @@ type Props = {
 
 export default function Map({
   location,
-  onLocationChange,
-  editable = false,
   userLocation = null,
   showPath = false,
   onEtaChange,
 }: Props) {
-  const [currentLocation, setCurrentLocation] = useState<Coordinates>(location);
+  const currentLocation = location;
   const [routePoints, setRoutePoints] = useState<Coordinates[]>([]);
 
   useEffect(() => {

@@ -3,7 +3,7 @@
 import React from "react";
 import NavLinks from "@/app/ui/sidebar/navlinks";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
-import { useUser } from "../lib/hooks/useUser";
+import { useUser } from "../lib/SWR-hooks/useUser";
 import { Roles } from "../lib/definitions";
 import { logout } from "@/app/signup/actions";
 

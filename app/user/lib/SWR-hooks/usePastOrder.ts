@@ -2,16 +2,14 @@
 import useSWR from "swr";
 import { Order } from "@/app/user/lib/definitions";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-export function usePastOrdersClient() {
+export function usePastOrdersClient(enabled = true) {
   const { data, error, isLoading, mutate } = useSWR<Order[]>(
-    "/api/user/pastOrder", 
+    enabled ? "/api/user/pastOrder" : null,
     fetcher,
     {
       refreshInterval: 3000,
     }
   );
-
-  console.log("Fetched orders from SWR:", data); 
 
   return {
     orders: data,

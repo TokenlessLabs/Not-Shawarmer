@@ -5,10 +5,11 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { usePastOrdersClient } from '../user/lib/SWR-hooks/usePastOrder';
 import { useRouter } from 'next/navigation'; 
+import { usePathname } from 'next/navigation';
 
 export default function OrderStatusListener() {
-  const { orders } = usePastOrdersClient(); 
-  console.log("orders from global compo " , orders)
+  const pathname = usePathname();
+  const { orders } = usePastOrdersClient(pathname.startsWith("/user"));
   const prevOrderStatus = useRef<Map<number, number>>(new Map());
   const hasLoadedOnce = useRef(false);
     const router = useRouter();
@@ -31,10 +32,9 @@ export default function OrderStatusListener() {
     if (order.status === 2 && prevStatus !== 2) {
       // Order just transitioned to "Delivered"
       toast(
-        (t) => (
+        () => (
           <div
             onClick={() => {
-              console.log("Toast clicked");
               router.push('/user/orders/past');
               //toast.dismiss(t.id);
             }}
@@ -54,7 +54,7 @@ export default function OrderStatusListener() {
     // Update status for next comparison
     prevOrderStatus.current.set(order.id, order.status);
   }
-}, [orders]);
+}, [orders, router]);
 //console.log('orders:', orders);
 
 
@@ -98,5 +98,5 @@ export default function OrderStatusListener() {
 //     }
 //   }, [orders]);
 
-//   return null; 
+  return null;
 }

@@ -1,5 +1,4 @@
 "use client";
-import AddressBarSkeleton from "../ui/dashboard/address-bar-skeleton";
 import React from "react";
 
 // 🟦 Search bar skeleton

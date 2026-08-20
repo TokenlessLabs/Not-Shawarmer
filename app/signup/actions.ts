@@ -61,24 +61,33 @@ export async function signupUser(
       VALUES (${name}, ${email}, ${phone}, ${hashedPassword})
     `;
 
-    await signIn('credentials', {
-      username: name,
-      password,
-      redirect: true,
-      callbackUrl: '/',
-    });
-
-    return {
-      message: null,
-      success: true,
-    };
   } catch (error) {
     console.error("Signup Error:", error);
     return {
       message: "Something went wrong. Please try again later.",
-      success: true,
+      success: false,
     };
   }
+
+  try {
+    await signIn("credentials", {
+      username: name,
+      password,
+      redirectTo: "/",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return {
+        message: "Your account was created, but automatic sign-in failed.",
+        success: false,
+      };
+    }
+
+    // A successful Next.js redirect is implemented as a thrown control signal.
+    throw error;
+  }
+
+  return { message: null, success: true };
 }
 
 export async function authenticate(

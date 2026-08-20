@@ -11,8 +11,6 @@ export function useCustomerOrders() {
     }
   );
 
-  console.log("Fetched orders from SWR:", data); 
-
   return {
     orders: data,
     isLoading,

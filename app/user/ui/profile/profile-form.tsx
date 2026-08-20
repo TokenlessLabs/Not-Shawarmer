@@ -6,7 +6,6 @@ import AddressModal from "../dashboard/address-modal";
 import Link from "next/link";
 import { updateUserAddress } from "../../lib/actions";
 import { reverseGeocode } from "../../lib/utils";
-import Loading from "@/app/profile/loading-skeleton";
 
 export default function ProfileForm({
   formData,

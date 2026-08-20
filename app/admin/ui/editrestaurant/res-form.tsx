@@ -34,7 +34,7 @@ export default function RestaurantForm({
             formData.longitude
           );
           setGeoAddress(address);
-        } catch (err) {
+        } catch {
           setGeoAddress("Failed to fetch address");
         }
       } else {
