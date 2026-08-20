@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const orders = await getAdminCurrentOrders();
     return NextResponse.json(orders);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }

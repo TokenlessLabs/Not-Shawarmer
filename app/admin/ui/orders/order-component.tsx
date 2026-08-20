@@ -66,7 +66,7 @@ const handleStatusChange = (newStatus: number ) => {
       await updateOrderStatus(order.id, newStatus);
       toast.success(`Order marked as ${popUpStatus}`);
         mutate();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update order status");
     }
   });

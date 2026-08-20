@@ -107,7 +107,7 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
     if (state.success) {
       onClose();
     }
-  }, [state.success]);
+  }, [state.success, onClose]);
 
   const handleDelete = async () => {
     setIsDeleting(true);

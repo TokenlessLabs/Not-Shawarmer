@@ -393,7 +393,6 @@ export async function placeOrder(
       `;
     }
 
-    console.log("✅ Order placed successfully with ID:", orderId);
     return { success: true, orderId };
 
   } catch (error: unknown) {
@@ -422,17 +421,35 @@ export async function deleteUserAccountAndLogout() {
 }
 
 
-export async function UpdateOrderRating(orderId:number , rating :number) {
-  try{await sql `
-    Update Orders set rating = ${rating}
-    where id= ${orderId}` ;
-  revalidatePath('user/orders/past');
-  return { success : true } ;
-}
-  catch(error){
-    return { success: false, message: "Failed to update rating" };
+export async function UpdateOrderRating(orderId: number, rating: number) {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return { success: false, message: "User not authenticated" };
   }
 
+  if (!Number.isInteger(orderId) || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return { success: false, message: "Invalid order or rating" };
+  }
+
+  try {
+    const result = await sql`
+      UPDATE Orders
+      SET rating = ${rating}
+      WHERE id = ${orderId} AND userId = ${userId} AND status >= 2
+      RETURNING id
+    `;
+
+    if (result.length === 0) {
+      return { success: false, message: "Order not found" };
+    }
+
+    revalidatePath("/user/orders/past");
+    return { success: true };
+  } catch {
+    return { success: false, message: "Failed to update rating" };
+  }
 }
 
 

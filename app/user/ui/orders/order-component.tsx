@@ -43,7 +43,7 @@ export default function OrderCompo({ order , user }: OrderCompoProps  ) {
     ) {
       fetchAddress();
     }
-  }, [isExpanded, order.latitude, order.longitude]);
+  }, [address, isExpanded, order.latitude, order.longitude]);
 
   const deliveryCharges = order.delivery_fee ?? 0;
 

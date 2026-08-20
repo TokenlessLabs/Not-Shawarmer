@@ -151,7 +151,7 @@ function MapInitializer({
 
   useEffect(() => {
     mapRef.current = map;
-  }, [map]);
+  }, [map, mapRef]);
 
   useEffect(() => {
     if (center) {

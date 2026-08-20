@@ -3,9 +3,10 @@ import { getOrderById } from "@/app/user/lib/data";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { orderid: string } }
+  { params }: { params: Promise<{ orderid: string }> }
 ) {
-  const orderId = parseInt(params.orderid, 10);
+  const { orderid } = await params;
+  const orderId = parseInt(orderid, 10);
 
   if (isNaN(orderId)) {
     return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });

@@ -11,9 +11,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
-import { useUser } from "../../user/lib/SWR-hooks/useUser";
-
-
 type NavItem = {
   name: string;
   href: string;
@@ -34,7 +31,6 @@ const iconMap: Record<string, React.ElementType> = {
 
 const NavLinks: React.FC<NavLinksProps> = ({ items, username }) => {
   const pathname = usePathname();
-  console.log(username)
   return (
     <nav className="flex flex-col gap-4 flex-grow text-theme-dark-blue">
       {items.map(({ name, href }) => {

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 
 const fetcher = () => fetch("/api/session").then((res) => {
@@ -12,6 +12,7 @@ const fetcher = () => fetch("/api/session").then((res) => {
 
 export default function SessionSync() {
     const router = useRouter();
+    const pathname = usePathname();
     const { data: session, mutate } = useSWR("/api/session", fetcher, {
         refreshInterval: 0,
     });
@@ -30,10 +31,13 @@ export default function SessionSync() {
 
     // Redirect if no session
     useEffect(() => {
-        if (session === null) {
+        const isProtectedRoute = pathname.startsWith("/user") ||
+            pathname.startsWith("/admin") || pathname.startsWith("/profile");
+
+        if (session === null && isProtectedRoute) {
             router.push("/");
         }
-    }, [session, router]);
+    }, [pathname, session, router]);
 
     return null;
 }

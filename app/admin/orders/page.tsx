@@ -6,7 +6,7 @@ import OrderComponent from "../ui/orders/order-component";
 import { useAdminOrders } from "../lib/admin-order";
 
 export default  function CurrentOrdersPage() {
-  const { orders  } = useAdminOrders();
+  const { orders, isLoading, isError } = useAdminOrders();
  // const orders = await getAdminCurrentOrders();
 
   return (
@@ -24,7 +24,11 @@ export default  function CurrentOrdersPage() {
       </div>
 
       {/* Render current orders */}
-     {orders?.length === 0 ? (
+     {isLoading ? (
+  <p className="text-center text-gray-500">Loading orders...</p>
+) : isError ? (
+  <p className="text-center text-red-600">Failed to load orders.</p>
+) : orders?.length === 0 ? (
   <p className="text-center text-gray-500">No current orders found.</p>
 ) : (
   orders?.map((order) => (

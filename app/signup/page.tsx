@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useActionState } from "react";
 import { signupUser } from "./actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
@@ -15,12 +15,6 @@ export default function Signup() {
     success: false,
     errors: [],
   });
-
-  useEffect(() => {
-    if (state.success) {
-      window.location.reload();
-    }
-  }, [state.success]);
 
   return (
     <div className="h-screen w-full flex text-theme-dark-blue">

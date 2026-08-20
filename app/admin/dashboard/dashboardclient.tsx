@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Card from "@/app/user/ui/dashboard/menu-item-card";
 import { MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { MenuItem } from "@/app/user/lib/definitions";
@@ -29,6 +29,7 @@ export default function DashboardClient({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
   const [searchValue, setSearchValue] = useState(searchQuery);
@@ -47,6 +48,8 @@ export default function DashboardClient({
   }, [searchValue, availabilityFilter, menuItems]);
 
   useEffect(() => {
+    if (searchValue === searchQuery) return;
+
     const debounce = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (searchValue) {
@@ -54,10 +57,11 @@ export default function DashboardClient({
       } else {
         params.delete("query");
       }
-      router.replace(`?${params.toString()}`);
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname);
     }, 300);
     return () => clearTimeout(debounce);
-  }, [searchValue, searchParams, router]);
+  }, [pathname, router, searchParams, searchQuery, searchValue]);
 
   useEffect(() => {
     const observerOptions = {

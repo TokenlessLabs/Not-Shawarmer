@@ -29,18 +29,49 @@ export function formatDateWithOffset(
   return formatted.replace(/\bAM\b/, "am").replace(/\bPM\b/, "pm");
 }
 
+const reverseGeocodeCache = new Map<string, string>();
+
 export async function reverseGeocode(
-  latitude: number,
-  longitude: number
+  latitude: number | string,
+  longitude: number | string
 ): Promise<string> {
+  const numericLatitude = Number(latitude);
+  const numericLongitude = Number(longitude);
+
+  if (!Number.isFinite(numericLatitude) || !Number.isFinite(numericLongitude)) {
+    return "Unknown location";
+  }
+
+  const fallback = `${numericLatitude.toFixed(5)}, ${numericLongitude.toFixed(5)}`;
+  const cacheKey = `${numericLatitude},${numericLongitude}`;
+  const cachedAddress = reverseGeocodeCache.get(cacheKey);
+
+  if (cachedAddress) return cachedAddress;
+
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${numericLatitude}&lon=${numericLongitude}&accept-language=en`,
+      {
+        signal: AbortSignal.timeout(2500),
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "Not-Shawarmer/0.1",
+        },
+        next: { revalidate: 86400 },
+      }
     );
+
+    if (!res.ok) {
+      reverseGeocodeCache.set(cacheKey, fallback);
+      return fallback;
+    }
+
     const data = await res.json();
-    return data?.display_name || "No Address Found";
-  } catch (err) {
-    console.error("Failed to reverse geocode:", err);
-    return "Error retrieving address";
+    const address = data?.display_name || fallback;
+    reverseGeocodeCache.set(cacheKey, address);
+    return address;
+  } catch {
+    reverseGeocodeCache.set(cacheKey, fallback);
+    return fallback;
   }
 }
