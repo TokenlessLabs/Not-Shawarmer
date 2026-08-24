@@ -20,7 +20,7 @@ export default function Signup() {
     <div className="h-screen w-full flex text-theme-dark-blue">
       {/* Left Panel */}
       <div className="w-1/2 h-full bg-theme-light-blue flex items-center justify-center">
-        <img src="/logo.svg" alt="Logo" className="w-[90%] h-auto" />
+        <img src="/Logo.svg" alt="Logo" className="w-[90%] h-auto" />
       </div>
 
       {/* Right Panel */}
