@@ -144,7 +144,7 @@ The summaries below are based on the repository’s Git history. Many features w
 
 The application can be deployed to a Next.js-compatible host such as Vercel. Configure all environment variables in the hosting provider, connect the production PostgreSQL database, and run `npm run build` before release.
 
-The `/seed` route recreates database tables and data and is destructive. It must not be exposed or invoked against a production database.
+The `/seed` route recreates database tables and data and is destructive. It is available only during local development and returns `404` in production and Vercel preview deployments. Initialize a hosted database from a trusted local environment before deploying the application.
 
 ## Collaboration policy
 

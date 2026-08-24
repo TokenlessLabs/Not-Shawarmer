@@ -352,6 +352,10 @@ async function seedOrderDetails() {
 }
 
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse(null, { status: 404 });
+  }
+
   try {
     await sql.begin(async () => {
       await dropTables();
